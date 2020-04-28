@@ -1,0 +1,2 @@
+[Fri Jan 25 17:35:56.654137 2019] [:error] [pid 19796] [client 192.168.1.161:61873] PHP Parse error:  syntax error, unexpected '?' in /home/developer/workspace/jasmis-web/vendor/laravel/framework/src/Illuminate/Foundation/helpers.php on line 500
+[Fri Feb 22 17:39:53.950511 2019] [:error] [pid 314] [client 192.168.1.224:59239] PHP Parse error:  syntax error, unexpected '?' in /home/developer/workspace/jasmis-web/vendor/laravel/framework/src/Illuminate/Foundation/helpers.php on line 500

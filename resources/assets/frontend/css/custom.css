@@ -1,0 +1,10 @@
+.pac-container.pac-logo{
+    z-index: 99999999999 !important;
+}
+
+.disable_pointer_event {
+    pointer-events: none;
+
+    /* for "disabled" effect */
+    opacity: 1.5;    
+}

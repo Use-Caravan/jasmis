@@ -1,0 +1,216 @@
+html, body{ direction: rtl; text-align: right; }
+body{overflow-x:hidden }
+
+/*header*/
+.navigation ul{ float: left;}
+.navigation ul li{ float: right;}
+.top-header .container{  padding-right: 15px; padding-left: 0px;}
+
+.navigation li.my_account a.dd-down{  padding-right: 30px; padding-left: 45px;}
+.navigation li.my_account a .fly_icon{ right: auto; left: 5px;}
+.navigation .dropdown-menu{ right: auto!important; left: 0px!important}
+.navigation .dropdown-menu:after, .navigation .dropdown-menu:before{ right: 60%;}
+
+.dropdown-item{text-align: right;}
+.banner-inner{ padding-right: 0px; padding-left: 520px;}
+.banner-inner .burger{ right: auto; left: -50px;}
+.banner-search .btn-box{ float: left;}
+.banner-search .form-control{ padding-right: 10px; padding-left: 55px;}
+.banner-search .gps{ right: auto; left: 15px;}
+.banner-search .radio-box label{ margin-right: 0px; margin-left: 30px; padding-left: 0px; padding-right: 35px;}
+.banner-search .radio-box label:before{ left: auto; right: 0px;}
+.how-it-works .icons{ margin-right: 0px; margin-left: 20px;}
+
+.advertisement-slider, .restaurant-slider{  direction: ltr;}
+
+.news_letter .box{ padding-right: 15px; padding-left: 200px;}
+.news_letter .shape-btn{ right: auto; left: 20px;}
+
+.floating_label .form-group label{ left: auto; right: 16px;}
+.footer h3:after{ margin-left: 0px; margin-right: 15px;}
+.quick_contact li{ padding-left: 0px; padding-right: 30px;}
+
+.quick_contact li i{ left: auto; right: 0px;}
+
+.social-icons a{  padding-left: 0px; padding-right: 44px;}
+.social-icons a i{ left: auto; right: 0px;}
+
+.forgot{ right: auto; left: 20px;}
+
+.text-right{text-align: left!important;}
+
+.listing-top{ padding-left: 0px; padding-right: 130px;}
+.listing-top .img, .img_fly{ left: auto; right: 0px;}
+.listing-bottom p.bt-border{ padding-right: 0px; padding-left: 80px;}
+.listing-bottom .fav{ right: auto; left: 0px;}
+.listing-bottom p span{ margin-right: 0px; margin-left: 30px;}
+.listing-bottom p span i{ margin-right: 0px; margin-left: 4px;}
+
+.listing-top .star .rt{  margin-left: 0px; margin-right: 15px;}
+.tags{ margin-right: 0px; margin-left: 10px;}
+.breadcums li{ padding-right: 0px; padding-left: 20px; margin-right: 0px; margin-left: 10px}
+.breadcums li:after{ right: auto; left: 0px;}
+.search-form .form-control{ padding-right: 50px; padding-left: 200px;}
+.search-and-filter #filter-toggle{  right: auto;  left: 0px;  border-right: 1px solid #ececec;  border-left: none;}
+.dd-menu{ left: auto; right: 0px;}
+
+input[type="checkbox"] + label.checkbox{  padding-left: 0px; padding-right: 25px; text-align: right;}
+input[type="checkbox"] + label.checkbox:before{ left: auto; right: 0px;}
+
+.restaurant-short-information .box{ padding-right: 0px; padding-left: 350px;}
+.restaurant-short-information .box-right{ right: auto; left: 0px; text-align:  left;}
+.star-one-row{ text-align:  left;}
+.star-one-row span.rt{ margin-right: 10px; margin-left: 0px;}
+.restaurant-short-information .box-top{ padding-left: 0px; padding-right: 130px;}
+
+.restaurant-short-information p.ui-enhance span{ padding-left: 0px; padding-right: 30px; margin-right: 0px; margin-left: 30px;}
+.restaurant-short-information p.ui-enhance span i{ left: auto; right: 0px;}
+
+.de-content{ float: right; padding-left: 15px;}
+.de-cart{ float: left; padding-right: 0px;}
+.side-categories{ float: right;}
+.main-menu{ float: left; padding-left: 0px; padding-right: 15px;}
+
+.side-categories a.nav-link:after, .side-categories a.nav-link.active:after{ right: auto; left: -16px;}
+.clos{ right: auto; left: 15px;}
+.item-information{ padding-left: 0px; padding-right: 200px;}
+
+.group-item ul li label span.price{ right: auto; left: 0px;}
+.group-item .box:after{ right: auto; left: 20px;}
+.item-information .img-menu{ left: auto; right: 0px;}
+.ing_modal_ui .quantity{margin-right: 0px!important; margin-left: 45px}
+
+.de-ratings .box a{ right: auto; left: 0px;}
+.de-ratings .border-box{ padding-right: 120px; padding-left: 110px;}
+.de-ratings .border-box .icon{ left: auto; right: 20px;}
+.de-ratings .border-box .date{ right: auto; left: 0px;}
+.modal_ratings .shape-dark{ margin-right: 0px; margin-left: 26px;}
+
+.min-height{ padding-left: 0px; padding-right: 100px;}
+.cart-table span.img{ left: auto; right: 0px;}
+.v-copon .int-group{ float: left;}
+
+.int-group .btn{border-radius: 6px 0px 0px 6px}
+.int-group .form-control{border-radius: 0px 6px 6px 0px;}
+.dl_info .col-md-7{ padding-right: 15px; padding-left: 200px;}
+
+input[type="radio"] + label.radio{  padding-left: 0px; padding-right: 25px; text-align: right;}
+.dl_group input[type="radio"] + label.radio{ margin-left: 15px; margin-right: 0px;}
+input[type="radio"] + label.radio:before{ left: auto;right: 0px;}
+.dl_group .form-group .form-control{ padding-left: 10px; padding-right: 40px;}
+.dl_group .form-group .icons{left: auto; right: 0px;}
+.cart-table .table td.rm{text-align: left;}
+
+.address_ul input[type="radio"] + label.radio{  padding-left: 0;  padding-right: 40px;}
+.dl_address .heading_border a.add-address{ right: auto; left: 0px;}
+
+section{ float: right;}
+
+.ad-textbox .form-control{  padding-left: 0px; padding-right: 40px;}
+.ad-textbox .form-group .icon{	 left: auto; right: 0px;}
+.only-timepicker .datepicker--time{ padding: 25px}
+
+.profile-user{ padding-right: 15px; padding-left: 250px;}
+.profile-user .shape-btn{  right: auto; left: 20px;}
+
+.account-links{ float: right;}
+.account-content{ float: left; padding-left: 0px; padding-right: 15px;}
+.account-links li a{ padding-left: 25px; padding-right: 60px;}
+.account-links li a i{ left: auto; right: 15px;}
+
+
+.right_slide .modal-header, .right_slide .modal-dialog{ right: auto; left: -100%;}
+.right_slide.show .modal-header, .right_slide.show .modal-dialog{ right: auto; left: 0px;}
+.right_slide .close-modal{ left: auto; right: 17px;}
+.edit-profile_ul .iconsfly{ right: auto; left: 0px;}
+.edit-profile_ul .change-password{ right: auto; left: 25px;}
+
+.address_list .options{text-align: left;}
+.address_list address{ padding-left: 0px; padding-right: 25px;}
+.address_list address i{ left: auto; right: 0px;}
+
+.fav_lists .box{ padding-left: 15px; padding-right: 110px;}
+.fav_lists .img{ left: auto; right: 0px;}
+.fav_lists .fav{ right: auto; left: 10px;}
+
+.add_money .form-group{ float: right;  margin-right: 0px;  margin-left: 40px;}
+
+.add_money .fly_price{ right: auto; left: 0px;   border-radius: 5px 0px 0px 5px;}
+
+.reedam_reward .form-group{ float: right; margin-right: 0px; margin-left: 40px;}
+
+#filter-toggle i{ left: auto; right: 10px;}
+#filter-toggle i.fa-angle-down{ right: auto; left: 15px;}
+
+.right_slide .modal-header{ box-shadow: -7px 0px 10px 0px #d0d0d0}
+.my_order_list .box-top{  padding-right: 15px; padding-left: 250px;}
+.my_order_list .status{ right: auto; left: 15px;}
+
+.view-order-box{  padding-right: 0px; padding-left: 200px;}
+.view-order-box .status{ right: auto; left: 0px;}
+.view-order-box p{ margin-right: 0px; margin-left: 25px;}
+.view_order_ui .total_price{ padding-left: 0px; padding-right: 350px;}
+
+.download-apps{  direction: ltr;}
+.navigation li.login a{ padding-left: 30px; padding-right: 45px;}
+.navigation li a .fly_icon{ left: auto; right: 10px;}
+.menu-button-box{ right: auto; left: 0px;}
+
+.cart_clear_confirm_modal .shape-btn{  margin-right: 35px;}
+.cart_clear_confirm_modal .clos{  color: #c8c8c8;}
+.price-menu.add_modal p.price{ right: auto; left: 0px; }
+
+
+@media (max-width: 850px){
+.banner-inner{ padding-left: 220px;}
+.responsive-menu{ right: auto; left: 10px;}
+.banner-inner .burger{ left: -10px;}
+.top-header .navigation{ left: auto; right: -100%;}
+.top-header .navigation.open{ left: auto; right: 0px;}
+.close-header-menu{ right: auto; left: 10px;}
+.dd-menu{max-width: 100%;}
+
+.de-cart{ right: -100%; left: auto; padding: 15px;}
+.de-cart.open{ right: 0; left: auto;}
+
+.de-cart .box-head{ padding-left: 0px; padding-right: 50px;}
+.close-cart-toggle{ left: auto; right: 0px;}
+.dl_info .col-md-7{ padding-left: 15px;}
+
+.restaurant-short-information .box{ padding-left: 220px;}
+
+	}
+
+@media (max-width: 700px){
+
+	.banner-inner{ padding-left: 0px;}
+	.footer h3:before{ right: auto; left: 0px;}
+	.restaurant-slider{direction: rtl}
+	.v-copon .int-group{ float: right;}
+.v-copon .int-group{  margin-top: 30px;}
+.profile-user .shape-btn{ left: 0px;}
+}
+
+@media (max-width: 540px){
+	.how-it-works .icons{  margin-left: 0px;}
+	.news_letter .box{ padding: 0px;}
+	.search-form .form-control {  padding-right: 15px;  padding-left: 120px;}
+	.filter-drop input[type="checkbox"] + label.checkbox{  margin-left: 19px;  margin-bottom: 19px; margin-right: 0px;}
+	.listing-top{  padding-right: 80px;}
+	.restaurant-short-information .box-top{ padding-right: 70px;}
+	.restaurant-short-information .box{ padding-left: 0px;}
+	.restaurant-short-information p.ui-enhance{ padding-left: 0px; padding-right: 70px;}
+	.restaurant-short-information .box-top p.ui-enhance{ padding-right: 0px}
+	.restaurant-short-information .box-right{text-align:  right; padding-left: 0px; padding-right: 70px;}
+	.star-one-row{text-align: right;}
+	.de-content{ padding-left: 0px;}
+	.side-categories a.nav-link:after, .side-categories a.nav-link.active:after{left: 0px;}
+	.main-menu{padding-right: 0px;}
+	.item-information{ padding-right: 0px;}
+	.profile-user{ padding: 15px;}
+	.account-content{ padding-right: 0px;}
+	.my_order_list .box-top{ padding: 10px;}
+	.my_order_list .status{ left: 0px;}
+	.my_order_list .box-bottom p{ margin-right: 0px; margin-left: 10px;}
+	.fav_lists .box{ padding-right: 80px;}
+}

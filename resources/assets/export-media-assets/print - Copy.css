@@ -1,0 +1,33 @@
+@media print {
+	* { -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; }
+	body { background: #fff; padding: 0px; text-align: center; font-family: 'Roboto', sans-serif; font-size: 15px; }
+	div.box_main { float: left; width: 100%; margin-bottom: 30px }
+	div.box { display: inline-block; width: 100%; max-width: 800px; text-align: left; border-radius: 0px; position: relative; overflow: hidden; color: #fff }
+	div.box:after { content: ""; position: absolute; right: 0px; top: 0px; height: 100%; width: 150px; background: #FBC000 }
+	div.content { width: 52%; float: left; position: relative; padding: 0px 4% }
+	div.img { width: 40%; background: #FBC000; padding: 0px; border-radius: 0px; height: 266px; }
+	img.img { border-radius: 100px; height: 200px; width: 200px; margin: 32px 0px; }
+	img.logo { background: #fff; display: inline-block; height: 35px; padding: 10px; }
+	p.logo { margin: 0px; text-align: right }
+	div.box h2 { font-weight: normal; margin: 20px 0px 20px 0px; font-size: 20px; padding-right: 15px; height: 53px; }
+	p.num { margin-bottom: 30px; }
+	span { display: inline-block; background: #fff; color: #202020; font-size: 25px; letter-spacing: 2px; }
+	div.pink { background: #D13286 }
+	div.blue { background: #6A4BC2 }
+	div.green { background: #12bf87 }
+
+	/*new box*/
+	div.new_box { display: inline-block; width: 100%; background: #6A4BC2; margin-bottom: 35px; }
+	img.logo_2 { margin-top: 25px; margin-left: 20px; margin-bottom: 25px; max-height: 50px; width: auto; }
+	h2.heading { margin-left: 20px; font-size: 25px; color: #fff; font-weight: normal; margin-bottom: 15px; margin-top: 0px; margin-right: 25px; }
+	div.left-side { width: 60%; display: inline-block; float: left; text-align: left; }
+	div.right-side { width: 40%; display: inline-block; float: left; height: 300px; background-size: cover; background-position: center; text-align: right; background-repeat: no-repeat; position: relative; background-image-resize: 0; }
+	p.nums { margin-left: 20px; background: rgba(0, 0, 0, 0.40); display: inline-block; font-size: 23px; width: 200px; text-align: center; height: 50px; line-height: 50px; margin-top: 0px; margin-bottom: 15px; color: #fff; }
+	p.small-coupon { margin-left: 20px; font-size: 18px; color: #fff; margin-top: 0px; }
+	img.logo_3 { margin-right: 15px; margin-top: 15px; max-height: 100px; width: auto; height: auto; max-width: 100%; }
+	.vendor-logo { display: inline-block; position: absolute; right: 5px; top: 5px; }
+	.vendor-logo img { max-height: 70px; z-index: 1; max-width: 70px; }
+	.terms { font-family: 'Roboto', sans-serif; padding: 0px; margin: 0px; font-size: 10px; font-weight: 100; color: #fff; margin-left: 20px; }
+	.image-banners { display: inline-block; width: 100%; text-align: center; }
+	.image-banners img { width: 350px; height: 230px; display: inline-block; object-fit: cover; border-radius: 5px; border: 1px solid #000; }
+}

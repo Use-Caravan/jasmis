@@ -1,0 +1,13 @@
+@media print {
+	* { -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; }
+	.table { display: table; width: 100%; background: #333; font-family: serif; margin-bottom: 20px; border-radius: 5px; }
+	.table td { padding: 15px; }
+	.table td .table-inside td { padding: 4px 0; }
+	.banner-image { display: inline-block; width: 100%; text-align: center; }
+	.title { font-size: 20px; color: #fff; font-weight: 600; margin-top: 10px; margin-bottom: 10px; height: 50px; line-height: 50px; display: inline-block; width: 100%; }
+	.validity { font-size: 18px; color: #fff; font-weight: 300; margin-bottom: 5px; }
+	.terms { font-weight: 300; color: #fff; margin-top: 0; }
+	.table.pink { background: #D13286; }
+	.table.blue { background: #6A4BC2; }
+	.table.green { background: #12BF87; }
+}
