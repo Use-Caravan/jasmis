@@ -1,12 +1,12 @@
-vendor
-public
+vendor/
+public/
 storage/app
 storage/framework
 storage/logs
 node_modules/
-/public/hot
-/public/storage
-/vendor
+public/hot
+public/storage
+vendor
 /.idea
 /.vscode
 /nbproject
