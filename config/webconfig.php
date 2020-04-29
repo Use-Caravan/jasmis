@@ -123,25 +123,25 @@ return [
          'live' => 'https://eps-net.sadadbh.com',
         ],
     "payment_gateway_api_url" => "/api/v2/web-ven-sdd/epayment/create/",
-    "payment_gateway_api_key" => "3246ea73-c521-4d6b-878c-c00ee3ef80b0",
-    "payment_gateway_vendor_id" => 2620,
-    "payment_gateway_branch_id" => 3663,
-    "payment_gateway_terminal_id" => 4324,
-    "payment_gateway_notification_mode" => 300,
+    // "payment_gateway_api_key" => "3246ea73-c521-4d6b-878c-c00ee3ef80b0",
+    // "payment_gateway_vendor_id" => 2620,
+    // "payment_gateway_branch_id" => 3663,
+    // "payment_gateway_terminal_id" => 4324,
+    // "payment_gateway_notification_mode" => 300,
 
-    "payment_gateway_success_url" => "https://usecaravan.com/api/v1/payment-gateway/success",
-    "payment_gateway_failiur_url" => "https://usecaravan.com/api/v1/payment-gateway/failiur",
+    // "payment_gateway_success_url" => "https://usecaravan.com/api/v1/payment-gateway/success",
+    // "payment_gateway_failiur_url" => "https://usecaravan.com/api/v1/payment-gateway/failiur",
 
 
 
-/* 
+ 
     "payment_gateway_api_key" => "8a868611-020f-4aa5-8cac-1e651b59b065",
     "payment_gateway_vendor_id" => 152,
     "payment_gateway_branch_id" => 193,
     "payment_gateway_terminal_id" => 262,
     "payment_gateway_notification_mode" => 300,
-    "payment_gateway_success_url" => "http://192.168.1.37:1006/api/v1/payment-gateway/success",
-    "payment_gateway_failiur_url" => "http://192.168.1.37:1006/api/v1/payment-gateway/failiur", */
+    "payment_gateway_success_url" => "https://caravan.brigita.co/api/v1/payment-gateway/success",
+    "payment_gateway_failiur_url" => "https://caravan.brigita.co/api/v1/payment-gateway/failiur", 
 
 ];
 
