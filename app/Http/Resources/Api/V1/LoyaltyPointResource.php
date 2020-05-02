@@ -31,6 +31,7 @@ class LoyaltyPointResource extends JsonResource
             'user_key' => $this->user_key, 
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,           
+            'created_year' => date("Y", strtotime($this->created_at)),           
             'card_number' => ($this->card_number !== null) ? $this->card_number : 0,
             'loyalty_points' => ($this->loyalty_points !== null) ? (int)$this->loyalty_points : 0,
             'loyalty_level_name' => $this->when(true,function() {

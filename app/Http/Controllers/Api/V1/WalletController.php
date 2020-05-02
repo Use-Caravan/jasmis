@@ -131,15 +131,15 @@ class WalletController extends Controller
             ]);
             $transaction->save();
                             
-            $userLoyaltyCredit = new UserLoyaltyCredit();
-            $userLoyaltyCredit = $userLoyaltyCredit->fill([
-                'user_id' => $userID,
-                'loyalty_point' => request()->points,
-                'transaction_for' => 2,
-                'previous_user_point' => $user->loyalty_points,
-                'current_user_point' => ( (int)$user->loyalty_points - request()->points),
-            ]);
-            $userLoyaltyCredit->save();
+            // $userLoyaltyCredit = new UserLoyaltyCredit();
+            // $userLoyaltyCredit = $userLoyaltyCredit->fill([
+            //     'user_id' => $userID,
+            //     'loyalty_point' => request()->points,
+            //     'transaction_for' => 2,
+            //     'previous_user_point' => $user->loyalty_points,
+            //     'current_user_point' => ( (int)$user->loyalty_points - request()->points),
+            // ]);
+            // $userLoyaltyCredit->save();
             
             $user->wallet_amount = ( (double)$user->wallet_amount + $amount);
             $user->loyalty_points = ( (int)$user->loyalty_points - request()->points);

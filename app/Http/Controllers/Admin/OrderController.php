@@ -236,7 +236,7 @@ class OrderController extends Controller
             }
             
             deliveryBoyPlaceOrder:
-            return $response = (new APIOrderController())->saveOrderOnDeliveryBoy($request->order_key);
+            $response = (new APIOrderController())->saveOrderOnDeliveryBoy($request->order_key);
             $deliveryboyResponse = Common::compressData($response);
             if($deliveryboyResponse->status == HTTP_SUCCESS) {
                 goto changeStatus;

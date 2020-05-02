@@ -1718,8 +1718,6 @@ class OrderController extends Controller
         }
         $url = config('webconfig.deliveryboy_url')."/api/v1/order/create?company_id=".config('webconfig.company_id');        
         $postData = json_encode($deliveryboyData);   
-        
-        return $url.'<br>'.$postData;
         $data = Curl::instance()->action('POST')->setUrl($url)->setContentType('text/plain')->send($postData);
         $response = json_decode($data,true);
         if($response['status'] == HTTP_SUCCESS) {

@@ -500,20 +500,20 @@ class Order extends CModel
         if($loyaltyPoint === null) {
             $loyaltyPoint = LoyaltyPoint::select('loyalty_point_id','to_amount','point')->where('status',ITEM_ACTIVE)->where('to_amount' ,'<', $orderModel->order_total)->orderBy('to_amount','DESC')->first();
         }
-        $orderPoint = $loyaltyPoint->point;
-        $userLoyaltyCredit = new UserLoyaltyCredit();
-        $userLoyaltyCredit = $userLoyaltyCredit->fill([
-            'order_id' => $orderModel->order_id,
-            'user_id' => $userDetails->user_id,
-            'loyalty_point_id' => $loyaltyPoint->loyalty_point_id,
-            'order_amount' => $orderModel->item_total,
-            'loyalty_point' => $loyaltyPoint->point,
-            'transaction_for' => 1,
-            'previous_user_point' => ($userDetails->loyalty_points === null) ? 0 : (int)$userDetails->loyalty_points,
-            'current_user_point' => ($userDetails->loyalty_points === null) ? 0 + $orderPoint : (int)$userDetails->loyalty_points + $orderPoint,
-        ]);
-        $userLoyaltyCredit->save();
-        $userDetails->loyalty_points = ($userDetails->loyalty_points === null) ? 0 + $orderPoint : (int)$userDetails->loyalty_points + $orderPoint;
+        // $orderPoint = $loyaltyPoint->point;
+        // $userLoyaltyCredit = new UserLoyaltyCredit();
+        // $userLoyaltyCredit = $userLoyaltyCredit->fill([
+        //     'order_id' => $orderModel->order_id,
+        //     'user_id' => $userDetails->user_id,
+        //     'loyalty_point_id' => $loyaltyPoint->loyalty_point_id,
+        //     'order_amount' => $orderModel->item_total,
+        //     'loyalty_point' => $loyaltyPoint->point,
+        //     'transaction_for' => 1,
+        //     'previous_user_point' => ($userDetails->loyalty_points === null) ? 0 : (int)$userDetails->loyalty_points,
+        //     'current_user_point' => ($userDetails->loyalty_points === null) ? 0 + $orderPoint : (int)$userDetails->loyalty_points + $orderPoint,
+        // ]);
+        //$userLoyaltyCredit->save();
+        $userDetails->loyalty_points = ($userDetails->loyalty_points === null) ? 0 + $loyaltyPoint->point : (int)$userDetails->loyalty_points + $orderPoint;
         return $userDetails->save();
         /** Adding Loyalty point to user */
     }
