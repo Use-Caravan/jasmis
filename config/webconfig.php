@@ -117,7 +117,7 @@ return [
 
 
 
-    "payment_gateway_mode" => 'live',
+    "payment_gateway_mode" => 'sandbox',
     "payment_gateway_base_url" => [
          'sandbox' => 'https://eps-net-uat.sadadbh.com',
          'live' => 'https://eps-net.sadadbh.com',

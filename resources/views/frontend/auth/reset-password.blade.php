@@ -30,11 +30,11 @@
       <i class="fa fa-user-o"></i>
     </div>
     <div class="form-group icon">
-      {!! Form::password('password', ['class' => 'form-control', 'placeholder' => 'Password'] ) !!}
+      {!! Form::password('password', ['class' => 'form-control', 'placeholder' => 'New Password'] ) !!}
       <i class="fa fa-lock"></i>
     </div>
     <div class="form-group icon">
-      {!! Form::password('password_confirmation', ['class' => 'form-control', 'placeholder' => 'Password'] ) !!}
+      {!! Form::password('password_confirmation', ['class' => 'form-control', 'placeholder' => 'Confirm Password'] ) !!}
       <i class="fa fa-lock"></i>
     </div>
     <div class="form-group action mb0">
