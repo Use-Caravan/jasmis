@@ -513,7 +513,8 @@ class Order extends CModel
         //     'current_user_point' => ($userDetails->loyalty_points === null) ? 0 + $orderPoint : (int)$userDetails->loyalty_points + $orderPoint,
         // ]);
         //$userLoyaltyCredit->save();
-        $userDetails->loyalty_points = ($userDetails->loyalty_points === null) ? 0 + $loyaltyPoint->point : (int)$userDetails->loyalty_points + $orderPoint;
+        $userDetails->loyalty_points = ($userDetails->loyalty_points === null) ? 0 + $loyaltyPoint->point : (int)$userDetails->loyalty_points + $loyaltyPoint->point;
+        $userDetails->total_loyalty_points = $userDetails->total_loyalty_points  + $loyaltyPoint->point;
         return $userDetails->save();
         /** Adding Loyalty point to user */
     }
