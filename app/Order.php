@@ -121,7 +121,8 @@ class Order extends CModel
                             User::tableName().'.user_type' => USER_TYPE_CORPORATES,
                             [Order::tableName().'.payment_type', '<>', PAYMENT_OPTION_COD]
                         ])->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_COD)
-                          ->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_ONLINE);
+                          ->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_ONLINE)
+                          ->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_WALLET);
                     }); 
                  }
                 BranchLang::selectTranslation($orders);
