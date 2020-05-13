@@ -40,35 +40,42 @@ class LoyaltyPointResource extends JsonResource
                 $loyalty_level = LoyaltyLevel::where('from_point','<=',(int)$this->total_loyalty_points)->where('to_point','>=',(int)$this->total_loyalty_points);
                 LoyaltyLevelLang::selectTranslation($loyalty_level);
                 $loyalty_level = $loyalty_level->first();
-                if($loyalty_level === null) {
-                    $loyalty_level = LoyaltyLevel::select('loyalty_level_name');
-                    LoyaltyLevelLang::selectTranslation($loyalty_level);
-                    $loyalty_level = $loyalty_level->orderBy(LoyaltyLevel::tableName().'.loyalty_level_id','asc')->first();
-                }
+                // if($loyalty_level === null) {
+                //     $loyalty_level = LoyaltyLevel::select('loyalty_level_name');
+                //     LoyaltyLevelLang::selectTranslation($loyalty_level);
+                //     $loyalty_level = $loyalty_level->orderBy(LoyaltyLevel::tableName().'.loyalty_level_id','asc')->first();
+                // }
                 return ($loyalty_level === null) ? '' : $loyalty_level->loyalty_level_name;
             }),  
             'next_level_points' => $this->when(true,function() {
                 $loyalty_level = LoyaltyLevel::where('from_point','<=',(int)$this->total_loyalty_points)->where('to_point','>=',(int)$this->total_loyalty_points);
                 $loyalty_level = $loyalty_level->first(); 
-                return ($loyalty_level->to_point+1) - $this->total_loyalty_points;
+
+                if($loyalty_level != null){
+                     $next_loyalty_level = LoyaltyLevel::where('from_point','<=',(int)$loyalty_level->to_point+1)->where('to_point','>=',(int)$loyalty_level->to_point+1)->first();
+                
+                    if($next_loyalty_level === null){
+                        return '';
+                    }
+                
+                    return ($loyalty_level->to_point+1) - $this->total_loyalty_points;
+                }
 
             }),
             'next_level_name' => $this->when(true,function() {
                 
                 $loyalty_level = LoyaltyLevel::where('from_point','<=',(int)$this->total_loyalty_points)->where('to_point','>=',(int)$this->total_loyalty_points);
                 $loyalty_level = $loyalty_level->first(); 
-                $next_level = ($loyalty_level->to_point+1);
 
-                $next_loyalty_level = LoyaltyLevel::where('from_point','<=',(int)$next_level)->where('to_point','>=',(int)$next_level);
-                LoyaltyLevelLang::selectTranslation($next_loyalty_level);
-                $next_loyalty_level = $next_loyalty_level->first();
-                $next_loyalty_level->to_point;
-                if($next_loyalty_level === null) {
-                    $next_loyalty_level = LoyaltyLevel::select('loyalty_level_name');
+                if($loyalty_level != null){
+                    $next_level = ($loyalty_level->to_point+1);
+
+                    $next_loyalty_level = LoyaltyLevel::where('from_point','<=',(int)$next_level)->where('to_point','>=',(int)$next_level);
                     LoyaltyLevelLang::selectTranslation($next_loyalty_level);
-                    $next_loyalty_level = $next_loyalty_level->orderBy(LoyaltyLevel::tableName().'.loyalty_level_id','asc')->first();
+                    $next_loyalty_level = $next_loyalty_level->first();
+                    
+                    return ($next_loyalty_level === null) ? '' : $next_loyalty_level->loyalty_level_name;
                 }
-                return ($next_loyalty_level === null) ? '' : $next_loyalty_level->loyalty_level_name;
             }),
              'card_image' => $this->when(true,function() {
                 $result = LoyaltyLevel::select('card_image')->where('from_point','<=',(int)$this->total_loyalty_points)->where('to_point','>=',(int)$this->total_loyalty_points)->first();                

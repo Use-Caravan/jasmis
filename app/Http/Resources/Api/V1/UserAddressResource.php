@@ -30,6 +30,8 @@ class UserAddressResource extends JsonResource
             'address_line_two' => ($this->address_line_two === null) ? '' : $this->address_line_two,
             'landmark' => ($this->landmark === null) ? '' : $this->landmark,
             'company' => ($this->company === null) ? '' : $this->company,
+            'floor' => ($this->floor === null) ? '' : $this->floor,
+            'block' => ($this->block === null) ? '' : $this->block,
             'full_address' => ($this->full_address === null) ? '' : $this->full_address,
             
         ];
