@@ -183,11 +183,12 @@ class CmsController extends Controller
     {
         $model = Cms::findByKey($id);
         $modelLang = CmsLang::loadTranslation(new CmsLang,$model->cms_id);
+        $sectionslist = Cms::getSections($model->cms_id); 
         if($request->old()) {
             $model = $model->fill($request->old());
             $modelLang = $modelLang->fill($request->old());
         }
-        return view('admin.cms.update', compact('model','modelLang'));
+        return view('admin.cms.update', compact('model','modelLang','sectionslist'));
     }
 
     /**
@@ -204,6 +205,56 @@ class CmsController extends Controller
             $model = Cms::findByKey($id);        
             $model->fill($request->all());
             $model->slug = str_slug($request->title['en'],'-'); 
+            $section = implode(",",$request->section);
+            $model->section = $section;
+            $exit_ldpi_image_path = $model->ldpi_image_path;
+            $exit_mdpi_image_path = $model->mdpi_image_path;
+            $exit_hdpi_image_path = $model->hdpi_image_path;
+            $exit_xhdpi_image_path = $model->xhdpi_image_path;
+            $exit_xxhdpi_image_path = $model->xxhdpi_image_path;
+            $exit_xxxhdpi_image_path = $model->xxxhdpi_image_path;
+            if($request->file('ldpi_image_path')) {
+                $files = $request->file('ldpi_image_path');
+                $destinationPath = APP_CMS_PATH; 
+                $idpiImage = FileHelper::uploadFile($files,$destinationPath);
+                FileHelper::deleteFile($exit_ldpi_image_path);
+                $model->ldpi_image_path = $idpiImage;
+            }
+            if($request->file('mdpi_image_path')) {
+                $files = $request->file('mdpi_image_path');
+                $destinationPath = APP_CMS_PATH; 
+                $mdpi_image_path = FileHelper::uploadFile($files,$destinationPath);
+                FileHelper::deleteFile($exit_mdpi_image_path);
+                $model->mdpi_image_path = $mdpi_image_path;
+            }
+            if($request->file('hdpi_image_path')) {
+                $files = $request->file('hdpi_image_path');
+                $destinationPath = APP_CMS_PATH; 
+                $hdpi_image_path = FileHelper::uploadFile($files,$destinationPath);
+                FileHelper::deleteFile($exit_hdpi_image_path);
+                $model->hdpi_image_path = $hdpi_image_path;
+            }
+            if($request->file('xhdpi_image_path')) {
+                $files = $request->file('xhdpi_image_path');
+                $destinationPath = APP_CMS_PATH; 
+                $xhdpi_image_path = FileHelper::uploadFile($files,$destinationPath);
+                FileHelper::deleteFile($exit_xhdpi_image_path);
+                $model->xhdpi_image_path = $xhdpi_image_path;
+            }
+            if($request->file('xxhdpi_image_path')) {
+                $files = $request->file('xxhdpi_image_path');
+                $destinationPath = APP_CMS_PATH; 
+                $xxhdpi_image_path = FileHelper::uploadFile($files,$destinationPath);
+                FileHelper::deleteFile($exit_xxhdpi_image_path);
+                $model->xxhdpi_image_path = $xxhdpi_image_path;
+            }
+            if($request->file('xxxhdpi_image_path')) {
+                $files = $request->file('xxxhdpi_image_path');
+                $destinationPath = APP_CMS_PATH; 
+                $xxxhdpi_image_path = FileHelper::uploadFile($files,$destinationPath);
+                FileHelper::deleteFile($exit_xxxhdpi_image_path);
+                $model->xxxhdpi_image_path = $xxxhdpi_image_path;
+            }
             $model->save();
             Common::log("Update","CMS has been updated",$model);                    
             DB::commit();

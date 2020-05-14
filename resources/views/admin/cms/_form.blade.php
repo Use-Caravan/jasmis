@@ -1,4 +1,4 @@
-{{ Form::open(['url' => $url, 'id' => 'cms-form', 'class' => 'form-horizontal', 'method' => ($model->exists) ? 'PUT' : 'POST','enctype' => "multipart/form-data" ]) }}
+{{ Form::open(['url' => $url, 'id' => 'cms-form', 'class' => 'form-horizontal', 'method' => ($model->exists) ? 'PUT' : 'POST','enctype' =>  'multipart/form-data']) }}
 
     <div class="box-body">
         
@@ -9,9 +9,7 @@
                     <a data-toggle="tab" href="#tab{{$key}}">{{ $language }} </a>
                 </li>
             @endforeach
-            <li @if($key == App::getLocale()) class="active" @endif haserror="{{ $errors->has("title.$key").$errors->has("keywords.$key").$errors->has("description.$key").$errors->has("cms_content.$key") }}"> 
-                    <a data-toggle="tab" href="#tab_image">Image </a>
-            </li>
+           
         </ul>
         <div class="tab-content full_row">
             @foreach ($languages as $key => $language)
@@ -55,75 +53,125 @@
             </div> 
             <!--tab-pane-->
             @endforeach
-            <div id="tab_image" class="form-group {{ ($errors->has("section")) ? 'has-error' : '' }}">
-                <div class="col-md-12">
-                    {{ Form::label("section", __('admincrud.Sections'), ['class' => 'required']) }} 
-                    {{ Form::select('section[]', $model->selectsections(),$sectionslist ,['class' => 'selectpicker','title' => __('admincrud.Please Choose Sections')] )}}
-                        @if($errors->has("section"))
-                            <span class="help-block error-help-block">{{ $errors->first("section") }}</span>
-                        @endif 
-                </div>
-                                   
-                <div class="col-md-12 ">                          
-                    {{ Form::label("ldpi_image_path", __('admincrud.ldpi'), ['class' => (!$model->exists) ? 'required' : '']) }}
-                    {{ Form::file("ldpi_image_path", ['class' => 'form-control',"accept" => "image/*"]) }}
-                    @if($errors->has("ldpi_image_path"))
-                        <span class="help-block error-help-block">{{ $errors->first("ldpi_image_path") }}</span>
-                    @endif  
-                </div>
-                
-                                   
-                <div class="col-md-12">                          
-                    {{ Form::label("mdpi_image_path", __('admincrud.mdpi'), ['class' => (!$model->exists) ? 'required' : '']) }}
-                    {{ Form::file("mdpi_image_path", ['class' => 'form-control',"accept" => "image/*"]) }}
-                    @if($errors->has("mdpi_image_path"))
-                        <span class="help-block error-help-block">{{ $errors->first("mdpi_image_path") }}</span>
-                    @endif  
-                </div>
-                
-                                   
-                <div class="col-md-12">                          
-                    {{ Form::label("hdpi_image_path", __('admincrud.hdpi'), ['class' => (!$model->exists) ? 'required' : '']) }}
-                    {{ Form::file("hdpi_image_path", ['class' => 'form-control',"accept" => "image/*"]) }}
-                    @if($errors->has("ldpi_image_path"))
-                        <span class="help-block error-help-block">{{ $errors->first("hdpi_image_path") }}</span>
-                    @endif  
-                </div>
-                
-                                   
-                <div class="col-md-12">                          
-                    {{ Form::label("xhdpi_image_path", __('admincrud.xhdpi'), ['class' => (!$model->exists) ? 'required' : '']) }}
-                    {{ Form::file("xhdpi_image_path", ['class' => 'form-control',"accept" => "image/*"]) }}
-                    @if($errors->has("xhdpi_image_path"))
-                        <span class="help-block error-help-block">{{ $errors->first("xhdpi_image_path") }}</span>
-                    @endif  
-                </div>
-                
-                                  
-                <div class="col-md-12">                          
-                    {{ Form::label("xxhdpi_image_path", __('admincrud.xxhdpi'), ['class' => (!$model->exists) ? 'required' : '']) }}
-                    {{ Form::file("xxhdpi_image_path", ['class' => 'form-control',"accept" => "image/*"]) }}
-                    @if($errors->has("xxhdpi_image_path"))
-                        <span class="help-block error-help-block">{{ $errors->first("xxhdpi_image_path") }}</span>
-                    @endif  
-                </div>
-                
-                                   
-                <div class="col-md-12">                          
-                    {{ Form::label("xxxhdpi_image_path", __('admincrud.xxhdpi'), ['class' => (!$model->exists) ? 'required' : '']) }}
-                    {{ Form::file("xxxhdpi_image_path", ['class' => 'form-control',"accept" => "image/*"]) }}
-                    @if($errors->has("xxxhdpi_image_path"))
-                        <span class="help-block error-help-block">{{ $errors->first("xxxhdpi_image_path") }}</span>
-                    @endif  
-                </div>
-                
-            </div>
-            
-            
-                
-                
-            
+        
         </div>
+        <div class="form-group {{ ($errors->has("cms_content.$key")) ? 'has-error' : '' }}"> 
+            <div class="col-md-12">
+                {{ Form::label("section", __('admincrud.Sections'), ['class' => 'required']) }} 
+                {{ Form::select('section[]', $model->selectsections(),$sectionslist ,['class' => 'selectpicker','title' => __('admincrud.Please Choose Sections')] )}}
+                    @if($errors->has("section"))
+                        <span class="help-block error-help-block">{{ $errors->first("section") }}</span>
+                    @endif 
+            </div>
+        </div>
+        <div class="form-group {{ ($errors->has("cms_content.$key")) ? 'has-error' : '' }}">                   
+            <div class="col-md-12 ">                          
+                {{ Form::label("ldpi_image_path", __('admincrud.ldpi'), ['class' => (!$model->exists) ? 'required' : '']) }}
+                {{ Form::file("ldpi_image_path", ['class' => 'form-control',"accept" => "image/*"]) }}
+                @if($errors->has("ldpi_image_path"))
+                    <span class="help-block error-help-block">{{ $errors->first("ldpi_image_path") }}</span>
+                @endif  
+            </div>
+        </div>
+        @if($model->exists)
+        <div class = "clearfix"></div>
+        <div class="form-group {{ ($errors->has("ldpi_image_path")) ? 'has-error' : '' }}">                    
+            <div class="col-md-12">                          
+            {{ Form::label("ldpi_image_path", __('admincrud.eldpi')."") }}
+            <img src="{{ FileHelper::loadImage($model->ldpi_image_path) }}" style="width: 150px;">
+            </div>
+        </div>
+        @endif
+        <div class="form-group {{ ($errors->has("cms_content.$key")) ? 'has-error' : '' }}">                   
+            <div class="col-md-12">                          
+                {{ Form::label("mdpi_image_path", __('admincrud.mdpi'), ['class' => (!$model->exists) ? 'required' : '']) }}
+                {{ Form::file("mdpi_image_path", ['class' => 'form-control',"accept" => "image/*"]) }}
+                @if($errors->has("mdpi_image_path"))
+                    <span class="help-block error-help-block">{{ $errors->first("mdpi_image_path") }}</span>
+                @endif  
+            </div>
+        </div>
+        @if($model->exists)
+        <div class = "clearfix"></div>
+        <div class="form-group {{ ($errors->has("mdpi_image_path")) ? 'has-error' : '' }}">                    
+            <div class="col-md-12">                          
+            {{ Form::label("mdpi_image_path", __('admincrud.emdpi')."") }}
+            <img src="{{ FileHelper::loadImage($model->mdpi_image_path) }}" style="width: 150px;">
+            </div>
+        </div>
+        @endif
+        <div class="form-group {{ ($errors->has("cms_content.$key")) ? 'has-error' : '' }}">                                    
+            <div class="col-md-12">                          
+                {{ Form::label("hdpi_image_path", __('admincrud.hdpi'), ['class' => (!$model->exists) ? 'required' : '']) }}
+                {{ Form::file("hdpi_image_path", ['class' => 'form-control',"accept" => "image/*"]) }}
+                @if($errors->has("ldpi_image_path"))
+                    <span class="help-block error-help-block">{{ $errors->first("hdpi_image_path") }}</span>
+                @endif  
+            </div>
+        </div>
+        @if($model->exists)
+        <div class = "clearfix"></div>
+        <div class="form-group {{ ($errors->has("hdpi_image_path")) ? 'has-error' : '' }}">                    
+            <div class="col-md-12">                          
+            {{ Form::label("hdpi_image_path", __('admincrud.ehdpi')."") }}
+            <img src="{{ FileHelper::loadImage($model->hdpi_image_path) }}" style="width: 150px;">
+            </div>
+        </div>
+        @endif
+        <div class="form-group {{ ($errors->has("cms_content.$key")) ? 'has-error' : '' }}">                                    
+            <div class="col-md-12">                          
+                {{ Form::label("xhdpi_image_path", __('admincrud.xhdpi'), ['class' => (!$model->exists) ? 'required' : '']) }}
+                {{ Form::file("xhdpi_image_path", ['class' => 'form-control',"accept" => "image/*"]) }}
+                @if($errors->has("xhdpi_image_path"))
+                    <span class="help-block error-help-block">{{ $errors->first("xhdpi_image_path") }}</span>
+                @endif  
+            </div>
+        </div>
+        @if($model->exists)
+        <div class = "clearfix"></div>
+        <div class="form-group {{ ($errors->has("xhdpi_image_path")) ? 'has-error' : '' }}">                    
+            <div class="col-md-12">                          
+            {{ Form::label("xhdpi_image_path", __('admincrud.exhdpi')."") }}
+            <img src="{{ FileHelper::loadImage($model->xhdpi_image_path) }}" style="width: 150px;">
+            </div>
+        </div>
+        @endif
+        <div class="form-group {{ ($errors->has("cms_content.$key")) ? 'has-error' : '' }}">                                    
+            <div class="col-md-12">                          
+                {{ Form::label("xxhdpi_image_path", __('admincrud.xxhdpi'), ['class' => (!$model->exists) ? 'required' : '']) }}
+                {{ Form::file("xxhdpi_image_path", ['class' => 'form-control',"accept" => "image/*"]) }}
+                @if($errors->has("xxhdpi_image_path"))
+                    <span class="help-block error-help-block">{{ $errors->first("xxhdpi_image_path") }}</span>
+                @endif  
+            </div>
+        </div>
+         @if($model->exists)
+        <div class = "clearfix"></div>
+        <div class="form-group {{ ($errors->has("xxhdpi_image_path")) ? 'has-error' : '' }}">                    
+            <div class="col-md-12">                          
+            {{ Form::label("xxhdpi_image_path", __('admincrud.exxhdpi')."") }}
+            <img src="{{ FileHelper::loadImage($model->xxhdpi_image_path) }}" style="width: 150px;">
+            </div>
+        </div>
+        @endif
+        <div class="form-group {{ ($errors->has("cms_content.$key")) ? 'has-error' : '' }}">                  
+            <div class="col-md-12">                          
+                {{ Form::label("xxxhdpi_image_path", __('admincrud.xxhdpi'), ['class' => (!$model->exists) ? 'required' : '']) }}
+                {{ Form::file("xxxhdpi_image_path", ['class' => 'form-control',"accept" => "image/*"]) }}
+                @if($errors->has("xxxhdpi_image_path"))
+                    <span class="help-block error-help-block">{{ $errors->first("xxxhdpi_image_path") }}</span>
+                @endif  
+            </div>
+        </div>
+        @if($model->exists)
+        <div class = "clearfix"></div>
+        <div class="form-group {{ ($errors->has("xxxhdpi_image_path")) ? 'has-error' : '' }}">                    
+            <div class="col-md-12">                          
+            {{ Form::label("xxxhdpi_image_path", __('admincrud.exxxhdpi')."") }}
+            <img src="{{ FileHelper::loadImage($model->xxxhdpi_image_path) }}" style="width: 150px;">
+            </div>
+        </div>
+        @endif
         <div class="form-group {{ ($errors->has("sort_no")) ? 'has-error' : '' }}">                    
             <div class="col-md-12">                          
                 {{ Form::label("sort_no", __('admincrud.Sort No')) }}

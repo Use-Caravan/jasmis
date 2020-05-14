@@ -102,11 +102,6 @@ class Cms extends CModel
         $sections = [ 
             SEC_1 => __('admincrud.Section 1'),
             SEC_2 => __('admincrud.Section 2'),
-            SEC_3 => __('admincrud.Section 3'),
-            SEC_4 => __('admincrud.Section 4'),
-            SEC_5 => __('admincrud.Section 5'),
-            SEC_6 => __('admincrud.Section 6'),
-
         ];
         if($values != null) {            
             $data  = explode(',',$values);            
@@ -117,6 +112,12 @@ class Cms extends CModel
             return $section;
         }
         return $sections;
+    }
+    public static function getSections($cmsid)
+    {
+        $self = new self();
+        $sectionslist = self::getList()->where([$self->getTable().'.status' => ITEM_ACTIVE, $self->getTable().'.cms_id' => $cmsid])->get()->toArray();        
+        return array_column($sectionslist,'section','cms_id');
     }
 
 }

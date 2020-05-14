@@ -57,7 +57,7 @@ class ItemController extends Controller
                                 return HtmlRender::statusColumn($model,'item.status');
                         })
                         ->editColumn('quickbuy_status', function ($model) {
-                                return HtmlRender::quickbuyColumn($model,'item.quikbuystatus');
+                                return HtmlRender::quickbuyColumn($model,'item.quickbuystatus');
                         })
                         ->addColumn('action', function ($model) {                                
                                 $view = HtmlRender::actionColumn(
@@ -332,7 +332,7 @@ class ItemController extends Controller
             return response()->json($response);
         }
     }
-    public function quikbuystatus(Request $request)
+    public function quickbuystatus(Request $request)
     {   
         if($request->ajax()){
             $response = ['status' => AJAX_FAIL, 'msg' => __('admincommon.Something went wrong') ];

@@ -123,10 +123,6 @@
      */
     const SEC_1 = 1;
     const SEC_2 = 2;
-    const SEC_3 = 3;
-    const SEC_4 = 4;
-    const SEC_5 = 5;
-    const SEC_6 = 6;
     const APP_CMS_PATH = 'gallery/cms';
     
 

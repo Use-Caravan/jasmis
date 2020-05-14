@@ -30,15 +30,17 @@
 
         <?php case (TYPE_QUICKBUYSTATUS_COLUMN): ?>
            <?php if(method_exists($model,'uniqueKey')): ?>
+             
             <label class="switch" for="quickid_<?php echo e($model->{$model::uniqueKey()}); ?>">
                 <input type="checkbox" itemkey="<?php echo e($model->{$model::uniqueKey()}); ?>" action="<?php echo e(route($route)); ?>" class="SwitchQuickbuy" id="quickid_<?php echo e($model->{$model::uniqueKey()}); ?>" <?php if( $model->quickbuy_status === ITEM_ACTIVE ): ?> checked="true" <?php endif; ?> >
                 <span class="slider"></span>
-            </label>                
+            </label>            
             <?php else: ?>
-            <label class="switch" for="quickid_<?php echo e($model->{$model::primaryKey()}); ?>">
+             
+             <label class="switch" for="quickid_<?php echo e($model->{$model::primaryKey()}); ?>">
                 <input type="checkbox" itemkey="<?php echo e($model->{$model::primaryKey()}); ?>" action="<?php echo e(route($route)); ?>" class="SwitchQuickbuy" id="quickid_<?php echo e($model->{$model::primaryKey()}); ?>" <?php if( $model->quickbuy_status === ITEM_ACTIVE ): ?> checked="true" <?php endif; ?> >
                 <span class="slider"></span>
-            </label>
+            </label>  
             <?php endif; ?>
             
         <?php break; ?>

@@ -573,6 +573,12 @@ return [
     'xhdpi' => 'xhdpi',
     'xxhdpi' => 'xxhdpi',
     'xxxhdpi' => 'xxxhdpi',
+    'eldpi' => 'Exist ldpi',
+    'emdpi' => 'Exist mdpi',
+    'ehdpi' => 'Exist hdpi',
+    'exhdpi' => 'Exist xhdpi',
+    'exxhdpi' => 'Exist xxhdpi',
+    'exxxhdpi' => 'Exist xxxhdpi',
 
     /**
      * FAQ Management

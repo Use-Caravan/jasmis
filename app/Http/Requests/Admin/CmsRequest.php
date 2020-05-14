@@ -32,6 +32,7 @@ class CmsRequest extends FormRequest
             'description.*' => 'required',
             'cms_content.*' => 'required',
             'sort_no' => 'nullable|numeric|max:1000',
+            'section' => 'required',
         ];
 
         switch ($this->method()) {
