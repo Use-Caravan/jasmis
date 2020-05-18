@@ -87,7 +87,7 @@ class ItemResource extends JsonResource
                         $userID = request()->user(GUARD_USER)->user_id;
                     }
 
-                    $cart = Cart::where(['user_id' => $userID, 'branch_id' => $this->branch_id])->first();                    
+                    $cart = Cart::where(['user_id' => $userID, 'branch_id' => $this->branch_id,'deleted_at' => NULL])->first();                    
                     if($cart === null) {
                         return 0;
                     }

@@ -294,6 +294,7 @@ class CartController extends Controller
                 'vendor_logo' => FileHelper::loadImage($vendorlangDetails->vendor_logo),
                 'branch_cuisine' => CuisineLang::whereIn('cuisine_id',BranchCuisine::where('branch_id',$branch_id)->pluck('cuisine_id')->toarray())->where('language_code','en')->get()->pluck('cuisine_name'),
                 'branch_key' => $branchDetails->branch_key,
+                'min_order_value' => Common::currency($branchDetails->min_order_value),
             
             ];
             array_push($cart['vendor_details'], $vendorDetails);
