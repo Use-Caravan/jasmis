@@ -149,9 +149,18 @@ class OrderController extends Controller
         }
         
         if(request()->order_status == ORDER_APPROVED_STATUS_REJECTED) {
+            
+            // refund to customer 
+            if($order->payment_type == PAYMENT_OPTION_ONLINE || $order->payment_type == PAYMENT_OPTION_WALLET){
+                $user = User::find($order->user_id);
+                $user->wallet_amount = ( (double)$user->wallet_amount + $order->item_total);
+                $user->save();
+            }
+            
             $order->order_rejected_datetime = date('Y-m-d H:i:s');
             $order->order_approved_datetime = null;
             $order->order_reject_reason = request()->order_reject_reason;
+
         }
         if(request()->order_status == ORDER_APPROVED_STATUS_READY_FOR_PICKUP) {
             if($order->order_type == ORDER_TYPE_DELIVERY) {

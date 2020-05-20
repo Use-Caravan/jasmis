@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\Controller;
 use App\Http\Controllers\Api\V1\OrderController as APIOrderController;
 use App\{
+    User,
     Order,
     Deliveryboy,
     UserAddress,
@@ -265,6 +266,14 @@ class OrderController extends Controller
             changeStatus:
             if($request->order_status == ORDER_APPROVED_STATUS_DELIVERED) {
                 Order::addLoyaltyPoints($model);
+            }
+            // refund to customer 
+            if($request->order_status == ORDER_APPROVED_STATUS_REJECTED) {
+                if($model->payment_type == PAYMENT_OPTION_ONLINE || $model->payment_type == PAYMENT_OPTION_WALLET){
+                    $user = User::find($model->user_id);
+                    $user->wallet_amount = ( (double)$user->wallet_amount + $model->item_total);
+                    $user->save();
+                }
             }
             $model = Order::findByKey($order_key);
             $model->order_status = $request->order_status;

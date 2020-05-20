@@ -26,8 +26,10 @@ class UserAddressResource extends JsonResource
             'area_id' => $this->area_id, */
             'latitude' => ($this->latitude === null) ? '' : $this->latitude,
             'longitude' => ($this->longitude === null) ? '' : $this->longitude,
-            'address_line_one' => ($this->address_line_one === null) ? '' : $this->address_line_one,
-            'address_line_two' => ($this->address_line_two === null) ? '' : $this->address_line_two,
+            'apartment' => ($this->apartment === null) ? '' : $this->apartment,
+            'building' => ($this->building === null) ? '' : $this->building,
+            'street' => ($this->street === null) ? '' : $this->street,
+            'area' => ($this->area === null) ? '' : $this->area,
             'landmark' => ($this->landmark === null) ? '' : $this->landmark,
             'company' => ($this->company === null) ? '' : $this->company,
             'floor' => ($this->floor === null) ? '' : $this->floor,

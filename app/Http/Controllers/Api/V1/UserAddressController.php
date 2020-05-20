@@ -77,7 +77,7 @@ class UserAddressController extends Controller
                 'area_id' => 'required', */
                 'latitude' => 'required',
                 'longitude' => 'required',
-                'address_line_one' => 'required',
+                // 'address_line_one' => 'required',
                 /* 'address_line_two' => 'required',
                 'landmark' => 'required',
                 'company' => 'required'    */
@@ -146,7 +146,7 @@ class UserAddressController extends Controller
                 'area_id' => 'required', */
                 'latitude' => 'required',
                 'longitude' => 'required',
-                'address_line_one' => 'required',
+                // 'address_line_one' => 'required',
                 /* 'address_line_two' => 'required',
                 'landmark' => 'required',
                 'company' => 'required'    */
