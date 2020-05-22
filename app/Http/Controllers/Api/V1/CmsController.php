@@ -18,6 +18,7 @@ use App\Api\{
     Cms,
     Faq,
     Branch,
+    Vendor,
     Item,
     Cuisine
 };
@@ -63,6 +64,10 @@ class CmsController extends Controller
                           ];
                 $section_items = [
 
+                                    'vendor_key' => Vendor::where('vendor_id',$sections['vendor_id'])->value('vendor_key'),
+                                    'vendor_id' => $sections['vendor_id'],
+                                    'branch_key' => Branch::where('branch_id',$sections['branch_id'])->value('branch_key'),
+                                    'branch_id' => $sections['branch_id'],
                                     'item_id' => null,
                                     'item_name' => '',
                                     'restarunt_name' => '',

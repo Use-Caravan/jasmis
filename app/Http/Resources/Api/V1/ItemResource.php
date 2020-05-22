@@ -87,19 +87,19 @@ class ItemResource extends JsonResource
                         $userID = request()->user(GUARD_USER)->user_id;
                     }
 
-                    $cart = Cart::where(['user_id' => $userID,'deleted_at' => NULL])->first();                    
+                    $cart = Cart::where(['user_id' => $userID])->withTrashed(false)->first();                    
                     if($cart === null) {
                         return 0;
                     }
                     $cartItem = CartItem::where([
                         'cart_id' => $cart->cart_id,
                         'item_id' => $this->item_id,
-                        'is_ingredient' => 0
-                    ])->first();
-                    if($cartItem === null){
+                        // 'is_ingredient' => 0
+                    ])->sum('quantity');
+                    if($cartItem == 0){
                         return 0;
                     } 
-                    return $cartItem->quantity;
+                    return (int)$cartItem;
                 }                
             }),
             /* $this->mergeWhen($request->item, [

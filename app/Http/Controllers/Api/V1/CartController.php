@@ -9,6 +9,7 @@ use App\{
     Api\Cart,
     Api\CartItem,
     Api\Branch,
+    Api\BranchLang,
     Api\Vendor,
     Api\VendorLang,
     Api\Item,
@@ -285,6 +286,7 @@ class CartController extends Controller
             /* vendor details */
 
             $vendorlangDetails = VendorLang::where('vendor_id',$branchDetails->vendor_id)->first();
+            $branch_name = BranchLang::where('branch_id',$branch_id)->value('branch_name');
             
             
             $vendorDetails = [
@@ -294,7 +296,8 @@ class CartController extends Controller
                 'vendor_logo' => FileHelper::loadImage($vendorlangDetails->vendor_logo),
                 'branch_cuisine' => CuisineLang::whereIn('cuisine_id',BranchCuisine::where('branch_id',$branch_id)->pluck('cuisine_id')->toarray())->where('language_code','en')->get()->pluck('cuisine_name'),
                 'branch_key' => $branchDetails->branch_key,
-                'min_order_value' => Common::currency($branchDetails->min_order_value),
+                'branch_name' => $branch_name,
+                'min_order_value' => $branchDetails->min_order_value,
             
             ];
             array_push($cart['vendor_details'], $vendorDetails);

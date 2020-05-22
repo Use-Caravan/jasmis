@@ -9,7 +9,9 @@ use App\Http\{
 };
 use App\{ 
     Cms,
-    CmsLang
+    CmsLang,
+    Vendor,
+    Branch
 };
 use Common;
 use DataTables;
@@ -91,8 +93,15 @@ class CmsController extends Controller
         if($request->old()) {
             $model = $model->fill($request->old());
             $modelLang = $modelLang->fill($request->old());
-        }       
-        return view('admin.cms.create', compact('model','modelLang','sectionslist'));
+        } 
+        if(APP_GUARD === GUARD_ADMIN){
+            $vendorList = Vendor::getVendors();
+            $branchList = [];
+        }if(APP_GUARD === GUARD_VENDOR) {
+            $branchList = Branch::getBranch(Auth::guard(APP_GUARD)->user()->vendor_id);
+        } 
+              
+        return view('admin.cms.create', compact('model','modelLang','sectionslist','vendorList','branchList'));
     }
 
     /**
@@ -188,7 +197,9 @@ class CmsController extends Controller
             $model = $model->fill($request->old());
             $modelLang = $modelLang->fill($request->old());
         }
-        return view('admin.cms.update', compact('model','modelLang','sectionslist'));
+        $vendorList = Vendor::getVendors();
+        $branchList = Branch::getBranch();
+        return view('admin.cms.update', compact('model','modelLang','sectionslist','branchList','vendorList'));
     }
 
     /**

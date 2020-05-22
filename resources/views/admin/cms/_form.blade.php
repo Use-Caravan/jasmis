@@ -64,6 +64,35 @@
                     @endif 
             </div>
         </div>
+
+        @if(APP_GUARD === GUARD_ADMIN)
+            <div class="col-md-6">  
+                <div class="form-group {{ ($errors->has("vendor_id")) ? 'has-error' : '' }}">
+                    {{ Form::label("vendor_id", __('admincrud.Vendor Name'), ['class' => 'required']) }}
+                    {{ Form::select('vendor_id', $vendorList, $model->vendor_id ,['class' => 'selectpicker','placeholder' => __('admincrud.Please Choose Vendor'),'id' => 'cms-vendor_id'] )}}
+                    @if($errors->has("vendor_id"))
+                        <span class="help-block error-help-block">{{ $errors->first("vendor_id") }}</span>
+                    @endif
+                </div>
+            </div>
+        @endif
+        @if(APP_GUARD === GUARD_ADMIN || APP_GUARD === GUARD_VENDOR)
+            <div class="col-md-6">  
+                <div class="form-group {{ ($errors->has("branch_id")) ? 'has-error' : '' }}">
+                    {{ Form::label("branch_id", __('admincrud.Branch Name'), ['class' => 'required']) }}
+                    {{ Form::select('branch_id', $branchList, $model->branch_id ,['class' => 'selectpicker','placeholder' => __('admincrud.Please Choose Branch'),'id' => 'cms-branch_id'] )}}
+                    @if($errors->has("branch_id"))
+                        <span class="help-block error-help-block">{{ $errors->first("branch_id") }}</span>
+                    @endif                    
+                </div>
+            </div>
+        @endif        
+        @if(APP_GUARD === GUARD_VENDOR || APP_GUARD === GUARD_OUTLET)
+            {{ Form::hidden("vendor_id",auth()->guard(GUARD_VENDOR)->user()->vendor_id, ['class' => 'form-control']) }}
+        @endif
+        @if(APP_GUARD === GUARD_OUTLET)        
+            {{ Form::hidden("branch_id",$model->branch_id, ['class' => 'form-control']) }}
+        @endif
         <div class="form-group {{ ($errors->has("cms_content.$key")) ? 'has-error' : '' }}">                   
             <div class="col-md-12 ">                          
                 {{ Form::label("ldpi_image_path", __('admincrud.ldpi'), ['class' => (!$model->exists) ? 'required' : '']) }}
@@ -222,4 +251,33 @@
         
                
     }
+
+    $(document).ready(function() {
+
+    $('#cms-vendor_id').change(function()
+    {   
+        $.ajax({
+            url: "{{ route('get-branch-by-vendor') }}",
+            type: 'post',
+            data: { vendor_id: $(this).val() , },
+            success: function(result){ 
+                 if(result.status == AJAX_SUCCESS){
+                    $('#cms-branch_id').html('');
+                    $('#cms-branch_id').append($('<option>', 'Select branch name','</option>'));
+                    $.each(result.data,function(key,title)
+                    {  
+                        $('#cms-branch_id').append($('<option>', { value : key }).text(title));                       
+                    });
+                    $('.selectpicker').selectpicker('refresh');
+                }else{
+                    Error('Something went wrong','Error');
+                }
+            }
+        });
+    });
+
+
+   
+
+});
 </script>   
