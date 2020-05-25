@@ -48,7 +48,7 @@ class LoyaltyPointResource extends JsonResource
                 return ($loyalty_level === null) ? '' : $loyalty_level->loyalty_level_name;
             }),  
             'next_level_points' => $this->when(true,function() {
-                $loyalty_level = LoyaltyLevel::where('from_point','<=',(int)$this->loyalty_points)->where('to_point','>=',(int)$this->loyalty_points);
+                $loyalty_level = LoyaltyLevel::where('from_point','<=',(int)$this->total_loyalty_points)->where('to_point','>=',(int)$this->total_loyalty_points);
                 $loyalty_level = $loyalty_level->first(); 
 
                 if($loyalty_level != null){
@@ -58,13 +58,13 @@ class LoyaltyPointResource extends JsonResource
                         return '';
                     }
                 
-                    return ($loyalty_level->to_point+1) - $this->loyalty_points;
+                    return ($loyalty_level->to_point+1) - $this->total_loyalty_points;
                 }
 
             }),
             'next_level_name' => $this->when(true,function() {
                 
-                $loyalty_level = LoyaltyLevel::where('from_point','<=',(int)$this->loyalty_points)->where('to_point','>=',(int)$this->loyalty_points);
+                $loyalty_level = LoyaltyLevel::where('from_point','<=',(int)$this->total_loyalty_points)->where('to_point','>=',(int)$this->total_loyalty_points);
                 $loyalty_level = $loyalty_level->first(); 
 
                 if($loyalty_level != null){
