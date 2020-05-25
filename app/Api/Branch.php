@@ -212,12 +212,12 @@ class Branch extends CommonBranch
         /**
          * Get One branch by key
          */
-        if(request()->branch !== null) {
+        if(request()->branch_key !== null) {
             $query = $query->Where([
-                self::tableName().".branch_key" => request()->branch
+                self::tableName().".branch_key" => request()->branch_key
             ]);
             $query = $query->orWhere([
-                self::tableName().".branch_slug" => request()->branch,
+                self::tableName().".branch_slug" => request()->branch_key,
             ]);
         } 
            
