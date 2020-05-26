@@ -122,7 +122,9 @@ class Order extends CModel
                             [Order::tableName().'.payment_type', '<>', PAYMENT_OPTION_COD]
                         ])->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_COD)
                           ->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_ONLINE)
-                          ->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_WALLET);
+                          ->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_WALLET)
+                          ->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_WALLET_AND_ONLINE);
+                          
                     }); 
                  }
                 BranchLang::selectTranslation($orders);
@@ -471,6 +473,7 @@ class Order extends CModel
             PAYMENT_OPTION_ONLINE   => __('admincrud.Online'),
             PAYMENT_OPTION_COD      => __('admincrud.COD'),
             PAYMENT_OPTION_WALLET     => __('admincrud.CWallet'),
+            PAYMENT_OPTION_WALLET_AND_ONLINE     => __('admincrud.CWalletandonline'),
             //PAYMENT_OPTION_ALL     => __('admincommon.All')
         ];
         

@@ -269,7 +269,7 @@ class OrderController extends Controller
             }
             // refund to customer 
             if($request->order_status == ORDER_APPROVED_STATUS_REJECTED) {
-                if($model->payment_type == PAYMENT_OPTION_ONLINE || $model->payment_type == PAYMENT_OPTION_WALLET){
+                if($model->payment_type == PAYMENT_OPTION_ONLINE || $model->payment_type == PAYMENT_OPTION_WALLET || $model->payment_type == PAYMENT_OPTION_WALLET_AND_ONLINE){
                     $user = User::find($model->user_id);
                     $user->wallet_amount = ( (double)$user->wallet_amount + $model->item_total);
                     $user->save();

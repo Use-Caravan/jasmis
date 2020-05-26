@@ -54,6 +54,8 @@ class PaymentGatewayController extends Controller
                         }
 
                         $userDetails = User::find($order->user_id);
+                        $userDetails->wallet_amount = 0;
+                        $userDetails->save();
                         $vendorDetails = Vendor::find($order->vendor_id);
                         $branch_id = $order->branch_id;
                         $orderkey = $order->order_key;

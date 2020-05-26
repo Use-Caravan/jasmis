@@ -513,34 +513,96 @@ class OrderController extends Controller
                         'transaction_number' => Common::generateRandomString(Transaction::tableName(), 'transaction_number', $length = 32),
                         'status' => TRANSACTION_STATUS_SUCCESS
                     ];
-                    $vendor = Vendor::find($this->branchDetails->vendor_id);
-                    $transaction = new Transaction();
-                    $transaction = $transaction->fill($transactionData);
-                    $transaction->save();
+
+
                     $user = User::find($this->userDetails->user_id);
-                    $user->wallet_amount = (int)$user->wallet_amount - $paymentDetails['total']['cprice'];
-                    $user->save();
-                    $order = Order::find($orderID);
-                    $order->transaction_id = $transaction->getKey();
-                    $order->payment_status = ORDER_PAYMENT_STATUS_SUCCESS;
-                    $order->save();
-                    (new CartController())->clearCart();
 
-                    if($order->payment_status = ORDER_PAYMENT_STATUS_SUCCESS) {
-                        $voucherUsageStatus = VoucherUsage::where(['order_id' => $order->order_id])->first();
-                            if($voucherUsageStatus !== null) {
-                                $voucherUsageStatus->status = ITEM_ACTIVE;
-                                $voucherUsageStatus->save(); 
-                            }
-                    }
+                    if($user->wallet_amount < $paymentDetails['total']['cprice']){
 
-                    $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
-                    $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
-                    if($vendor->web_app_id !== null) {
-                        $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
-                    } 
-                    if(!$oneSignalCustomer || !$oneSignalVendor) {
-                        $this->commonError(__("apimsg.Notification not send") );
+                        $payableAmount = $paymentDetails['total']['cprice'] - $user->wallet_amount;
+                        
+                        
+                        $response = SadadPaymentGateway::instance()
+                        ->setAmount($payableAmount)
+                        ->setCustomerName($this->userDetails->first_name)
+                        ->setCustomerMail($this->userDetails->email)
+                        ->setCustomerPhone($this->userDetails->phone_number);
+                        if(request()->is_web !== null) {
+                            $response = $response->setRequestFrom(request()->is_web);
+                        }
+                        $response = $response->makePayment();
+                        
+                        
+                        if($response !== null) {
+
+                            $paymentData = [
+                                'customer_name' => $this->userDetails->first_name,
+                                'customer_email' => $this->userDetails->email,
+                                'customer_phone_number' => $this->userDetails->phone_number,
+                                'price' => $payableAmount,
+                            ];
+
+                            $paymentGateway = new PaymentGateway();                    
+                            $paymentGateway = $paymentGateway->fill([
+                                'sent_data' => json_encode($paymentData),
+                                'gateway_url' => $response['payment-url'],
+                                'received_data' => json_encode($response)
+                            ]);
+                            $paymentGateway->save();                                        
+
+                            $paymentGatewayID = $paymentGateway->getKey();
+
+                            $transactionData = [
+                                'payment_gateway_id' => $paymentGatewayID,
+                                'user_id' => $this->userDetails->user_id,
+                                'transaction_for' => TRANSACTION_FOR_ONLINE_BOOKING,
+                                'transaction_type' => TRANSACTION_TYPE_DEBIT,
+                                'amount' => $payableAmount,
+                                'transaction_number' => $response['transaction-reference'],
+                                'status' => TRANSACTION_STATUS_PENDING
+                            ];
+                            $transaction = new Transaction();
+                            $transaction = $transaction->fill($transactionData);
+                            $transaction->save();
+                            $responseData['payment_url'] =  $response['payment-url'];
+                            $order = Order::find($orderID);
+                            $order->transaction_id = $transaction->getKey();
+                            $order->payment_type = PAYMENT_OPTION_WALLET_AND_ONLINE;
+                            $order->wallet_amount_used = $user->wallet_amount;
+                            $order->save();
+          
+                        }
+                    }else{
+
+                        $vendor = Vendor::find($this->branchDetails->vendor_id);
+                        $transaction = new Transaction();
+                        $transaction = $transaction->fill($transactionData);
+                        $transaction->save();
+                        
+                        $user->wallet_amount = (int)$user->wallet_amount - $paymentDetails['total']['cprice'];
+                        $user->save();
+                        $order = Order::find($orderID);
+                        $order->transaction_id = $transaction->getKey();
+                        $order->payment_status = ORDER_PAYMENT_STATUS_SUCCESS;
+                        $order->save();
+                        (new CartController())->clearCart();
+
+                        if($order->payment_status = ORDER_PAYMENT_STATUS_SUCCESS) {
+                            $voucherUsageStatus = VoucherUsage::where(['order_id' => $order->order_id])->first();
+                                if($voucherUsageStatus !== null) {
+                                    $voucherUsageStatus->status = ITEM_ACTIVE;
+                                    $voucherUsageStatus->save(); 
+                                }
+                        }
+
+                        $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+                        $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
+                        if($vendor->web_app_id !== null) {
+                            $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
+                        } 
+                        if(!$oneSignalCustomer || !$oneSignalVendor) {
+                            $this->commonError(__("apimsg.Notification not send") );
+                        }
                     }
                 break;
                 
@@ -1006,7 +1068,7 @@ class OrderController extends Controller
                         $returnData['error'] = __("apimsg.You don't have wallet amount");
                         return $returnData;
                     }
-                    if($this->userDetails->wallet_amount < $totalCheckoutAmount) {
+                    if($this->userDetails->wallet_amount <= WALLET_ZERO ) {
                         $returnData['error'] = __("apimsg.Your wallet amount is too low to buy through c wallet");
                         return $returnData;
                     }

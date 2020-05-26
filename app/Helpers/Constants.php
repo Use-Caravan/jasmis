@@ -139,10 +139,12 @@
     const PAYMENT_OPTION_COD = 2;
     const PAYMENT_OPTION_WALLET = 3;
     const PAYMENT_OPTION_ALL = 4;
+    const WALLET_ZERO = 0;
 
     const CORPORATE_BOOKING_PAYMENT_ONLINE = 5;
     const CORPORATE_BOOKING_PAYMENT_CREDIT = 6;
     const CORPORATE_BOOKING_PAYMENT_LPO = 7;
+    const PAYMENT_OPTION_WALLET_AND_ONLINE = 8;
 
     /**
      * Vendor Commission type 

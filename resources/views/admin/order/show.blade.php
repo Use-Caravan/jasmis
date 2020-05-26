@@ -58,6 +58,10 @@
                 <tr>
                     <th>@lang('admincrud.Item Total')</th>
                     <td>{{ $model->item_total }}</td>
+                </tr> 
+                <tr>
+                    <th>@lang('admincrud.Wallet Amount Used')</th>
+                    <td>{{ $model->wallet_amount_used }}</td>
                 </tr>
                <tr>
                     <th>@lang('admincrud.Delivery Fee')</th>
