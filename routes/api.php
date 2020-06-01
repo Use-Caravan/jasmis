@@ -79,6 +79,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
         Route::post('place-order','OrderController@placeOrder');        
 
         Route::post('cart-update','CartController@userCart');
+        Route::post('cart-quantity-update','CartController@updateQuantity');
         Route::get('cart-view','CartController@getCart');
         Route::get('cart-clear','CartController@clearCart');
 

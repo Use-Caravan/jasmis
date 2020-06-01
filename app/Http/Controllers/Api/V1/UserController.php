@@ -133,7 +133,7 @@ class UserController extends Controller
         $user->password = Hash::make(request()->new_password);
         $user->save();
         $this->setData(new UserResource($user));
-        $this->setMessage(__("apimsg.Password changes successfully"));
+        $this->setMessage(__("apimsg.Password changed successfully"));
         return $this->asJson();
     }
 

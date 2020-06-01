@@ -579,7 +579,7 @@ class OrderController extends Controller
                         $transaction = $transaction->fill($transactionData);
                         $transaction->save();
                         
-                        $user->wallet_amount = (int)$user->wallet_amount - $paymentDetails['total']['cprice'];
+                        $user->wallet_amount = $user->wallet_amount - $paymentDetails['total']['cprice'];
                         $user->save();
                         $order = Order::find($orderID);
                         $order->transaction_id = $transaction->getKey();
@@ -1234,7 +1234,7 @@ class OrderController extends Controller
         }
             
         if($branchDeliveryArea === null) {
-            return ['status'=> false, 'error' => __('apimsg.Branch is not available to selected address type')];
+            return ['status'=> false, 'error' => __('apimsg.The selected address in not within the delivery area of the branch')];
         }
         $this->branchDeliveryArea = $branchDeliveryArea;
         return $this->calculateDistanceFar($userAddress, request()->branch_key);

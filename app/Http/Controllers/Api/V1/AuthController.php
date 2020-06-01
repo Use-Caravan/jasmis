@@ -87,7 +87,7 @@ class AuthController extends Controller
             $user = $user->fill($request->except('password'));
             $user->save();
             $this->user = $user;
-            $this->setMessage( __('apimsg.Login Successfull') );
+            $this->setMessage( __('apimsg.Login Successful') );
             return $this->makeAuth();
         }
         else{
@@ -150,7 +150,7 @@ class AuthController extends Controller
         $user->status = ITEM_ACTIVE;
         $user->save();
         $this->user = $user;
-        $this->setMessage( __('apimsg.Login Successfull') );
+        $this->setMessage( __('apimsg.Login Successful') );
         return $this->makeAuth();
     }
 
