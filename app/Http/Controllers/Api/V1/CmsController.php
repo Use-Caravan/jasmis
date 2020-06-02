@@ -33,7 +33,7 @@ class CmsController extends Controller
      */
     public function index(Request $request)
     {
-        $cms = Cms::getList()->where(['status' => ITEM_ACTIVE])->orderBy('sort_no','asc')->get()->toArray();
+        $cms = Cms::getList()->where(['status' => ITEM_ACTIVE])->where(['section' => NULL])->orderBy('sort_no','asc')->get()->toArray();
         array_push($cms,['title' => 'FAQ','slug' => 'faq', 'position' => 3]);
         $data = [];
         foreach($cms as $key => $value) {

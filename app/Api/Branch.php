@@ -195,7 +195,7 @@ class Branch extends CommonBranch
         }else if(request()->orderby_popularity == 1) {
             $query = $query->orderBy(Vendor::tableName().".popular_status","desc");
         }else{
-            $query = $query->orderBy(self::tableName().".branch_id","asc");
+            // $query = $query->orderBy(self::tableName().".branch_id","asc");
         }
         
         /**
