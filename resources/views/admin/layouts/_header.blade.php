@@ -39,7 +39,7 @@
             {{Form::open( ['url' => route('change-language'), 'method' => 'POST', 'id' => "changeLanguageForm" ] )  }}                
                 {{ Form::select('language', $languages, App::getLocale(), [ 'class' => 'selectpicker', "onchange" => "$('#changeLanguageForm').submit()" ] ) }}
             {{Form::close()}}
-          </li> 
+          </li>
           <li class="dropdown user user-menu">
             <a class="dropdown-toggle" data-toggle="dropdown">
               <img src="<?= asset('resources/assets/admin/images/user-small.png') ?>" class="user-image"> 

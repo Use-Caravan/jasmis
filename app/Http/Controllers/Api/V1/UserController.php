@@ -219,7 +219,7 @@ class UserController extends Controller
                         $model->save();                        
                     }
                     DB::commit();
-                    $this->setMessage(__('apimsg.Branch has been added to wishlist'));
+                    $this->setMessage(__('apimsg.Restaurant has been added to wishlist'));
                 } catch (\Throwable $e) {
                     DB::rollback();
                     throw $e;
@@ -256,7 +256,7 @@ class UserController extends Controller
                                                 
                     $model = UserWishlist::where(['branch_id' => $branchId->branch_id,'user_id' => $userId])->update(['status' => ITEM_INACTIVE]);
                     DB::commit();     
-                    $this->setMessage(__('apimsg.Branch has been removed from wishlist'));
+                    $this->setMessage(__('apimsg.Restaurant has been removed from wishlist'));
                 } catch (\Throwable $e) {
                     DB::rollback();
                     throw $e;

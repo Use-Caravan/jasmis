@@ -6,6 +6,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use App\Api\OrderItem;
 use App\Api\Order;
 use App\Api\VendorLang;
+use App\Api\BranchReview;
 use App\Http\Resources\Api\V1\OrderItemResource;
 use Common;
 use FileHelper;
@@ -21,6 +22,9 @@ class OrderResource extends JsonResource
     public function toArray($request)
     {  
         //return parent::toArray($request);
+        $ratings = BranchReview::where('vendor_id',$this->vendor_id)->where('branch_id',$this->branch_id)->where('user_id',$this->user_id)
+                        ->where('approved_status',REVIEW_APPROVED_STATUS_APPROVED)->first();
+        
         return [
             'order_key' => $this->order_key,            
             'order_number' => ($this->order_number === null) ? '' : "#".config('webconfig.app_inv_prefix').$this->order_number,
@@ -33,6 +37,8 @@ class OrderResource extends JsonResource
             'vendor_logo' => FileHelper::loadImage(Vendorlang::where('vendor_id',$this->vendor_id)->pluck('vendor_logo')),
             'branch_name' => $this->branch_name,                        
             'branch_key' => $this->branch_key,                                    
+            'branch_rating' => ($ratings == null) ? "" : $ratings->rating,                           
+            'branch_review' => ($ratings == null) ? "" : $ratings->review,                           
             'color_code' => ($this->color_code === null) ? '' : '#'.$this->color_code,
             'payment_status' => $this->payment_status,
             'total_amount' => $this->when(true,function()

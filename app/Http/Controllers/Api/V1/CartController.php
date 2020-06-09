@@ -156,7 +156,12 @@ class CartController extends Controller
             $this->setMessage( __("apimsg.Item has been updated in cart") );
             request()->request->add([
                 'branch_key' =>  $rawData['branch_key']
-            ]);            
+            ]); 
+
+            $cartitem_key = [
+                'cart_item_key' => $cartItem['cart_item_key'],
+            ];  
+            $this->setData($cartitem_key);         
             return $this->asJson();
             
         } catch(Exception $e) {

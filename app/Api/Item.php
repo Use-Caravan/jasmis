@@ -95,7 +95,7 @@ class Item extends CommonItem
             }    
             if(request()->item_name !== null) {
                 $query->where("IL.item_name", 'like' , "%".request()->item_name."%");
-            }    
+            } 
             /* for Web filter */
         });
               

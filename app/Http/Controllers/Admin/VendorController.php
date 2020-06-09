@@ -167,26 +167,26 @@ class VendorController extends Controller
                 $branchController = new BranchController();
                 $branchController->store($model, $request);
             } */
-               // if ($model) {
-               //  $nodeVendor = $this->getNodeVenodr($model);
-               //  $url = config('webconfig.deliveryboy_url')."/api/v1/vendor?company_id=".config('webconfig.company_id');
-               //  $nodeVendor = json_encode($nodeVendor);
-               //  $data = Curl::instance()->action('POST')->setUrl($url)->setContentType('text/plain')->send($nodeVendor);
-               //  $response = json_decode($data,true);
-               //  if($response['status'] != HTTP_SUCCESS) {
-               //      DB::rollback();
-               //      return redirect()->route('vendor.create')->with('error', __('admincrud.something went wrong') );
-               //  }
-            // } 
+               if ($model) {
+                $nodeVendor = $this->getNodeVenodr($model);
+                $url = config('webconfig.deliveryboy_url')."/api/v1/vendor?company_id=".config('webconfig.company_id');
+                $nodeVendor = json_encode($nodeVendor);
+                $data = Curl::instance()->action('POST')->setUrl($url)->setContentType('text/plain')->send($nodeVendor);
+                $response = json_decode($data,true);
+                if($response['status'] != HTTP_SUCCESS) {
+                    DB::rollback();
+                    return redirect()->route('vendor.create')->with('error', __('admincrud.something went wrong') );
+                }
+            } 
             
             DB::commit();
-            // $mailData = [ 
-            //         'userName' => $model->username,
-            //         'email' => $model->email,
-            //         'mobileNumber' => $model->mobile_number,
-            //         'password' => $request->password,
-            //     ];  
-            // Mail::to($model->email)->send(new VendorEmail($mailData));
+            $mailData = [ 
+                    'userName' => $model->username,
+                    'email' => $model->email,
+                    'mobileNumber' => $model->mobile_number,
+                    'password' => $request->password,
+                ];  
+            Mail::to($model->email)->send(new VendorEmail($mailData));
             Common::log("Create","Vendor has been saved",$model);
         } catch (\Throwable $e) {
             DB::rollback();

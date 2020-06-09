@@ -98,11 +98,11 @@ return [
     'Invalid branch key' => 'Invalid branch key',
     'Branch already exists in wishlist' => 'Branch already exists in wishlist',
 
-    'Branch has been added to wishlist' => 'Branch has been added to wishlist',   
+    'Restaurant has been added to wishlist' => 'Restaurant has been added to wishlist',   
 
     'Branch already removed from wishlist' => 'Branch already removed from wishlist',
     'Branch is unavailable to unwishlist' => 'Branch is unavailable to unwishlist',
-    'Branch has been removed from wishlist' => 'Branch has been removed from wishlist',
+    'Restaurant has been removed from wishlist' => 'Restaurant has been removed from wishlist',
     'Rating has been saved' => 'Rating has been saved',
     'Already You Give Rating' => 'Already You Give Rating',
     'It seems you have rated already!' => 'It seems you have rated already!',

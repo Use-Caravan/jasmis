@@ -42,7 +42,7 @@
 
             <?php echo e(Form::close()); ?>
 
-          </li> 
+          </li>
           <li class="dropdown user user-menu">
             <a class="dropdown-toggle" data-toggle="dropdown">
               <img src="<?= asset('resources/assets/admin/images/user-small.png') ?>" class="user-image"> 
