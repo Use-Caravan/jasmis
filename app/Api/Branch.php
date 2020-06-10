@@ -123,71 +123,69 @@ class Branch extends CommonBranch
         });
 
 
-        
-
-        // $distance_array = [];
-
-
-        // foreach ($deliveryBranchIDs as $distances) {
-        //     //find distances
+        $distance_array = [];
+        foreach ($deliveryBranchIDs as $distances) {
+            //find distances
 
 
-        //     $branch_nearest = Branch::where('branch_id',$distances)->first();
+            $branch_nearest = Branch::where('branch_id',$distances)->first();
 
-        //    // $branch_distance = $this->twopoints_on_earth(request()->latitude, request()->longitude, 
-        //    //                      $branch_nearest->latitude,  $branch_nearest->longitude);
+           // $branch_distance = $this->twopoints_on_earth(request()->latitude, request()->longitude, 
+           //                      $branch_nearest->latitude,  $branch_nearest->longitude);
 
-        //    $lat1 = deg2rad(request()->latitude); 
-        //    $lon1 = deg2rad(request()->longitude); 
-        //    $lat2 = deg2rad($branch_nearest->latitude); 
-        //    $lon2 = deg2rad($branch_nearest->longitude); 
-        //    $unit = "K";
+           $lat1 = deg2rad(request()->latitude); 
+           $lon1 = deg2rad(request()->longitude); 
+           $lat2 = deg2rad($branch_nearest->latitude); 
+           $lon2 = deg2rad($branch_nearest->longitude); 
+           $unit = "K";
 
-        //       if (($lat1 == $lat2) && ($lon1 == $lon2)) {
-        //         $distance =  0;
-        //       }
-        //       else {
-        //         $theta = $lon1 - $lon2;
-        //         $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
-        //         $dist = acos($dist);
-        //         $dist = rad2deg($dist);
-        //         $miles = $dist * 60 * 1.1515;
-        //         $unit = strtoupper($unit);
+              if (($lat1 == $lat2) && ($lon1 == $lon2)) {
+                $distance =  0;
+              }
+              else {
+                $theta = $lon1 - $lon2;
+                $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+                $dist = acos($dist);
+                $dist = rad2deg($dist);
+                $miles = $dist * 60 * 1.1515;
+                $unit = strtoupper($unit);
 
-        //         if ($unit == "K") {
-        //           $distance = ($miles * 1.609344);
-        //         } else if ($unit == "N") {
-        //           $distance = ($miles * 0.8684);
-        //         } else {
-        //           $distance = $miles;
-        //         }
-        //       }
+                if ($unit == "K") {
+                  $distance = ($miles * 1.609344);
+                } else if ($unit == "N") {
+                  $distance = ($miles * 0.8684);
+                } else {
+                  $distance = $miles;
+                }
+              }
 
-        //       $branch_arry = ['branch_id' => $distances, 'distance' => $distance];
-        //       array_push($distance_array, $branch_arry);
+              $branch_arry = ['branch_id' => $distances, 'distance' => $distance,'vendor_id' => $branch_nearest->vendor_id];
+              array_push($distance_array, $branch_arry);
 
-        // }
-        // $distance_sort = [];
-        // foreach ($distance_array as $val) {
-        //     array_push($distance_sort,$val['distance']);
-        // }
-        // asort($distance_sort);
-
-        
-        
-        // exit;
-
-        if(!empty($deliveryBranchIDs) && request()->latitude !== null &&  request()->longitude !== null) {
-            $query = $query->whereIn(Branch::tableName().".branch_id", $deliveryBranchIDs);
         }
 
 
+        $sort_by_distance = collect($distance_array)->sortBy('distance');
+        $unique_vendors = $sort_by_distance->unique('vendor_id');
+        $nearest = [];
+        foreach ($unique_vendors as $sort) {
+            array_push($nearest,$sort['branch_id']);
+        }
+        $query = $query->addSelect([
+                DB::raw(Branch::tableName().".branch_id as branchid"),
+            ]);
+
+        $implode = "'" . implode ( "', '", $nearest ) . "'";
+
+        if(request()->latitude !== null &&  request()->longitude !== null) {
+            $query = $query->whereIn(Branch::tableName().".branch_id", $nearest)->orderByRaw("FIELD(branchid, $implode) ASC");
+        }
+        
         if(request()->voucher_branch !== null && request()->voucher_branch == true) {
             $query = $query->addSelect(DB::Raw("($voucherSubQuery) AS voucher_id"))
             ->groupBy(Branch::tableName().".branch_id")->havingRaw('voucher_id IS NOT NULL');
         }
 
-       
         VendorLang::selectTranslation($query);        
         BranchLang::selectTranslation($query,'BRL');
         CuisineLang::selectTranslation($query);
@@ -205,6 +203,7 @@ class Branch extends CommonBranch
             Vendor::tableName().".approved_status" => BRANCH_APPROVED_STATUS_APPROVED
         ]);
 
+
         if(request()->latitude !== null &&  request()->longitude !== null) {
             
         }
@@ -212,7 +211,7 @@ class Branch extends CommonBranch
         /* DB::raw(" (select price from delivery_charge where from_km <= (distance/1000) && to_km >= (distance/1000) LIMIT 1 OFFSET 0) as delivery_cost "), */
 
 
-        $vendor_ids = DB::table('branch')->whereIn('branch_id',$deliveryBranchIDs)->pluck('vendor_id');
+        $vendor_ids = DB::table('branch')->whereIn('branch_id',$nearest)->pluck('vendor_id');
 
         $query = $query->whereIn(Vendor::tableName().".vendor_id", $vendor_ids);
 
@@ -221,6 +220,7 @@ class Branch extends CommonBranch
             ->groupBy(self::tableName().".branch_id");
         } else {
             $query = $query->groupBy(Vendor::tableName().".vendor_id");
+
         }
 
         $query = $query->havingRaw("timeslotcount > 0");
@@ -256,7 +256,7 @@ class Branch extends CommonBranch
         }else if(request()->orderby_popularity == 1) {
             $query = $query->orderBy(Vendor::tableName().".popular_status","desc");
         }else{
-            // $query = $query->orderBy(self::tableName().".branch_id","asc");
+            // $query = $query->orderBy(self::tableName().".branch_id",$nearest);
         }
         
         /**
@@ -287,40 +287,5 @@ class Branch extends CommonBranch
         /**  $data = new Paginator($query->get(), PER_PAGE); For manual paginate */
         
     }
-
-    public function twopoints_on_earth($latitudeFrom, $longitudeFrom, 
-                                    $latitudeTo,  $longitudeTo) 
-      { 
-           $long1 = deg2rad($longitudeFrom); 
-           $long2 = deg2rad($longitudeTo); 
-           $lat1 = deg2rad($latitudeFrom); 
-           $lat2 = deg2rad($latitudeTo); 
-              
-           //Haversine Formula 
-           $dlong = $long2 - $long1; 
-           $dlati = $lat2 - $lat1; 
-              
-           $val = pow(sin($dlati/2),2)+cos($lat1)*cos($lat2)*pow(sin($dlong/2),2); 
-              
-           $res = 2 * asin(sqrt($val)); 
-              
-           $radius = 3958.756; 
-              
-           return ($res*$radius); 
-      } 
-  
-      // latitude and longitude of Two Points 
-      // $latitudeFrom = 19.017656 ; 
-      // $longitudeFrom = 72.856178; 
-      // $latitudeTo = 40.7127; 
-      // $longitudeTo = -74.0059; 
-         
-      // Distance between Mumbai and New York 
-      // print_r(twopoints_on_earth( $latitudeFrom, $longitudeFrom,  
-      //               $latitudeTo,  $longitudeTo).' '.'miles'); 
-  
-// This code is contributed by akash1295 
-// https://auth.geeksforgeeks.org/user/akash1295/articles 
-
 
 }

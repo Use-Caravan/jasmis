@@ -196,6 +196,7 @@ class BranchController extends Controller
     public function branchByVendor($vendor_key=null,$branch_key=null)
     {           
         $branches = Branch::getBranches()->get();
+        // return $this->asJson($branches);
         $branches = BranchResource::collection($branches);
 
         // return $this->asJson($branches);

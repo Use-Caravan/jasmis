@@ -93,8 +93,9 @@ class Item extends CommonItem
             if(request()->category_id !== null) {
                 $query->where([Item::tableName().'.category_id' => request()->category_id]);
             }    
-            if(request()->item_name !== null) {
-                $query->where("IL.item_name", 'like' , "%".request()->item_name."%");
+            if(request()->item_name !== null && request()->vendor_id !== null) {
+                $query->orwhere("IL.item_name", 'like' , "%".request()->item_name."%")->whereIn(Vendor::tableName().".vendor_id", request()->vendor_id);
+                $query->orwhere("VL.vendor_name", 'like' , "%".request()->item_name."%")->whereIn(Vendor::tableName().".vendor_id", request()->vendor_id);;
             } 
             /* for Web filter */
         });
