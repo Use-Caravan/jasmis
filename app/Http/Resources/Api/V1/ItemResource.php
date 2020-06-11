@@ -34,7 +34,7 @@ class ItemResource extends JsonResource
             'branch_id' => $this->branch_id,
             'vendor_id' => $this->vendor_id,
             'vendor_name' => $this->vendor_name,
-            'vendor_key' => $this->vendor_key,
+            'vendor_key' => Vendor::where('vendor_id',$this->vendor_id)->value('vendor_key'),
             'offer_enable' => $this->when(true,function() {
                 return ($this->offer_type !== null && $this->offer_type != '') ? true : false;
             }),

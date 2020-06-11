@@ -11,6 +11,7 @@ use App\Http\{
 use Illuminate\Http\Response;
 use App\Api\{
     Item,
+    Vendor,
     ItemGroupMapping,
     IngredientGroupMapping,
     IngredientLang,
@@ -22,6 +23,7 @@ use App\Api\{
 use Validator;
 use DB;
 use App;
+use FileHelper;
 
 class ItemController extends Controller
 {
@@ -35,10 +37,41 @@ class ItemController extends Controller
         if(request()->branch_key != null && request()->webfilter === null) {
             $data = CategoryResource::collection(Category::getCategories()->get());
         } else {
-            $data = ItemResource::collection(Item::getItems()->get());
+            if(request()->auto_suggestion == true){
+                $suggestions = Item::getItems()->get();
+                $items = [];
+                foreach ($suggestions as $value) {
+                    $set_suggestions = [
+                                            
+                                            'vendor_id' => $value->vendor_id,
+                                            'vendor_key' => Vendor::where('vendor_id',$value->vendor_id)->value('vendor_key'),
+                                            'vendor_name' => $value->vendor_name,
+                                            'vendor_logo' => FileHelper::loadImage($value->vendor_logo),
+                                            'branch_id' => $value->branch_id,
+                                            'branch_key' => $value->branch_key,
+                                            'branch_name' => $value->branch_name,
+                                            'item_id' => $value->item_id,
+                                            'item_key' => $value->item_key,
+                                            'item_name' => $value->item_name,
+                                            'item_image' => FileHelper::loadImage($value->item_image),
+
+                                      ];
+                    array_push($items, $set_suggestions);
+                }
+
+                $data['items'] = $items;
+                $data['vendors'] = collect($data['items'])->unique('vendor_id');
+                
+                // $data['vendors'] = collect($data['items'])->unique('vendor_id');
+
+            }else{
+                $data['items'] = ItemResource::collection(Item::getItems()->get());
+                $data['vendors'] = collect($data['items'])->unique('vendor_id');
+            }
         }
         $this->setMessage( __('apimsg.Items are fetched.') );            
         return $this->asJson($data);
+       
     }
 
     /**

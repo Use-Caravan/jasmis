@@ -90,13 +90,116 @@ class Item extends CommonItem
                 $query->where([Item::tableName().'.category_id' => $categoryId]);
             }
             /* for Web filter */
+
+            $deliveryBranchIDs = [];
+            if(request()->latitude !== null &&  request()->longitude !== null) {
+
+                /**
+                 * Circle contains point reference link
+                 * https://developers.google.com/maps/solutions/store-locator/clothing-store-locator
+                 */            
+                $deliveryAreasCircle = BranchDeliveryArea::select([
+                    BranchDeliveryArea::tableName().".branch_id",
+                    DeliveryArea::tableName().".zone_radius",
+                    DB::raw(" ( 6371000 * acos( cos( radians(".request()->latitude.") ) * cos( radians( circle_latitude ) )
+                    * cos( radians( circle_longitude ) - radians(".request()->longitude.") ) + sin( radians(".request()->latitude.") )
+                    * sin( radians( circle_latitude ) ) ) ) as distance"),
+                ])
+                ->leftJoin(DeliveryArea::tableName(),BranchDeliveryArea::tableName().".delivery_area_id",DeliveryArea::tableName().".delivery_area_id")
+                ->havingRaw("distance <=  ".DeliveryArea::tableName().".zone_radius")
+                ->where([
+                    DeliveryArea::tableName().".zone_type" => DELIVERY_AREA_ZONE_CIRCLE,
+                    DeliveryArea::tableName().".status" => ITEM_ACTIVE,
+                ])
+                ->groupBy(BranchDeliveryArea::tableName().".branch_id")
+                ->whereNull(DeliveryArea::tableName().".deleted_at")->get();
+
+
+                if($deliveryAreasCircle !== null) {                
+                    $deliveryAreasCircle = $deliveryAreasCircle->toArray();
+                    $deliveryBranchCircle = array_column($deliveryAreasCircle,'branch_id');
+                    $deliveryBranchIDs = array_merge($deliveryBranchIDs, $deliveryBranchCircle);
+                }
+                
+                /**
+                 * Polygon contains point reference link
+                 * https://gis.stackexchange.com/questions/79311/how-to-find-points-inside-each-polygon-in-mysql
+                 * https://marcgg.com/blog/2017/03/13/mysql-viewport-gis/
+                 */
+                $deliveryAreasPolygon = BranchDeliveryArea::select([
+                    BranchDeliveryArea::tableName().".branch_id",                
+                ])
+                ->leftJoin(DeliveryArea::tableName(),BranchDeliveryArea::tableName().".delivery_area_id",DeliveryArea::tableName().".delivery_area_id")
+                ->where([
+                    DeliveryArea::tableName().".zone_type" => DELIVERY_AREA_ZONE_POLYGON,
+                    DeliveryArea::tableName().".status" => ITEM_ACTIVE,
+                ])
+                ->whereNull(DeliveryArea::tableName().".deleted_at")
+                ->whereRaw("ST_CONTAINS(".DeliveryArea::tableName().".zone_latlng, Point(".request()->latitude.", ".request()->longitude."))")
+                ->groupBy(BranchDeliveryArea::tableName().".branch_id")->get(); 
+                            
+                if($deliveryAreasPolygon !== null) {
+                    $deliveryAreasPolygon = $deliveryAreasPolygon->toArray();
+                    $deliveryBranchPolygons = array_column($deliveryAreasPolygon,'branch_id');
+                    $deliveryBranchIDs = array_merge($deliveryBranchIDs,$deliveryBranchPolygons);
+                }
+                $distance_array = [];
+                foreach ($deliveryBranchIDs as $distances) {
+                    //find distances
+                   $branch_nearest = Branch::where('branch_id',$distances)->first();
+
+                   // $branch_distance = $this->twopoints_on_earth(request()->latitude, request()->longitude, 
+                   //                      $branch_nearest->latitude,  $branch_nearest->longitude);
+
+                   $lat1 = deg2rad(request()->latitude); 
+                   $lon1 = deg2rad(request()->longitude); 
+                   $lat2 = deg2rad($branch_nearest->latitude); 
+                   $lon2 = deg2rad($branch_nearest->longitude); 
+                   $unit = "K";
+
+                      if (($lat1 == $lat2) && ($lon1 == $lon2)) {
+                        $distance =  0;
+                      }
+                      else {
+                        $theta = $lon1 - $lon2;
+                        $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+                        $dist = acos($dist);
+                        $dist = rad2deg($dist);
+                        $miles = $dist * 60 * 1.1515;
+                        $unit = strtoupper($unit);
+
+                        if ($unit == "K") {
+                          $distance = ($miles * 1.609344);
+                        } else if ($unit == "N") {
+                          $distance = ($miles * 0.8684);
+                        } else {
+                          $distance = $miles;
+                        }
+                      }
+
+                      $branch_arry = ['branch_id' => $distances, 'distance' => $distance,'vendor_id' => $branch_nearest->vendor_id];
+                      array_push($distance_array, $branch_arry);
+
+                }
+
+
+                // $sort_by_distance = collect($distance_array)->sortBy('distance');
+                // $unique_vendors = $sort_by_distance->unique('vendor_id');
+                $nearest = [];
+                foreach ($distance_array as $sort) {
+                    array_push($nearest,$sort['branch_id']);
+                }
+
+                if(request()->item_name !== null) {
+                    $query->orwhere("IL.item_name", 'like' , "%".request()->item_name."%")->whereIn(Branch::tableName().".branch_id", $nearest);
+                    $query->orwhere("VL.vendor_name", 'like' , "%".request()->item_name."%")->whereIn(Branch::tableName().".branch_id", $nearest);
+                }
+
+            }
             if(request()->category_id !== null) {
                 $query->where([Item::tableName().'.category_id' => request()->category_id]);
             }    
-            if(request()->item_name !== null && request()->vendor_id !== null) {
-                $query->orwhere("IL.item_name", 'like' , "%".request()->item_name."%")->whereIn(Vendor::tableName().".vendor_id", request()->vendor_id);
-                $query->orwhere("VL.vendor_name", 'like' , "%".request()->item_name."%")->whereIn(Vendor::tableName().".vendor_id", request()->vendor_id);;
-            } 
+             
             /* for Web filter */
         });
               
