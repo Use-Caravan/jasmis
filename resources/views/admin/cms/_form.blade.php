@@ -201,6 +201,19 @@
             </div>
         </div>
         @endif
+        <div class="form-group radio_group{{ ($errors->has("as_arabic")) ? 'has-error' : '' }}">                    
+            <div class="col-md-12">
+                {{ Form::label("arabic_banner", __('admincommon.Use This As Arabic Banner'),['class' => 'required']) }}                                           
+                
+                {{ Form::radio('arabic_banner', ITEM_ACTIVE, ($model->arabic_banner == ITEM_ACTIVE), ['class' => 'hide','id'=> 'statuson' ]) }}
+                {{ Form::label("statuson", __('admincommon.Active'), ['class' => ' radio']) }}
+                {{ Form::radio('arabic_banner', ITEM_INACTIVE, ($model->arabic_banner == ITEM_INACTIVE), ['class' => 'hide','id'=>'statusoff']) }}
+                {{ Form::label("statusoff", __('admincommon.Inactive'), ['class' => 'radio']) }}
+                @if($errors->has("arabic_banner"))
+                    <span class="help-block error-help-block">{{ $errors->first("arabic_banner") }}</span>
+                @endif                    
+            </div>
+        </div>
         <div class="form-group {{ ($errors->has("sort_no")) ? 'has-error' : '' }}">                    
             <div class="col-md-12">                          
                 {{ Form::label("sort_no", __('admincrud.Sort No')) }}

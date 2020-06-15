@@ -7,6 +7,7 @@ use App\{
     Api\ItemLang,
     Api\Branch,
     Api\BranchReview,
+    Api\BranchTimeslot,
     Api\BranchLang,
     Api\Vendor,
     Api\VendorLang,
@@ -143,6 +144,16 @@ class Item extends CommonItem
                     $deliveryBranchPolygons = array_column($deliveryAreasPolygon,'branch_id');
                     $deliveryBranchIDs = array_merge($deliveryBranchIDs,$deliveryBranchPolygons);
                 }
+                $currentTime = date('H:i:s');
+                $deliveryBranchIDs = BranchTimeslot::where([
+                                    'status' => ITEM_ACTIVE,
+                                    'day_no' => date("N", strtotime(date('Y-m-d H:i:s'))),
+                                    ])
+                                    ->whereIn('branch_id',$deliveryBranchIDs)
+                                    ->whereRaw('start_time < "'.$currentTime.'" and end_time > "'.$currentTime.'"')
+                                    ->pluck('branch_id');  
+                 
+
                 $distance_array = [];
                 foreach ($deliveryBranchIDs as $distances) {
                     //find distances

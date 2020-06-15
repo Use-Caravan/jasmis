@@ -66,6 +66,7 @@ class CmsController extends Controller
 
                                     'vendor_key' => Vendor::where('vendor_id',$sections['vendor_id'])->value('vendor_key'),
                                     'vendor_id' => $sections['vendor_id'],
+                                    'as_arabic_banner' => $sections['arabic_banner'],
                                     'branch_key' => Branch::where('branch_id',$sections['branch_id'])->value('branch_key'),
                                     'branch_id' => $sections['branch_id'],
                                     'item_id' => null,

@@ -27,6 +27,7 @@ return [
     'S.No' => 'S.No ',
     'Name' => 'Name ',
     'Sort No' => 'Sort No',
+    'Use This As Arabic Banner' => 'Use This As Arabic Banner',
     'Created Date' => 'Created Date',
     'Send'  => 'Send',
     'User Name' => 'User Name',

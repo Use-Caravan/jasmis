@@ -71,9 +71,12 @@ class ItemResource extends JsonResource
             'item_description' => $this->item_description,
             'category_name' => $this->category_name,
             'cuisine_name' => $this->cuisine_name,   
-            'ingrdient_groups' =>  $this->when($this->item_id, function () {                    
-                $ingredientGroupQuery = IngredientGroup::getIngredientGroups($this->item_id)->get();
-                return IngredientGroupResource::collection($ingredientGroupQuery);
+            'ingrdient_groups' =>  $this->when($this->item_id, function () {   
+
+                if(!isset(request()->auto_suggestion)){
+                    $ingredientGroupQuery = IngredientGroup::getIngredientGroups($this->item_id)->get();
+                    return IngredientGroupResource::collection($ingredientGroupQuery);
+                }
             }),
             'in_cart' => $this->when(true,function() {
                 
