@@ -105,6 +105,36 @@ class ItemResource extends JsonResource
                     return (int)$cartItem;
                 }                
             }),
+            'cart_item_key' => $this->when(true,function() {
+                
+                if( (!auth()->guard(GUARD_USER_API)->check()) && (!auth()->guard(GUARD_USER)->check())) {
+                    $cart_item_key = [];
+                } else {
+                    if(auth()->guard(GUARD_USER_API)->check()) {                        
+                        $userID = request()->user(GUARD_USER_API)->user_id;
+                    }
+                    if(auth()->guard(GUARD_USER)->check()) {
+                        $userID = request()->user(GUARD_USER)->user_id;
+                    }
+
+                    $cart = Cart::where(['user_id' => $userID])->withTrashed(false)->first();                    
+                    if($cart === null) {
+                        $cart_item_key = [];
+                    }
+                    $cart_item = CartItem::where([
+                        'cart_id' => $cart->cart_id,
+                        'item_id' => $this->item_id,
+                        // 'is_ingredient' => 0
+                    ])->pluck('cart_item_key')->toArray();
+                    if($cart_item === null){
+                        $cart_item_key = [];
+                    }else{
+                        $cart_item_key = $cart_item;   
+                    }
+                    return $cart_item_key;
+                    
+                }                
+            }),
             /* $this->mergeWhen($request->item, [
                 'ingrdient_groups' =>  $this->when($this->item_id, function () {                    
                     $ingredientGroupQuery = IngredientGroup::getIngredientGroups($this->item_id)->get();
