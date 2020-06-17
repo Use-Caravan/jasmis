@@ -7,10 +7,15 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Http\Controllers\Api\V1\CartController;
+use App\Http\Controllers\Api\V1\OrderController;
 use App\Language;
 use App\Api\Branch;
 use App\Api\Cart;
 use App\Api\CartItem;
+use App\Api\Item;
+use App\Api\Vendor;
+use Common;// no
 use App;
 
 class Controller extends BaseController
@@ -224,18 +229,95 @@ class Controller extends BaseController
 
 
        if(!$cart_details) {
-            $cart = 0;
+            $cart_qty = 0;
             $branch_key = null;
+            $totalCheckouAmount = 0;
         }else{
-            $cart = CartItem::where(['cart_id' => $cart_details->cart_id])->count();
-            $branch_key = Branch::where('branch_id',$cart_details->branch_id)->value('branch_key');
-        }
+            $cart_qty = CartItem::where(['cart_id' => $cart_details->cart_id])->count();
 
+            /* get cart price logic start */
+
+            $branchDetails = Branch::select([
+                Vendor::tableName().'.*',
+                Branch::tableName().'.*',
+            ])
+                ->leftJoin(Vendor::tableName(),Branch::tableName().".vendor_id",'=',Vendor::tableName().'.vendor_id')
+                ->where([
+                    Branch::tableName().'.status' => ITEM_ACTIVE,
+                    Vendor::tableName().'.status' => ITEM_ACTIVE,
+                    Branch::tableName().'.branch_id' => $cart_details->branch_id,
+                ])->first();
+
+            $branch_key = $branchDetails->branch_key;
+            
+            $cartItem = CartItem::where('cart_id',$cart_details->cart_id)->get();
+        
+            $itemArray['items'] = [];
+            foreach($cartItem as $key => $value) {            
+                $item = Item::find($value->item_id);
+                if($item === null) {
+                    $getThisItem = CartItem::where(['cart_id' => $cart_details->cart_id,'item_id' => $value->item_id])->first();
+                    if($getThisItem !== null) {
+                        $getThisItem->delete();
+                        
+                    }
+                    continue;
+                }
+                $itemArray['items'][] = [
+                    'cart_item_key' => $value->cart_item_key,
+                    'item_key' => $item->item_key,
+                    'quantity' => $value->quantity,
+                    'ingrdient_groups' =>  json_decode($value->ingredients,true),
+                ];
+            }     
+            
+
+            $items = (new OrderController())->itemCheckoutItemData($itemArray);
+            
+
+            if($items['status'] === false) {
+                $totalCheckouAmount = 0;
+            }
+            
+            $totalCheckouAmount = 0;
+            $cart = (new OrderController())->dataFormat(['items' => $items['data']]); 
+            if( count($cart['items']) <= 0) {
+               $totalCheckouAmount = 0; 
+            } else {
+
+                $itemSubtotal = 0;
+                foreach($cart['items'] as $key => $value) {
+                    $itemSubtotal += $value['subtotal'];
+                }
+
+
+                /** Vat tax amount */
+                $vatAmount = ($itemSubtotal * $branchDetails->tax) / 100;
+                         
+
+                /** Service tax amount */
+                $serviceTaxAmount = 0;
+                if($branchDetails->service_tax !== null && $branchDetails->service_tax > 0) {
+                    
+                   $serviceTaxAmount = ($itemSubtotal * $branchDetails->service_tax) / 100;
+                   
+                }
+
+                /** Total Cost */
+                $totalCheckouAmount = $itemSubtotal +$vatAmount + $serviceTaxAmount;
+              
+            }
+            
+            
+            /* get cart price logic end */
+        }
+        
         $response = [
             'status' => $this->status, 
             'message' => $this->message,
             'time'=> time(),
-            'cart_quantity' => $cart,
+            'cart_quantity' => $cart_qty,
+            'cart_price' => $totalCheckouAmount,
             'branch_key' => $branch_key,
             'system' => [
                 'error_for' => $this->error_for,

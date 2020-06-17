@@ -32,7 +32,7 @@ class UserWishlistResource extends JsonResource
             'branch_key' => $this->branch_key,
             'branch_slug' => $this->branch_slug,
             'branch_name' => $this->branch_name,
-            'branch_avg_rating' => ($this->branch_avg_rating === null) ? 0 : $this->branch_avg_rating,            
+            'branch_avg_rating' => ($this->branch_avg_rating === null) ? 0 : number_format($this->branch_avg_rating,1),            
             'cuisines' => $this->cuisines,
             'branch_logo' => FileHelper::loadImage($this->vendor_logo),
             'color_code' => ($this->color_code === null) ? '' : '#'.$this->color_code,

@@ -23,6 +23,7 @@ class OrderResource extends JsonResource
     {  
         //return parent::toArray($request);
         $ratings = BranchReview::where('vendor_id',$this->vendor_id)->where('branch_id',$this->branch_id)->where('user_id',$this->user_id)
+                        ->where('status',ITEM_ACTIVE)
                         ->where('approved_status',REVIEW_APPROVED_STATUS_APPROVED)->first();
         
         return [
