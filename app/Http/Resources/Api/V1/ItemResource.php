@@ -10,6 +10,7 @@ use App\Api\CartItem;
 use App\Api\Vendor;
 use App\Api\Branch;
 use App\Api\BranchReview;
+use App\Api\ItemLang;
 use FileHelper;
 use Common;
 use DB;
@@ -65,6 +66,7 @@ class ItemResource extends JsonResource
             'rating' => BranchReview::where('branch_id',$this->branch_id)->value('rating'),
             'min_order_value' => Vendor::where('vendor_id',$this->vendor_id)->value('min_order_value'),
             'item_name' => $this->item_name,
+            'arabic_item_name' => ItemLang::where('item_id',$this->item_id)->where('language_code','ar')->value('item_name'),
             'item_image' => FileHelper::loadImage($this->item_image),
             'item_price' => Common::currency($this->item_price),
             'flat_item_price' => $this->item_price,
@@ -119,7 +121,7 @@ class ItemResource extends JsonResource
 
                     $cart = Cart::where(['user_id' => $userID])->withTrashed(false)->first();                    
                     if($cart === null) {
-                        $cart_item_key = [];
+                        return $cart_item_key = [];
                     }
                     $cart_item = CartItem::where([
                         'cart_id' => $cart->cart_id,
@@ -127,7 +129,7 @@ class ItemResource extends JsonResource
                         // 'is_ingredient' => 0
                     ])->pluck('cart_item_key')->toArray();
                     if($cart_item === null){
-                        $cart_item_key = [];
+                        return $cart_item_key = [];
                     }else{
                         $cart_item_key = $cart_item;   
                     }

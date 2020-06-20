@@ -13,6 +13,8 @@ use App\{
     Api\Cuisine,
     Api\UserWishlist,
     Api\Vendor,
+    Api\VendorLang,
+    Api\BranchLang,
     Api\Order,
     Api\Category
 };
@@ -38,9 +40,11 @@ class BranchResource extends JsonResource
             'branch_id' => $this->branch_id,
             'branch_key' => $this->branch_key,
             'branch_name' => $this->branch_name,
+            'arabic_branch_name' => BranchLang::where('branch_id',$this->branch_id)->where('language_code','ar')->value('branch_name'),
             'vendor_id' => $this->vendor_id,
             'vendor_key' => $this->vendor_key,
             'vendor_name' => $this->vendor_name,
+            'arabic_vendor_name' => VendorLang::where('vendor_id',$this->vendor_id)->where('language_code','ar')->value('vendor_name'),
             'branch_logo' => FileHelper::loadImage($this->vendor_logo),     
             'preparation_time' => $this->preparation_time,            
             'delivery_time' => ($this->delivery_time === null) ? 0 : $this->delivery_time,
