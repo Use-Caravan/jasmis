@@ -82,10 +82,10 @@ class CartController extends Controller
                 }                
                                 
                 foreach($getThisItem as $key => $value) {
-                    if($value->is_ingredient == 0) {                        
-                        $catItemID = $value->cart_item_id;
-                        goto cartItemUpdate;
-                    }
+                    // if($value->is_ingredient == 0) {                        
+                    //     $catItemID = $value->cart_item_id;
+                    //     goto cartItemUpdate;
+                    // } // code commented for item add issue with and without ingredient 
                     $existsIngredients = json_decode($value->ingredients,true);
                     $currentIngredients = $rawData['ingrdient_groups'];
                     if($existsIngredients == $currentIngredients) {

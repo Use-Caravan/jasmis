@@ -148,6 +148,19 @@ class AuthController extends Controller
         $user->last_name = $request->last_name;
         $user->email = $request->email;
         $user->status = ITEM_ACTIVE;
+
+        $len = '16';
+        $existsCardNumber = User::get();
+        $cardNumber = sprintf("%0".$len."d", mt_rand(1, (int)str_pad("", $len,"9")));
+        foreach ($existsCardNumber as $key => $value) {
+            if($value->card_number = $cardNumber) {
+               $user->card_number = sprintf("%0".$len."d", mt_rand(1, (int)str_pad("", $len,"9")));
+            }
+            else {
+                $user->card_number = $cardNumber;
+            } 
+        }
+
         $user->save();
         $this->user = $user;
         $this->setMessage( __('apimsg.Login Successful') );
@@ -194,10 +207,20 @@ class AuthController extends Controller
             $errorMsg = __('apimsg.Phone Number already exists');
             goto error;
         }
-
+        $len = '16';
+        $existsCardNumber = User::get();
         $user = new User();
         $user = $user->fill($request->all());        
         $user->password = bcrypt($request->password);
+        $cardNumber = sprintf("%0".$len."d", mt_rand(1, (int)str_pad("", $len,"9")));
+        foreach ($existsCardNumber as $key => $value) {
+            if($value->card_number = $cardNumber) {
+               $user->card_number = sprintf("%0".$len."d", mt_rand(1, (int)str_pad("", $len,"9")));
+            }
+            else {
+                $user->card_number = $cardNumber;
+            } 
+        }
         $user->save();        
         $this->user = $user;
 
