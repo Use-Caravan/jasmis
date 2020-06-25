@@ -25,6 +25,9 @@ class OrderResource extends JsonResource
         $ratings = BranchReview::where('vendor_id',$this->vendor_id)->where('branch_id',$this->branch_id)->where('user_id',$this->user_id)
                         ->where('status',ITEM_ACTIVE)
                         ->where('approved_status',REVIEW_APPROVED_STATUS_APPROVED)->first();
+						
+	   $user_rating = BranchReview::where('vendor_id',$this->vendor_id)->where('branch_id',$this->branch_id)->
+                       where('user_id',$this->user_id)->first();
         
         return [
             'order_key' => $this->order_key,            
@@ -37,7 +40,8 @@ class OrderResource extends JsonResource
             'order_datetime' => Common::renderDate($this->order_datetime),
             'vendor_logo' => FileHelper::loadImage(Vendorlang::where('vendor_id',$this->vendor_id)->pluck('vendor_logo')),
             'branch_name' => $this->branch_name,                        
-            'branch_key' => $this->branch_key,                                    
+            'branch_key' => $this->branch_key, 
+            'rating'     =>  ($user_rating == null) ? "null" : 'rated',  			
             'branch_rating' => ($ratings == null) ? "" : $ratings->rating,                           
             'branch_review' => ($ratings == null) ? "" : $ratings->review,                           
             'color_code' => ($this->color_code === null) ? '' : '#'.$this->color_code,

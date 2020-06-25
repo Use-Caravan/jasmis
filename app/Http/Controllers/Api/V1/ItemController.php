@@ -66,7 +66,7 @@ class ItemController extends Controller
 
             }else{
                 $data['items'] = ItemResource::collection(Item::getItems()->get());
-                $data['vendors'] = collect($data['items'])->unique('vendor_id');
+                $data['vendors'] = collect($data['items'])->unique('vendor_id')->values();
             }
         }
         $this->setMessage( __('apimsg.Items are fetched.') );            
