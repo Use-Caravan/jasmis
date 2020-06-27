@@ -352,7 +352,7 @@ class CartController extends Controller
             /** Total Cost */
             $totalCheckouAmount = $itemSubtotal +$vatAmount + $serviceTaxAmount;
             $cart['total'] = [
-                'cprice' => $totalCheckouAmount,
+                'cprice' => number_format($totalCheckouAmount,3),
                 'price' => Common::currency($totalCheckouAmount),
                 'name' => 'Total',
                 'cart_total' => count($cart['items']),

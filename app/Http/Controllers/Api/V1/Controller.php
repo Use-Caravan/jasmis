@@ -317,7 +317,7 @@ class Controller extends BaseController
             'message' => $this->message,
             'time'=> time(),
             'cart_quantity' => $cart_qty,
-            'cart_price' => $totalCheckouAmount,
+            'cart_price' => number_format($totalCheckouAmount,3),
             'branch_key' => $branch_key,
             'system' => [
                 'error_for' => $this->error_for,
