@@ -48,8 +48,6 @@ class CmsController extends Controller
     {
         $cms = Cms::getList()->where(['status' => ITEM_ACTIVE])->whereIn('section',CMS_SEC)->orderBy('section','asc')->groupBy('section')->get()->toArray();
         $data = [];
-        $arBanners = [];
-        $enBanners = [];
         $i = 0;
         foreach($cms as $key => $value) {
             $i++;
@@ -65,54 +63,21 @@ class CmsController extends Controller
                             'xxxhdpi_image_path' => FileHelper::loadImage($sections['xxxhdpi_image_path']),
                           ];
                 
-                          if ($sections['vendor_id'] != NULL) {
-                    if ($sections['arabic_banner'] == 0) {
-                        $enBanners = [
-                            'vendor_key' => Vendor::where('vendor_id', $sections['vendor_id'])->value('vendor_key'),
-                            'vendor_id' => $sections['vendor_id'],
-                            'as_arabic_banner' => $sections['arabic_banner'],
-                            'branch_key' => Branch::where('branch_id', $sections['branch_id'])->value('branch_key'),
-                            'branch_id' => $sections['branch_id'],
-                            'item_id' => null,
-                            'item_name' => '',
-                            'restarunt_name' => '',
-                            'item_price' => '',
-                            'image_link' => '',
-                            'image' => $images,
-                        ];
-                    } else {
-                        $arBanners = [
-                            'vendor_key' => Vendor::where('vendor_id', $sections['vendor_id'])->value('vendor_key'),
-                            'vendor_id' => $sections['vendor_id'],
-                            'as_arabic_banner' => $sections['arabic_banner'],
-                            'branch_key' => Branch::where('branch_id', $sections['branch_id'])->value('branch_key'),
-                            'branch_id' => $sections['branch_id'],
-                            'item_id' => null,
-                            'item_name' => '',
-                            'restarunt_name' => '',
-                            'item_price' => '',
-                            'image_link' => '',
-                            'image' => $images,
-                        ];
-                    }
-                }
-                //$section_items = [
-                //'vendor_key' => Vendor::where('vendor_id',$sections['vendor_id'])->value('vendor_key'),
-                // 'vendor_id' => $sections['vendor_id'],
-                //'as_arabic_banner' => $sections['arabic_banner'],
-                // 'branch_key' => Branch::where('branch_id',$sections['branch_id'])->value('branch_key'),
-                // 'branch_id' => $sections['branch_id'],
-                // 'item_id' => null,
-                //  'item_name' => '',
-                //  'restarunt_name' => '',
-                // 'item_price' => '',
-                //  'image_link' => '',
-                //'image' => $images,
-                // ];
-                //array_push($sectionitems_arr, $section_items);
+                $section_items = [
+                'vendor_key' => Vendor::where('vendor_id',$sections['vendor_id'])->value('vendor_key'),
+                'vendor_id' => $sections['vendor_id'],
+                'as_arabic_banner' => $sections['arabic_banner'],
+                'branch_key' => Branch::where('branch_id',$sections['branch_id'])->value('branch_key'),
+                'branch_id' => $sections['branch_id'],
+                'item_id' => null,
+                'item_name' => '',
+                'restarunt_name' => '',
+                'item_price' => '',
+                'image_link' => '',
+                'image' => $images,
+                 ];
+                array_push($sectionitems_arr, $section_items);
             }
-            $section_items = array_merge($enBanners, $arBanners);
-            array_push($sectionitems_arr, $section_items);
 
 
 

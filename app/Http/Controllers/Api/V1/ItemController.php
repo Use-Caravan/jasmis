@@ -60,7 +60,7 @@ class ItemController extends Controller
                 }
 
                 $data['items'] = $items;
-                $data['vendors'] = collect($data['items'])->unique('vendor_id');
+                $data['vendors'] = collect($data['items'])->unique('vendor_id')->values();
                 
                 // $data['vendors'] = collect($data['items'])->unique('vendor_id');
 
