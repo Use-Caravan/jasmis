@@ -72,6 +72,7 @@ class BranchResource extends JsonResource
             }),
             'distance' => ($this->distance === null) ? 0 : Common::round($this->distance),
             'branch_cuisine' => $this->branch_cuisine,
+            'arabic_branch_cuisine' => $this->arabic_branch_cuisine,
             'availability_status' => $this->when(true,function(){
                 $availabilityStatus = $this->availability_status;
                 $currentTime = date('H:i:s');

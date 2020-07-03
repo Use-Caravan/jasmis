@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Api\Ingredient;
+use App\Api\IngredientGroupLang;
 
 class IngredientGroupResource extends JsonResource
 {
@@ -13,13 +14,14 @@ class IngredientGroupResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function toArray($request)
+    public function toArray($requestIngredientGroupLang)
     {
         // return parent::toArray($request);
         return [
             'ingredient_group_id' => $this->ingredient_group_id,            
             'ingredient_group_key' => $this->ingredient_group_key,
             'ingredient_group_name' => $this->ingredient_group_name,
+            'arabic_ingredient_group_name' => IngredientGroupLang::where('ingredient_group_id',$this->ingredient_group_id)->where('language_code','ar')->value('ingredient_group_name'),
             'ingredient_type' => $this->ingredient_type,
             'minimum' => ($this->minimum === null) ? 0 : $this->minimum,
             'maximum' => ($this->maximum === null) ? 0 : $this->maximum,

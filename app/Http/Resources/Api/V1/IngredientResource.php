@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Common;
+use App\Api\IngredientLang;
 
 class IngredientResource extends JsonResource
 {
@@ -19,7 +20,8 @@ class IngredientResource extends JsonResource
         return [
             'ingredient_id' => $this->ingredient_id,            
             'ingredient_key' => $this->ingredient_key,
-            'ingredient_name' => $this->ingredient_name,
+            'ingredient_name' => $this->ingredient_name, 
+            'arabic_ingredient_name' => IngredientLang::where('ingredient_id',$this->ingredient_id)->where('language_code','ar')->value('ingredient_name'),
             'price' => Common::currency($this->price),
             'flat_ingredient_price' => $this->price,
         ];

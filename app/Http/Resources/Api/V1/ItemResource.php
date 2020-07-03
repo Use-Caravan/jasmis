@@ -8,6 +8,9 @@ use App\Api\IngredientGroup;
 use App\Api\Cart;
 use App\Api\CartItem;
 use App\Api\Vendor;
+use App\Api\VendorLang;
+use App\Api\CategoryLang;
+use App\Api\CuisineLang;
 use App\Api\Branch;
 use App\Api\BranchReview;
 use App\Api\ItemLang;
@@ -35,6 +38,7 @@ class ItemResource extends JsonResource
             'branch_id' => $this->branch_id,
             'vendor_id' => $this->vendor_id,
             'vendor_name' => $this->vendor_name,
+            'arabic_vendor_name' => VendorLang::where('vendor_id',$this->vendor_id)->where('language_code','ar')->value('vendor_name'),
             'vendor_key' => Vendor::where('vendor_id',$this->vendor_id)->value('vendor_key'),
             'offer_enable' => $this->when(true,function() {
                 return ($this->offer_type !== null && $this->offer_type != '') ? true : false;
@@ -71,8 +75,11 @@ class ItemResource extends JsonResource
             'item_price' => Common::currency($this->item_price),
             'flat_item_price' => $this->item_price,
             'item_description' => $this->item_description,
+            'arabic_item_description' => ItemLang::where('item_id',$this->item_id)->where('language_code','ar')->value('item_description'),
             'category_name' => $this->category_name,
-            'cuisine_name' => $this->cuisine_name,   
+            'arabic_category_name' => CategoryLang::where('category_id',$this->item_id)->where('language_code','ar')->value('category_name'),
+            'cuisine_name' => $this->cuisine_name,    
+            'arabic_cuisine_name' => CuisineLang::where('cuisine_id',$this->item_id)->where('language_code','ar')->value('cuisine_name'),
             'ingrdient_groups' =>  $this->when($this->item_id, function () {   
 
                 if(!isset(request()->auto_suggestion)){

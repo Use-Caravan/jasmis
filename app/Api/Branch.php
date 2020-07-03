@@ -105,6 +105,10 @@ class Branch extends CommonBranch
                     SELECT group_concat(cuisine_name) FROM cuisine_lang AS CL
                     LEFT JOIN branch_cuisine AS BC ON BC.cuisine_id = CL.cuisine_id
                     WHERE branch_id = branch.branch_id and language_code = ? ) as branch_cuisine'),
+                DB::raw('(
+                    SELECT group_concat(cuisine_name) FROM cuisine_lang AS CL
+                    LEFT JOIN branch_cuisine AS BC ON BC.cuisine_id = CL.cuisine_id
+                    WHERE branch_id = branch.branch_id and language_code = "ar" ) as arabic_branch_cuisine'),
                 DB::raw("(SELECT AVG(branch_review.rating) from branch_review where branch_id = branch.branch_id and approved_status = 1 and deleted_at IS NULL) as branch_avg_rating"),
                 DB::raw("(SELECT COUNT(branch_review.branch_review_id) from branch_review where branch_id = branch.branch_id and approved_status = 1 and deleted_at IS NULL) as branch_rating_count"),                
                 DB::raw("(SELECT COUNT(*) from branch_timeslot as BT where BT.branch_id = branch.branch_id and status = 1) as timeslotcount"),

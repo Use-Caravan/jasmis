@@ -6,6 +6,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Api\Category;
+use App\Api\CategoryLang;
 use App\Api\Item;
 use FileHelper;
 
@@ -26,6 +27,7 @@ class CategoryResource extends JsonResource
             'category_id' => $this->category_id,            
             'category_key' => $this->category_key,
             'category_name' => $this->category_name,
+            'arabic_category_name' => $this->arabic_category_name,
             'category_image' => FileHelper::loadImage($this->category_image),
             'is_main_category' => $this->is_main_category,
             'category_count'    => $this->category_count,
