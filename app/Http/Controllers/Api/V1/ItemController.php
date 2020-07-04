@@ -11,13 +11,16 @@ use App\Http\{
 use Illuminate\Http\Response;
 use App\Api\{
     Item,
+    ItemLang,
     Vendor,
+    VendorLang,
     ItemGroupMapping,
     IngredientGroupMapping,
     IngredientLang,
     IngredientGroupLang,
     IngredientGroup,
     Branch,
+    BranchLang,
     Category
 };
 use Validator;
@@ -46,13 +49,16 @@ class ItemController extends Controller
                                             'vendor_id' => $value->vendor_id,
                                             'vendor_key' => Vendor::where('vendor_id',$value->vendor_id)->value('vendor_key'),
                                             'vendor_name' => $value->vendor_name,
+                                            'arabic_vendor_name' => VendorLang::where('vendor_id',$value->vendor_id)->where('language_code','ar')->value('vendor_name'),
                                             'vendor_logo' => FileHelper::loadImage($value->vendor_logo),
                                             'branch_id' => $value->branch_id,
                                             'branch_key' => $value->branch_key,
                                             'branch_name' => $value->branch_name,
+                                            'arabic_branch_name' => BranchLang::where('branch_id',$value->branch_id)->where('language_code','ar')->value('branch_name'),
                                             'item_id' => $value->item_id,
                                             'item_key' => $value->item_key,
                                             'item_name' => $value->item_name,
+                                            'arabic_item_name' => ItemLang::where('item_id',$value->item_id)->where('language_code','ar')->value('item_name'),
                                             'item_image' => FileHelper::loadImage($value->item_image),
 
                                       ];
