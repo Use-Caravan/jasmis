@@ -52,6 +52,8 @@ class CmsController extends Controller
         foreach($cms as $key => $value) {
             $i++;
             $get_section_items = Cms::getList()->where(['status' => ITEM_ACTIVE])->where('section',$value['section'])->get()->toArray();
+            $en_banners = [];
+            $ar_banners = [];
             $sectionitems_arr =[];
             foreach ($get_section_items as $key => $sections) {
                 $images = [
@@ -79,7 +81,61 @@ class CmsController extends Controller
                 array_push($sectionitems_arr, $section_items);
             }
 
-
+      // Languagewise banners start
+            
+            foreach ($get_section_items as $key => $sections) {
+                $images = [
+                            'ldpi_image_path' => FileHelper::loadImage($sections['ldpi_image_path']),
+                            'mdpi_image_path' => FileHelper::loadImage($sections['mdpi_image_path']),
+                            'hdpi_image_path' => FileHelper::loadImage($sections['hdpi_image_path']),
+                            'xhdpi_image_path' => FileHelper::loadImage($sections['xhdpi_image_path']),
+                            'xxhdpi_image_path' => FileHelper::loadImage($sections['xxhdpi_image_path']),
+                            'xxxhdpi_image_path' => FileHelper::loadImage($sections['xxxhdpi_image_path']),
+                          ];
+                
+                $vendor_id = $sections['vendor_id'];
+                $as_arabic_banner = $sections['arabic_banner'];
+                
+                if($vendor_id != null)
+                {
+                    if($as_arabic_banner == 0)
+                    {
+                       $en_banners = [
+                'vendor_key' => Vendor::where('vendor_id',$sections['vendor_id'])->value('vendor_key'),
+                'vendor_id' => $sections['vendor_id'],
+                'as_arabic_banner' => $sections['arabic_banner'],
+                'branch_key' => Branch::where('branch_id',$sections['branch_id'])->value('branch_key'),
+                'branch_id' => $sections['branch_id'],
+                'item_id' => null,
+                'item_name' => '',
+                'restarunt_name' => '',
+                'item_price' => '',
+                'image_link' => '',
+                'image' => $images,
+                 ];  
+                    }
+                    else
+                    {
+                        $ar_banners = [
+                'vendor_key' => Vendor::where('vendor_id',$sections['vendor_id'])->value('vendor_key'),
+                'vendor_id' => $sections['vendor_id'],
+                'as_arabic_banner' => $sections['arabic_banner'],
+                'branch_key' => Branch::where('branch_id',$sections['branch_id'])->value('branch_key'),
+                'branch_id' => $sections['branch_id'],
+                'item_id' => null,
+                'item_name' => '',
+                'restarunt_name' => '',
+                'item_price' => '',
+                'image_link' => '',
+                'image' => $images,
+                 ];  
+                    }
+                }
+                             
+                //array_push($sectionitems_arr, $section_items);
+            }
+            
+      // Languagewise banners end
 
 
             $data[] =  [ 
@@ -87,12 +143,13 @@ class CmsController extends Controller
                          'section_name' => $value['title'], 
                          'no_of_items' => '', 
                          'section_items' => $sectionitems_arr,
-                         'section_items_'.$i => $sectionitems_arr
-                           
+                         'section_items_'.$i => $sectionitems_arr,
+                         'en_banners'   => $en_banners,
+                         'ar_banners'   => $ar_banners
 
                        ];
 
-
+                     
          
         }
 
@@ -101,7 +158,7 @@ class CmsController extends Controller
         
 
         $cuisine = CuisineResource::collection(Cuisine::getList()->where('status',ITEM_ACTIVE)->get());
-
+        
         $branches = Branch::getBranches()->where('popular_status',ITEM_ACTIVE)->get();
         $branches = BranchResource::collection($branches);   
 
