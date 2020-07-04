@@ -292,16 +292,19 @@ class CartController extends Controller
 
             $vendorlangDetails = VendorLang::where('vendor_id',$branchDetails->vendor_id)->first();
             $branch_name = BranchLang::where('branch_id',$branch_id)->value('branch_name');
-            
+            $arabic_branch_name = BranchLang::where('branch_id',$branch_id)->where('language_code','ar')->value('branch_name');
             
             $vendorDetails = [
                 'vendor_id' => $branchDetails->vendor_id,
                 'vendor_key' => $branchDetails->vendor_key,
                 'vendor_name' => $vendorlangDetails->vendor_name,
+                'arabic_vendor_name' => VendorLang::where('vendor_id',$branchDetails->vendor_id)->where('language_code','ar')->value('vendor_name'),
                 'vendor_logo' => FileHelper::loadImage($vendorlangDetails->vendor_logo),
                 'branch_cuisine' => CuisineLang::whereIn('cuisine_id',BranchCuisine::where('branch_id',$branch_id)->pluck('cuisine_id')->toarray())->where('language_code','en')->get()->pluck('cuisine_name'),
+                'arabic_branch_cuisine' => CuisineLang::whereIn('cuisine_id',BranchCuisine::where('branch_id',$branch_id)->pluck('cuisine_id')->toarray())->where('language_code','ar')->get()->pluck('cuisine_name'),
                 'branch_key' => $branchDetails->branch_key,
                 'branch_name' => $branch_name,
+                'arabic_branch_name' => $arabic_branch_name,
                 'min_order_value' => $branchDetails->min_order_value,
             
             ];

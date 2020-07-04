@@ -1105,6 +1105,7 @@ class OrderController extends Controller
                 'item_key' => $itemDetails->item_key,
                 'item_id' => $itemDetails->item_id,
                 'item_name' => $itemDetails->item_name,
+                'arabic_item_name' => ItemLang::where('item_id',$itemDetails->item_id)->where('language_code','ar')->value('item_name'),
                 'item_image' => FileHelper::loadImage($itemDetails->item_image),
                 'price' => Common::currency($itemPrice),
                 'cprice' => $itemPrice,
@@ -1112,6 +1113,7 @@ class OrderController extends Controller
                 'subtotal' => $itemSubTotal,
                 'ingredient_groups' => [],
                 'ingredient_name' => "",
+                'arabic_ingredient_name' => "",
                 'item_instruction' => isset($value['item_instruction']) ? $value['item_instruction'] : '',
             ];  
             if(isset($value['cart_item_key'])) {
@@ -1128,7 +1130,8 @@ class OrderController extends Controller
                     $items[$key]['ingredient_groups'][$igKey] = [
                         'ingredient_group_key' => $ingredientGroup->ingredient_group_key,
                         'ingredient_group_id' => $ingredientGroup->ingredient_group_id,
-                        'ingredient_group_name' => $ingredientGroup->ingredient_group_name,                    
+                        'ingredient_group_name' => $ingredientGroup->ingredient_group_name,
+                        'arabic_ingredient_group_name' => IngredientGroupLang::where('ingredient_group_id',$ingredientGroup->ingredient_group_id)->where('language_code','ar')->value('ingredient_group_name'), 
                     ];                
                     $ingredientGroupSubTotal = 0;                
                     if(!isset($igValue['ingredients'])) {
@@ -1148,6 +1151,7 @@ class OrderController extends Controller
                         }
                         $ingredientSubtotal = (int)$iValue['quantity'] * ( (float)$ingredients->price * $itemQuantity) ;
                         $items[$key]['ingredient_name'] = (isset($items[$key]['ingredient_name']) && $items[$key]['ingredient_name'] != '') ? $items[$key]['ingredient_name'].", ".$ingredients->ingredient_name : $ingredients->ingredient_name;
+                        $items[$key]['arabic_ingredient_name'] = (isset($items[$key]['arabic_ingredient_name']) && $items[$key]['arabic_ingredient_name'] != '') ? $items[$key]['arabic_ingredient_name']. "," .IngredientLang::where('ingredient_name',$ingredients->ingredient_name)->where('language_code','ar')->value('ingredient_name'):IngredientLang::where('ingredient_name',$ingredients->ingredient_name)->where('language_code','ar')->value('ingredient_name');
                         $items[$key]['ingredient_groups'][$igKey]['ingredients'][$iKey] = [
                             'ingredient_key' => $ingredients->ingredient_key,
                             'ingredient_id' => $ingredients->ingredient_id,
