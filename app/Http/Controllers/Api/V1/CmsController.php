@@ -78,12 +78,30 @@ class CmsController extends Controller
                 'image_link' => '',
                 'image' => $images,
                  ];
+                
+                // Languagewise banners start
+                
+                $vendor_id = $sections['vendor_id'];
+                $as_arabic_banner = $sections['arabic_banner'];
+                
+                if($vendor_id != null)
+                {
+                    if($as_arabic_banner == 0)
+                    {
+                       array_push($en_banners, $section_items);
+                    }
+                    else
+                    {
+                       array_push($ar_banners, $section_items);
+                    }
+                }
+                // Languagewise banners end
                 array_push($sectionitems_arr, $section_items);
             }
 
       // Languagewise banners start
             
-            foreach ($get_section_items as $key => $sections) {
+          /*  foreach ($get_section_items as $key => $sections) {
                 $images = [
                             'ldpi_image_path' => FileHelper::loadImage($sections['ldpi_image_path']),
                             'mdpi_image_path' => FileHelper::loadImage($sections['mdpi_image_path']),
@@ -133,7 +151,7 @@ class CmsController extends Controller
                 }
                              
                 //array_push($sectionitems_arr, $section_items);
-            }
+            }*/
             
       // Languagewise banners end
 

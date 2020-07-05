@@ -33,7 +33,8 @@ class ItemResource extends JsonResource
         $vendor = new Vendor();
 
         return [
-            'item_id' => $this->item_id,            
+            'item_id' => $this->item_id,
+          //  'category_id' => $this->category_id,       
             'item_key' => $this->item_key,
             'branch_id' => $this->branch_id,
             'vendor_id' => $this->vendor_id,
@@ -77,9 +78,9 @@ class ItemResource extends JsonResource
             'item_description' => $this->item_description,
             'arabic_item_description' => ItemLang::where('item_id',$this->item_id)->where('language_code','ar')->value('item_description'),
             'category_name' => $this->category_name,
-            'arabic_category_name' => CategoryLang::where('category_id',$this->item_id)->where('language_code','ar')->value('category_name'),
+            'arabic_category_name' => CategoryLang::where('category_id',$this->category_id)->where('language_code','ar')->value('category_name'),
             'cuisine_name' => $this->cuisine_name,    
-            'arabic_cuisine_name' => CuisineLang::where('cuisine_id',$this->item_id)->where('language_code','ar')->value('cuisine_name'),
+            'arabic_cuisine_name' => CuisineLang::where('cuisine_id',$this->cuisine_id)->where('language_code','ar')->value('cuisine_name'),
             'ingrdient_groups' =>  $this->when($this->item_id, function () {   
 
                 if(!isset(request()->auto_suggestion)){
