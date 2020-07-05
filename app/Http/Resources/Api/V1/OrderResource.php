@@ -6,6 +6,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use App\Api\OrderItem;
 use App\Api\Order;
 use App\Api\VendorLang;
+use App\Api\BranchLang;
 use App\Api\BranchReview;
 use App\Http\Resources\Api\V1\OrderItemResource;
 use Common;
@@ -39,7 +40,8 @@ class OrderResource extends JsonResource
             'csub_total' => $this->item_total,
             'order_datetime' => Common::renderDate($this->order_datetime),
             'vendor_logo' => FileHelper::loadImage(Vendorlang::where('vendor_id',$this->vendor_id)->pluck('vendor_logo')),
-            'branch_name' => $this->branch_name,                        
+            'branch_name' => $this->branch_name,
+            'arabic_branch_name' => BranchLang::where('branch_id',$this->branch_id)->where('language_code','ar')->value('branch_name'),
             'branch_key' => $this->branch_key, 
             'rating'     =>  ($user_rating == null) ? "null" : 'rated',  			
             'branch_rating' => ($ratings == null) ? "" : $ratings->rating,                           

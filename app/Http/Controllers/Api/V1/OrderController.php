@@ -291,7 +291,9 @@ class OrderController extends Controller
                     'order_item_id' => $orderItemID,
                     'language_code' => $ILvalue->language_code,
                     'item_name' => $ILvalue->item_name,
+                    'arabic_item_name' => ItemLang::where('item_id',$ILvalue->item_id)->where('language_code','ar')->value('item_name'),
                     'item_description' => $ILvalue->item_description,
+                    'arabic_item_description' => ItemLang::where('item_id', $ILvalue->item_id)->where('language_code','ar')->value('item_description'),
                     'item_image_path' => $item_path
                     ]);
                     $orderItemLang->save();
@@ -321,6 +323,7 @@ class OrderController extends Controller
                             'order_item_ingredient_group_id' => $orderingredientGroupID,
                             'language_code' => $IGroupLang->language_code,
                             'group_name' => $IGroupLang->ingredient_group_name,
+                            'arabic_group_name' => IngredientGroupLang::where('ingredient_group_id', $IGroupLang->ingredient_group_id)->where('language_code','ar')->value('ingredient_group_name'),                      
                         ]);
                         $orderIngredientGropuLang->save();
                     }
@@ -351,7 +354,8 @@ class OrderController extends Controller
                             $orderIngredientLang = $orderIngredientLang->fill([
                                 'order_ingredient_id' => $orderIngredientID,
                                 'language_code' => $ingredientLang->language_code,
-                                'ingredient_name' => $ingredientLang->ingredient_name
+                                'ingredient_name' => $ingredientLang->ingredient_name,
+                                'arabic_ingredient_name' => IngredientLang::where('ingredient_id', $ingredientLang->ingredient_id)->where('language_code','ar')->value('ingredient_name'),
                             ]);                            
                             $orderIngredientLang->save();
                             $deliveryboyItems[$countItems]['ingredients']['name'] = $ingredientLang->ingredient_name;
@@ -1662,6 +1666,7 @@ class OrderController extends Controller
                 foreach($ingredients as $ingredientValue) {
                     $itemDetails['details']['items'][$itemKey]['ingredients'][] = [
                         'name' => $ingredientValue->ingredient_name,
+                        'arabic_name' => IngredientLang::where('ingredient_id', $ingredientValue->ingredient_id)->where('language_code','ar')->value('ingredient_name'),
                         'price' => $ingredientValue->ingredient_subtotal,
                         'quantity' => $ingredientValue->ingredient_quanitity,
                         'type' => 1, /*1-add , 2- remove*/                        

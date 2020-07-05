@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
+use App\Api\AreaLang;
 
 class AreaResource extends JsonResource
 {
@@ -19,6 +20,7 @@ class AreaResource extends JsonResource
          return [
             'area_key' => $this->area_key,
             'area_name' => $this->area_name,
+            'arabic_area_name' => AreaLang::where('area_id',$this->area_id)->where('language_code','ar')->value('area_name'),
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
         ];

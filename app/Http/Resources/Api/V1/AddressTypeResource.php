@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
+use App\Api\AddressTypeLang;
 
 class AddressTypeResource extends JsonResource
 {
@@ -20,6 +21,7 @@ class AddressTypeResource extends JsonResource
             'address_type_id' => $this->address_type_id,
             'address_type_key' => $this->address_type_key,
             'address_type_name' => $this->address_type_name,
+            'arabic_address_type_name' => AddressTypeLang::where('address_type_id',$this->address_type_id)->where('language_code','ar')->value('address_type_name'),
             // 'status' => $this->status,
         ];
     }
