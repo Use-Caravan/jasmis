@@ -48,13 +48,13 @@ class CmsController extends Controller
     {
         $cms = Cms::getList()->where(['status' => ITEM_ACTIVE])->whereIn('section',CMS_SEC)->orderBy('section','asc')->groupBy('section')->get()->toArray();
         $data = [];
-        $i = 0;
+        //$i = 0;
         foreach($cms as $key => $value) {
-            $i++;
+          //  $i++;
             $get_section_items = Cms::getList()->where(['status' => ITEM_ACTIVE])->where('section',$value['section'])->get()->toArray();
             $en_banners = [];
             $ar_banners = [];
-            $sectionitems_arr =[];
+            //$sectionitems_arr =[];
             foreach ($get_section_items as $key => $sections) {
                 $images = [
                             'ldpi_image_path' => FileHelper::loadImage($sections['ldpi_image_path']),
@@ -65,7 +65,14 @@ class CmsController extends Controller
                             'xxxhdpi_image_path' => FileHelper::loadImage($sections['xxxhdpi_image_path']),
                           ];
                 
-                $section_items = [
+                $vendor_id = $sections['vendor_id'];
+                $as_arabic_banner = $sections['arabic_banner'];
+                
+                if($vendor_id != null)
+                {
+                    if($as_arabic_banner == 0)
+                    {
+                $en_banners = [
                 'vendor_key' => Vendor::where('vendor_id',$sections['vendor_id'])->value('vendor_key'),
                 'vendor_id' => $sections['vendor_id'],
                 'as_arabic_banner' => $sections['arabic_banner'],
@@ -78,25 +85,30 @@ class CmsController extends Controller
                 'image_link' => '',
                 'image' => $images,
                  ];
-                
-                // Languagewise banners start
-                
-                $vendor_id = $sections['vendor_id'];
-                $as_arabic_banner = $sections['arabic_banner'];
-                
-                if($vendor_id != null)
-                {
-                    if($as_arabic_banner == 0)
-                    {
-                       array_push($en_banners, $section_items);
                     }
                     else
                     {
-                       array_push($ar_banners, $section_items);
+                $ar_banners_banners = [
+                'vendor_key' => Vendor::where('vendor_id',$sections['vendor_id'])->value('vendor_key'),
+                'vendor_id' => $sections['vendor_id'],
+                'as_arabic_banner' => $sections['arabic_banner'],
+                'branch_key' => Branch::where('branch_id',$sections['branch_id'])->value('branch_key'),
+                'branch_id' => $sections['branch_id'],
+                'item_id' => null,
+                'item_name' => '',
+                'restarunt_name' => '',
+                'item_price' => '',
+                'image_link' => '',
+                'image' => $images,
+                    ];
                     }
                 }
-                // Languagewise banners end
-                array_push($sectionitems_arr, $section_items);
+                // Languagewise banners start
+                
+                
+   
+                
+               
             }
 
       // Languagewise banners start
@@ -160,8 +172,8 @@ class CmsController extends Controller
                          'section_id' => $value['section'], 
                          'section_name' => $value['title'], 
                          'no_of_items' => '', 
-                         'section_items' => $sectionitems_arr,
-                         'section_items_'.$i => $sectionitems_arr,
+                         //'section_items' => $sectionitems_arr,
+                         //'section_items_'.$i => $sectionitems_arr,
                          'en_banners'   => $en_banners,
                          'ar_banners'   => $ar_banners
 
