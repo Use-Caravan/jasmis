@@ -5,6 +5,8 @@ namespace App\Http\Resources\Api\V1;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Common;
 use FileHelper;
+use App\Api\ItemLang;
+use App\Api\IngredientLang;
 
 class OrderItemResource extends JsonResource
 {
@@ -18,12 +20,15 @@ class OrderItemResource extends JsonResource
     {
         //return parent::toArray($request);
         return [
-            'item_name' => $this->item_name,                        
+            'item_name' => $this->item_name,
+            'arabic_item_name' => ItemLang::where('item_id',$this->item_id)->where('language_code','ar')->value('item_name'),
             'item_subtotal' => Common::currency($this->item_subtotal),
             'item_quantity' => $this->item_quantity,
             'item_image_path' => FileHelper::loadImage($this->item_image_path),
             'item_description' => $this->item_description,
+            'arabic_item_description' => ItemLang::where('item_id',$this->item_id)->where('language_code','ar')->value('item_description'),
             'ingredients' => $this->ingredients,
+            'arabic_ingredients' => $this->arabic_ingredients,
         ];
     }
     /**

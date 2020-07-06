@@ -68,6 +68,7 @@ class OrderResource extends JsonResource
             'user_latitude' => ($this->user_latitude === null) ? '' : $this->user_latitude,
             'user_longitude' => ($this->user_longitude === null) ? '' : $this->user_longitude,
             'item_namelist' => OrderItem::getOrderItems($this->order_id)->pluck('item_name'),
+            'arabic_item_namelist' => OrderItem::getOrderItemsArabic($this->order_id)->pluck('item_name'),
             $this->mergeWhen($request->order_key, [                
 
                 'items' =>  $this->when($request->order_key, function() {                    
