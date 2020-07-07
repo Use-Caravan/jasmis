@@ -53,11 +53,7 @@ class CmsController extends Controller
             $i++;
             $get_section_items = Cms::getList()->where(['status' => ITEM_ACTIVE])->where('section',$value['section'])->get()->toArray();
             $sectionitems_arr =[];
-            $en_banners = [];
-            $ar_banners = [];
             foreach ($get_section_items as $key => $sections) {
-                $vendor_id = $sections['vendor_id'];
-                $as_arabic_banner = $sections['arabic_banner'];
                 $images = [
                             'ldpi_image_path' => FileHelper::loadImage($sections['ldpi_image_path']),
                             'mdpi_image_path' => FileHelper::loadImage($sections['mdpi_image_path']),
@@ -80,45 +76,19 @@ class CmsController extends Controller
                                     'image_link' => '',
                                     'image' => $images,
                                  ];
-                /*if($vendor_id!= '')
-                {
-                if($as_arabic_banner == 1)
-                {
-                       array_push($ar_banners, $section_items);
-                }
-                else
-                {
-                        array_push($en_banners, $section_items);
-                }  
-                }*/
+
                 array_push($sectionitems_arr, $section_items);
             }
 
-            foreach($sectionitems_arr as $avalue )
-            {
-                if($avalue['vendor_id']!= '')
-                {
-                if($avalue['as_arabic_banner'] == 1)
-                {
-                       array_push($ar_banners, $avalue);
-                }
-                else
-                {
-                        array_push($en_banners, $avalue);
-                }  
-                }
-            }
+            
 
                        
-
             $data[] =  [ 
                          'section_id' => $value['section'], 
                          'section_name' => $value['title'], 
                          'no_of_items' => '', 
                          'section_items' => $sectionitems_arr,
-                         'section_items_'.$i => $sectionitems_arr,
-                         'en_banners' => $en_banners,
-                         'ar_banners' => $ar_banners
+                         'section_items_'.$i => $sectionitems_arr
                            
 
                        ];
