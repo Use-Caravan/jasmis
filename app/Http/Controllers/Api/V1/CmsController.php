@@ -80,7 +80,7 @@ class CmsController extends Controller
                                     'image_link' => '',
                                     'image' => $images,
                                  ];
-                if($vendor_id!= '')
+                /*if($vendor_id!= '')
                 {
                 if($as_arabic_banner == 1)
                 {
@@ -90,11 +90,24 @@ class CmsController extends Controller
                 {
                         array_push($en_banners, $section_items);
                 }  
-                }
+                }*/
                 array_push($sectionitems_arr, $section_items);
             }
 
-            
+            foreach($sectionitems_arr as $avalue )
+            {
+                if($avalue['vendor_id']!= '')
+                {
+                if($avalue['as_arabic_banner'] == 1)
+                {
+                       array_push($ar_banners, $avalue);
+                }
+                else
+                {
+                        array_push($en_banners, $avalue);
+                }  
+                }
+            }
 
                        
 
