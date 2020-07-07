@@ -103,7 +103,9 @@ class CmsController extends Controller
                          'section_name' => $value['title'], 
                          'no_of_items' => '', 
                          'section_items' => $sectionitems_arr,
-                         'section_items_'.$i => $sectionitems_arr
+                         'section_items_'.$i => $sectionitems_arr,
+                         'en_banners' => $en_banners,
+                         'ar_banners' => $ar_banners
                            
 
                        ];
