@@ -59,12 +59,12 @@ class CmsController extends Controller
                 $vendor_id = $sections['vendor_id'];
                 $as_arabic_banner = $sections['arabic_banner'];
                 $images = [
-                            'ldpi_image_path'     => $sections['ldpi_image_path'],
-                            'mdpi_image_path'     => $sections['mdpi_image_path'],
-                            'hdpi_image_path'     => $sections['hdpi_image_path'],
-                            'xhdpi_image_path'    => $sections['xhdpi_image_path'],
-                            'xxhdpi_image_path'   => $sections['xxhdpi_image_path'],
-                            'xxxhdpi_image_path'  => $sections['xxxhdpi_image_path'],                          
+                            'ldpi_image_path'     => FileHelper::loadImage($sections['ldpi_image_path']),
+                            'mdpi_image_path'     => FileHelper::loadImage($sections['mdpi_image_path']),
+                            'hdpi_image_path'     => FileHelper::loadImage($sections['hdpi_image_path']),
+                            'xhdpi_image_path'    => FileHelper::loadImage($sections['xhdpi_image_path']),
+                            'xxhdpi_image_path'   => FileHelper::loadImage($sections['xxhdpi_image_path']),
+                            'xxxhdpi_image_path'  => FileHelper::loadImage($sections['xxxhdpi_image_path']),                          
                           ];
                 $section_items = [
 
@@ -106,8 +106,9 @@ class CmsController extends Controller
                          'section_name' => $value['title'], 
                          'no_of_items' => '', 
                          'section_items' => $sectionitems_arr,
-                         'section_items_'.$i => $sectionitems_arr
-                           
+                         'section_items_'.$i => $sectionitems_arr,
+                         'en_banners'  => $en_banners,
+                         'ar_banners' => $ar_banners
 
                        ];
 
