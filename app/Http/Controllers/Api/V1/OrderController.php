@@ -1666,7 +1666,7 @@ class OrderController extends Controller
                 foreach($ingredients as $ingredientValue) {
                     $itemDetails['details']['items'][$itemKey]['ingredients'][] = [
                         'name' => $ingredientValue->ingredient_name,
-                        'arabic_name' => IngredientLang::where('ingredient_id', $ingredientValue->ingredient_id)->where('language_code','ar')->value('ingredient_name'),
+                        //'arabic_name' => IngredientLang::where('ingredient_id', $ingredientValue->ingredient_id)->where('language_code','ar')->value('ingredient_name'),
                         'price' => $ingredientValue->ingredient_subtotal,
                         'quantity' => $ingredientValue->ingredient_quanitity,
                         'type' => 1, /*1-add , 2- remove*/                        
