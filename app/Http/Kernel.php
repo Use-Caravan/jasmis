@@ -73,6 +73,11 @@ class Kernel extends HttpKernel
 
 
         'oauth.providers' => \SMartins\PassportMultiauth\Http\Middleware\AddCustomProvider::class,
+        /**
+        * other middlewares
+        * ...
+        */
+        'localization' => \App\Http\Middleware\localization::class,
 
         // 'cors' => \App\Http\Middleware\Cors::class,
         //'cors' => \Barryvdh\Cors\HandleCors::class
