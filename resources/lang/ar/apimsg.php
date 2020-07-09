@@ -98,10 +98,10 @@ return [
     'wishlists are fetched' => 'يتم جلب قوائم الأماني',
     'Invalid branch key' => 'مفتاح الفرع غير صالح',
     'Branch already exists in wishlist' => 'الفرع موجود بالفعل في قائمة الأمنيات',
-    'Restaurant has been added to wishlist' => 'تمت إضافة المطعم إلى قائمة الرغبات'   
+    'Restaurant has been added to wishlist' => 'تمت إضافة المطعم إلى قائمة الرغبات',   
     'Branch already removed from wishlist' => 'تمت إزالة الفرع بالفعل من قائمة الأمنيات',
     'Branch is unavailable to unwishlist' => 'الفرع غير متاح لقائمة غير مرغوب فيها',
-    'Restaurant has been removed from wishlist' => 'تمت إزالة المطعم من قائمة الرغبات'
+    'Restaurant has been removed from wishlist' => 'تمت إزالة المطعم من قائمة الرغبات',
     'Rating has been saved' => 'تم حفظ التقييم',
     'Already You Give Rating' => 'بالفعل كنت تعطي التقييم',
     'It seems you have rated already!' => 'يبدو أنك قد قيمت بالفعل!',
