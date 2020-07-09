@@ -1155,7 +1155,7 @@ class OrderController extends Controller
                         }
                         $ingredientSubtotal = (int)$iValue['quantity'] * ( (float)$ingredients->price * $itemQuantity) ;
                         $items[$key]['ingredient_name'] = (isset($items[$key]['ingredient_name']) && $items[$key]['ingredient_name'] != '') ? $items[$key]['ingredient_name'].", ".$ingredients->ingredient_name : $ingredients->ingredient_name;
-                        $items[$key]['arabic_ingredient_name'] = (isset($items[$key]['arabic_ingredient_name']) && $items[$key]['arabic_ingredient_name'] != '') ? $items[$key]['arabic_ingredient_name']. "," .IngredientLang::where('ingredient_name',$ingredients->ingredient_name)->where('language_code','ar')->value('ingredient_name'):IngredientLang::where('ingredient_name',$ingredients->ingredient_name)->where('language_code','ar')->value('ingredient_name');
+                        $items[$key]['arabic_ingredient_name'] = (isset($items[$key]['arabic_ingredient_name']) && $items[$key]['arabic_ingredient_name'] != '') ? $items[$key]['arabic_ingredient_name']. "," .IngredientLang::where('ingredient_id',$ingredients->ingredient_id)->where('language_code','ar')->value('ingredient_name'):IngredientLang::where('ingredient_id',$ingredients->ingredient_id)->where('language_code','ar')->value('ingredient_name');
                         $items[$key]['ingredient_groups'][$igKey]['ingredients'][$iKey] = [
                             'ingredient_key' => $ingredients->ingredient_key,
                             'ingredient_id' => $ingredients->ingredient_id,
