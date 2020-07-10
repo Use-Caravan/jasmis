@@ -20,7 +20,7 @@ class CuisineResource extends JsonResource
         return [
             'cuisine_id' => ($this->cuisine_id === null) ? '' : $this->cuisine_id,            
             'cuisine_key' => ($this->cuisine_key === null) ? '' : $this->cuisine_key,
-            'cuisine_name' => ($this->cuisine_name === null) ? '' : $this->cuisine_name,
+            'cuisine_name' => CuisineLang::where('cuisine_id',$this->cuisine_id)->where('language_code','en')->value('cuisine_name'),
             'arabic_cuisine_name' => CuisineLang::where('cuisine_id',$this->cuisine_id)->where('language_code','ar')->value('cuisine_name'),
             //'arabic_cuisine_name' => ($this->arabic_cuisine_name === null) ? '' : $this->arabic_cuisine_name,
             'sort_no' => ($this->sort_no === null) ? '' : $this->sort_no,
