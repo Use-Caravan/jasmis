@@ -129,6 +129,14 @@ class Order extends CommonOrder
             });        
         }
         
+        $orders = $orders->where(function($orders) {
+            $orders->where('payment_type', '<>', PAYMENT_OPTION_ONLINE)
+                ->orWhere(function ($query) {
+                    $query->where('payment_type', '=', PAYMENT_OPTION_ONLINE)
+                          ->where('payment_status', '=', ORDER_PAYMENT_STATUS_SUCCESS);
+                });
+        });
+
         $orders = $orders->groupBy('order_id');
         return $orders;
     }
