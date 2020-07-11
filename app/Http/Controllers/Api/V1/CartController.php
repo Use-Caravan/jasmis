@@ -21,7 +21,7 @@ use Validator;
 use Common;
 use DB;
 use FileHelper;
-
+use Storage;
 
 class CartController extends Controller
 {
@@ -182,6 +182,10 @@ class CartController extends Controller
             $removeCartItem->item_instruction = request()->item_instruction;
             $removeCartItem->save();
         } 
+        
+        /** Write request data in text file **/
+        $log_string = "Log Date Time - ".date("d-m-Y H:i:s").", "."Cart Item Key - ".request()->cart_item_key.", "."Cart Quantity - ".request()->quantity.", "."Item Instruction - ".request()->item_instruction."*********************";
+        Storage::append('mobile_log.txt', $log_string);
         $this->setMessage( __("apimsg.Item have been updated") );
         return $this->asJson();
     }
