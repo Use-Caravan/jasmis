@@ -48,9 +48,8 @@ class OrderItemLang extends CModel
      * @var bool
      */
     public $timestamps = false;
-
-
-
+    
+    
     public static function selectTranslation($query,$alias = '')
     {
         $self = new self();        
@@ -68,6 +67,28 @@ class OrderItemLang extends CModel
         $query->leftJoin("$tableName as $alias",function($query) use ($alias, $langForeignKey) {
             $query->on(OrderItem::tableName().".$langForeignKey", '=', "$alias.$langForeignKey")
             ->where("$alias.language_code",App::getLocale());
+        })->addSelect($selects);
+    }
+
+
+
+    public static function selectTranslationArabic($query,$alias = '')
+    {
+        $self = new self();        
+        $tableName = $self->table;
+        if($alias == ''){
+            $alias = 'OIL';
+        }
+        $selectable = $self->fillable; 
+        $langForeignKey = $self->langForeignKey; 
+        foreach($selectable as $key => $value){
+            if($value != $langForeignKey && $value != 'language_code'){
+            $selects[] = "$alias.$value";
+            } 
+        }
+        $query->leftJoin("$tableName as $alias",function($query) use ($alias, $langForeignKey) {
+            $query->on(OrderItem::tableName().".$langForeignKey", '=', "$alias.$langForeignKey")
+            ->where("$alias.language_code",'ar');
         })->addSelect($selects);
     }
 	       

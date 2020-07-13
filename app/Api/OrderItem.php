@@ -51,7 +51,7 @@ class OrderItem extends CommonOrderItem
             OrderItem::tableName().'.order_id' => $orderID
             ])
         ->leftJoin(OrderIngredient::tableName(),OrderItem::tableName().'.order_item_id','=',OrderIngredient::tableName().'.order_item_id');
-        OrderItemLang::selectTranslation($query);
+        OrderItemLang::selectTranslationArabic($query);
         return $query->groupBy(OrderItem::tableName().'.order_item_id')->get();
     }
 }
