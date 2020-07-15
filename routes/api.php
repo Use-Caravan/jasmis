@@ -45,6 +45,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
     Route::get('voucher-branches','VoucherController@getVoucherBranches')->middleware('localization');
     Route::get('get-vouchers','VoucherController@getVouchers')->middleware('localization');
     Route::get('offer', 'OfferController@getOffers')->middleware('localization');
+    Route::resource('faq','FaqController')->middleware('localization');
     Route::get('get-near-branches/{vendor_key?}/{branch_key?}','BranchController@branchByVendor')->middleware('localization');
     
 
@@ -108,7 +109,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
 
     });
 
-
+           
     Route::fallback(function () {
         $response = ['status' => 'fail', 'code' => HTTP_NOT_FOUND, 'message' => 'URL Not Found.', 'time'=> time()];
         return response()->json($response,HTTP_NOT_FOUND);
