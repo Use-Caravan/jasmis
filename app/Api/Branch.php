@@ -44,13 +44,15 @@ class Branch extends CommonBranch
                 * sin( radians( circle_latitude ) ) ) ) as distance"),
             ])
             ->leftJoin(DeliveryArea::tableName(),BranchDeliveryArea::tableName().".delivery_area_id",DeliveryArea::tableName().".delivery_area_id")
+            ->leftJoin(Branch::tableName(),Branch::tableName().".branch_id",BranchDeliveryArea::tableName().".branch_id")
             ->havingRaw("distance <=  ".DeliveryArea::tableName().".zone_radius")
             ->where([
                 DeliveryArea::tableName().".zone_type" => DELIVERY_AREA_ZONE_CIRCLE,
                 DeliveryArea::tableName().".status" => ITEM_ACTIVE,
             ])
             ->groupBy(BranchDeliveryArea::tableName().".branch_id")
-            ->whereNull(DeliveryArea::tableName().".deleted_at")->get();
+            ->whereNull(DeliveryArea::tableName().".deleted_at")
+            ->whereNull(Branch::tableName().".deleted_at")->get();
 
 
             if($deliveryAreasCircle !== null) {                
@@ -68,11 +70,13 @@ class Branch extends CommonBranch
                 BranchDeliveryArea::tableName().".branch_id",                
             ])
             ->leftJoin(DeliveryArea::tableName(),BranchDeliveryArea::tableName().".delivery_area_id",DeliveryArea::tableName().".delivery_area_id")
+            ->leftJoin(Branch::tableName(),Branch::tableName().".branch_id",BranchDeliveryArea::tableName().".branch_id")            
             ->where([
                 DeliveryArea::tableName().".zone_type" => DELIVERY_AREA_ZONE_POLYGON,
                 DeliveryArea::tableName().".status" => ITEM_ACTIVE,
             ])
             ->whereNull(DeliveryArea::tableName().".deleted_at")
+            ->whereNull(Branch::tableName().".deleted_at")
             ->whereRaw("ST_CONTAINS(".DeliveryArea::tableName().".zone_latlng, Point(".request()->latitude.", ".request()->longitude."))")
             ->groupBy(BranchDeliveryArea::tableName().".branch_id")->get(); 
                         
