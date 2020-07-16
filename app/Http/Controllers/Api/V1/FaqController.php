@@ -7,7 +7,6 @@ use App\Http\Controllers\Api\V1\Controller;
 use App\Http\Resources\Api\V1\FaqResource;
 use Illuminate\Http\Response;
 use App\Api\Faq;
-use Validator;
 
 
 class FaqController extends Controller
@@ -48,15 +47,7 @@ class FaqController extends Controller
      */
     public function store(Request $request)
     {                
-        $validator = Validator::make($request->all(),
-            [
-                'cuisine_name.*' => 'required',
-                'sort_no' => "numeric|nullable"
-            ]);
-        if($validator->fails()) {
-            return $this->validateError($validator->errors());
-        }        
-        return $this->asJson($data);
+       
     }
 
     /**
@@ -67,14 +58,7 @@ class FaqController extends Controller
      */
     public function show($id)
     {
-        $data = Cuisine::getList()->where(['cuisine.cuisine_id' => $id])->first();
-
-        return (new CuisineResource($data))
-        ->additional(['meta' => [
-            'status' => 200,
-            'time' => time(),
-            ]
-        ]);
+        
     }
 
     /**

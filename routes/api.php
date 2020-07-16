@@ -32,7 +32,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
     
     Route::resource('area','AreaController')->middleware('localization');
     Route::resource('addresstype','AddressTypeController')->middleware('localization');
-    Route::resource('cuisine','CuisineController')->middleware('localization')->middleware('localization');
+    Route::resource('cuisine','CuisineController')->middleware('localization');
     Route::resource('item','ItemController')->middleware('localization');
     Route::resource('branch','BranchController')->middleware('localization');
     Route::post('timeslot','BranchController@branchTimeslot')->middleware('localization');
