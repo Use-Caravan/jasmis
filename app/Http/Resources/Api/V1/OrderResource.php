@@ -93,14 +93,14 @@ class OrderResource extends JsonResource
                             'is_italic' => IS_ITALIC,
                             'is_line' => IS_LINE,                            
                         ],
-                        [
+                        /*[
                             'name' => __('apimsg.VAT',['percent' => $this->tax_percent]),
                             'price' => Common::currency($this->tax),
                             'color_code' => PAYMENT_VAR_TAX_COLOR,
                             'is_bold' => IS_BOLD,
                             'is_italic' => IS_ITALIC,
                             'is_line' => IS_LINE, 
-                        ],                        
+                        ], */                       
                     ];
                     if($this->service_tax !== null && $this->service_tax > 0) {
                         $service_tax = [
