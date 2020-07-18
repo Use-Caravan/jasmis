@@ -14,7 +14,8 @@ use App\Mail\OrderConfirmation;
 use App\Helpers\{
     OneSignal,
     Curl,
-    SadadPaymentGateway
+    SadadPaymentGateway,
+    CredimaxPaymentGateway
 };
 use App\Api\{
     Cart,
@@ -124,8 +125,620 @@ class OrderController extends Controller
         return $this->asJson($orders);
     }
 
-
     /**
+     * Place order with credimax payment gateway
+     */
+    public function placeOrderCredimax()
+    {      
+        /*$grand_total = 0.010;
+        $customer_id = 5;
+        $order_id = 10;
+        $response = CredimaxPaymentGateway::instance()
+                    ->setAmount($grand_total)
+                    ->setCustomerId($customer_id)
+                    ->setOrderId($order_id);
+        $response = $response->makePayment();
+        print_r($response);exit;*/
+
+        $rules = [
+            'branch_key'    => 'required|exists:branch,branch_key',
+            'user_address_key'    => 'nullable|required_if:order_type,1|exists:user_address,user_address_key',
+            'coupon_code'    => 'nullable',
+            'order_type'    => 'nullable|numeric',
+            'payment_option'    => 'nullable|numeric',
+            'delivery_date' => 'nullable|required_if:asap,0',
+            'delivery_time' => 'nullable|required_if:asap,0',
+            'asap'    => 'nullable|numeric',                        
+        ];                       
+        //print_r($rules);exit;
+        $validator = Validator::make(request()->all(),$rules);   
+        //print_r($validator);exit;     
+        if($validator->fails()) {
+            return $this->validateError($validator->errors());            
+        }   
+        //print_r($rules);exit;
+        $this->cartDetails = Cart::where(['user_id' => request()->user()->user_id])->first();
+        //print_r($this->cartDetails);exit;
+        $responseData = $this->checkoutQuotation(true);
+        
+        if($responseData['status'] === false && $responseData['type'] === EXPECTATION_FAILED) {
+            return $this->commonError($responseData['error']);
+        }
+        if($responseData['status'] === false && $responseData['type'] === HTTP_UNPROCESSABLE) {
+            return $this->prepareResponse();
+        }         
+        $paymentDetails = $responseData['data'];                        
+        $deliveryboyData = [];
+        DB::beginTransaction();
+        try{ 
+
+            if(request()->corporate_voucher !== true) {
+                if($paymentDetails['sub_total']['cprice'] < $this->branchDetails->vendor_min_order_value) {                
+                    return $this->commonError( __("apimsg.Order value should be greater than",['amount' => Common::currency($this->branchDetails->vendor_min_order_value)]) );
+                }
+            }
+
+            $totalOrders = ((int)Order::count()) + 1;
+            $orderNumber = str_repeat('0', max(0, 7 - strlen($totalOrders))) . $totalOrders;
+            $orderDateTime = date('Y-m-d H:i:s');
+            $adminProfit = ((($paymentDetails['total']['cprice'])/100)*($this->branchDetails->vendor_commission));
+
+            $userCorporateID = null;
+            if(request()->user()->user_type === USER_TYPE_CORPORATES) {
+                $userCorporate = UserCorporate::where(['office_email' => $this->userDetails->email, 'is_booked' => 0])->first();
+                if($userCorporate !== null) {
+                    $userCorporateID = $userCorporate->user_corporate_id;
+                    $this->userCorporate = $userCorporate;
+                }
+            }
+
+            $claim_corporate_offer_booking = 0;
+            if(request()->corporate_voucher === true) {
+                $claim_corporate_offer_booking = 1;
+            }
+            $corporate_voucher_code = '';
+            if(request()->corporate_voucher_code !== null) {
+                $corporate_voucher_code = request()->corporate_voucher_code;
+            }
+
+            $fillables = [                
+                'order_number'  => $orderNumber,
+                'order_booked_by' => request()->user()->user_type === USER_TYPE_CUSTOMER ? USER_TYPE_CUSTOMER : USER_TYPE_CORPORATES,
+                'user_corporate_id' => $userCorporateID,
+                'claim_corporate_offer_booking' => $claim_corporate_offer_booking,
+                'corporate_voucher_code' => $corporate_voucher_code,
+                'vendor_id'  => $this->branchDetails->vendor_id,
+                'branch_id'  => $this->branchDetails->branch_id,
+                'user_id'  => $this->userDetails->user_id,
+                'cart_id'  => $this->cartDetails->cart_id,
+                'user_address_id'  => ($this->userAddress === null) ? '' : $this->userAddress->user_address_id,
+                'user_email'  => $this->userDetails->email,
+                'user_phone_number'  => $this->userDetails->phone_number,
+                'order_datetime'  => $orderDateTime,
+                'order_type'  => request()->order_type,
+                'delivery_type'  => (request()->asap == 1) ? request()->asap : 2,
+                'payment_type'  => request()->payment_option,
+                'item_total'  => $paymentDetails['sub_total']['cprice'],
+                'delivery_fee'  => (isset($paymentDetails['delivery_cost']['cprice'])) ? $paymentDetails['delivery_cost']['cprice'] : 0,
+                'delivery_distance'  => (isset($paymentDetails['delivery_cost']['delivery_distance'])) ? $paymentDetails['delivery_cost']['delivery_distance'] : 0,
+                'tax'  => $paymentDetails['vat_tax']['cprice'],
+                'tax_percent'  => $paymentDetails['vat_tax']['percent'],
+                'service_tax'  => isset($paymentDetails['service_tax']['cprice']) ? $paymentDetails['service_tax']['cprice'] : 0,
+                'service_tax_percent'  => isset($paymentDetails['service_tax']['percent']) ? $paymentDetails['service_tax']['percent'] : 0,
+                'voucher_id'  => ($this->voucherDetails === null) ? null : $this->voucherDetails->voucher_id,
+                'voucher_offer_value'  => isset($paymentDetails['voucher_details']['cprice']) ? $paymentDetails['voucher_details']['cprice'] : 0,
+                'order_total'  => $paymentDetails['total']['cprice'],
+                'order_message'  => request()->order_notes,
+                'vendor_commission' => $this->branchDetails->vendor_commission,
+                'admin_profit' => $adminProfit,
+                'vendor_profit' => (($paymentDetails['total']['cprice']) - $adminProfit),
+                'delivery_datetime' => (request()->asap == 1) ? date('Y-m-d H:i:s') : request()->delivery_date." ". date('H:i:s', strtotime(request()->delivery_time)),
+                'order_status' => ORDER_APPROVED_STATUS_PENDING,
+                'status' => ITEM_ACTIVE,
+            ];
+
+            $order = new Order();
+            $order = $order->fill($fillables);
+            $order->save();
+            $orderID = $order->getKey();
+            $orderKey = $order->order_key;
+            $this->orderDetails = $order;
+            DB::commit();            
+        } catch(Exception $e) {
+            DB::rollback();
+            throw $e->getMessage();
+        }
+        DB::beginTransaction();
+        try {
+            $userDetails = $this->userDetails;                                                          
+            $branchDetails = Branch::where(['branch_key' => request()->branch_key]);
+            BranchLang::selectTranslation($branchDetails);
+            $branchDetails = $branchDetails->first();
+            $responseData = ['branch_logo' => FileHelper::loadImage($branchDetails->branch_logo),'contact_email' => $order->user_email,'order_key' => $order->order_key,'order_number' => config('webconfig.app_inv_prefix').$order->order_number, 'order_total' => Common::currency($order->order_total)];
+            $countItems = 0;
+            foreach($paymentDetails['items'] as $value) {
+                
+                /** Order Item and Item Lang */
+                $orderItem = new OrderItem();
+                $items = [
+                    'order_id' => $orderID,
+                    'item_id' => $value['item_id'],
+                    'base_price' => $value['cprice'],
+                    'item_quantity' => $value['quanity'],
+                    'item_total_price' => $value['cprice'] * $value['quanity'],
+                    'item_subtotal' => $value['csubtotal'],
+                    'item_instruction' => isset($value['item_instruction']) ? $value['item_instruction'] : '',
+                ];
+                $orderItem = $orderItem->fill($items);
+                $orderItem->save();
+                $orderItemID = $orderItem->getKey();                
+
+                if(request()->user()->user_type === USER_TYPE_CORPORATES) {
+
+                    for($voucherQty = 0; $voucherQty < (int)$value['quanity']; $voucherQty++) {
+
+                        $coporateVoucher = new CorporateVoucher();
+                        $coporateVoucher = $coporateVoucher->fill([
+                            'voucher_number' => rand(1000,9999),
+                            'order_id' => $orderID,
+                            'user_corporate_id' => $this->userCorporate->user_corporate_id
+                        ]);
+                        $coporateVoucher->save();
+                        $coporateVoucherItem = new CorporateVoucherItem();
+                        $coporateVoucherItem = $coporateVoucherItem->fill([
+                            'corporate_voucher_id' => $coporateVoucher->getKey(),
+                            'order_item_id' => $orderItemID,
+                            'quantity' => 1,
+                            'is_claimed' => 0
+                        ]);
+                        $coporateVoucherItem->save();
+                    }
+                }
+
+                $itemLang = ItemLang::where('item_id',$value['item_id'])->get();
+                foreach($itemLang as $ILvalue) {
+
+                    $item_path = FileHelper::copyFile($ILvalue->item_image,ORDER_ITEM_PATH);
+                    $orderItemLang = new OrderItemLang();
+                    $orderItemLang = $orderItemLang->fill([
+                    'order_item_id' => $orderItemID,
+                    'language_code' => $ILvalue->language_code,
+                    'item_name' => $ILvalue->item_name,
+                    'arabic_item_name' => ItemLang::where('item_id',$ILvalue->item_id)->where('language_code','ar')->value('item_name'),
+                    'item_description' => $ILvalue->item_description,
+                    'arabic_item_description' => ItemLang::where('item_id', $ILvalue->item_id)->where('language_code','ar')->value('item_description'),
+                    'item_image_path' => $item_path
+                    ]);
+                    $orderItemLang->save();
+                }
+                /** Order Item and Item Lang */
+
+                /** Order Item Ingredient Group and Ingredient Group  Lang */
+                foreach($value['ingredient_groups'] as $IGValue) {
+
+                    $orderingredientGroup = new OrderItemIngredientGroup();
+                    $ingredientGroupDetails = IngredientGroup::find($IGValue['ingredient_group_id']);
+                    $orderingredientGroup = $orderingredientGroup->fill([
+                        'order_id' => $orderID,
+                        'order_item_id' => $orderItemID,
+                        'ingredient_group_id' => $IGValue['ingredient_group_id'],
+                        'ingredient_type' => $ingredientGroupDetails->ingredient_type,
+                        'minimum' => $ingredientGroupDetails->minimum,
+                        'maximum' => $ingredientGroupDetails->maximum,
+                        'ingredient_group_subtotal' => $IGValue['ingredient_group_csubtotal']
+                    ]);
+                    $orderingredientGroup->save();
+                    $orderingredientGroupID = $orderingredientGroup->getKey();
+                    $ingredientGroupLang = IngredientGroupLang::where('ingredient_group_id',$IGValue['ingredient_group_id'])->get();
+                    foreach($ingredientGroupLang as $IGroupLang) {
+                        $orderIngredientGropuLang = new OrderItemIngredientGroupLang();
+                        $orderIngredientGropuLang = $orderIngredientGropuLang->fill([
+                            'order_item_ingredient_group_id' => $orderingredientGroupID,
+                            'language_code' => $IGroupLang->language_code,
+                            'group_name' => $IGroupLang->ingredient_group_name,
+                            'arabic_group_name' => IngredientGroupLang::where('ingredient_group_id', $IGroupLang->ingredient_group_id)->where('language_code','ar')->value('ingredient_group_name'),                      
+                        ]);
+                        $orderIngredientGropuLang->save();
+                    }
+                    /** Order Item Ingredient Group and Ingredient Group  Lang */
+
+                    /** Order Item Ingredient and Ingredient Lang */
+                    $deliveryboyItems[$countItems]['ingredients'] = [];
+                    foreach($IGValue['ingredients'] as $Ivalue) {
+
+
+                        $ingredientDetails = Ingredient::find($Ivalue['ingredient_id']);
+                        $orderIngredient = new OrderIngredient();
+                        $orderIngredient = $orderIngredient->fill([
+                            'order_id' => $orderID,
+                            'order_item_id' => $orderItemID,
+                            'order_item_ingredient_group_id' => $orderingredientGroupID,
+                            'ingredient_id' => $Ivalue['ingredient_id'],
+                            'ingredient_price' => $Ivalue['cprice'],
+                            'ingredient_quanitity' => $Ivalue['quantity'],
+                            'ingredient_subtotal' => $Ivalue['ingredient_csubtotal']
+                        ]);
+                        $orderIngredient->save();
+                        $orderIngredientID = $orderIngredient->getKey();
+                        $ingredientLangDetails = IngredientLang::where('ingredient_id',$Ivalue['ingredient_id'])->get();                        
+
+                        foreach($ingredientLangDetails as $ingredientLang) {
+                            $orderIngredientLang = new OrderIngredientLang();
+                            $orderIngredientLang = $orderIngredientLang->fill([
+                                'order_ingredient_id' => $orderIngredientID,
+                                'language_code' => $ingredientLang->language_code,
+                                'ingredient_name' => $ingredientLang->ingredient_name,
+                                'arabic_ingredient_name' => IngredientLang::where('ingredient_id', $ingredientLang->ingredient_id)->where('language_code','ar')->value('ingredient_name'),
+                            ]);                            
+                            $orderIngredientLang->save();
+                            $deliveryboyItems[$countItems]['ingredients']['name'] = $ingredientLang->ingredient_name;
+                        }
+                    }
+                }
+                $countItems++;
+               /*  $responseData = ['branch_logo' => FileHelper::loadImage($branchDetails->branch_logo),'contact_email' => $order->user_email,'order_key' => $order->order_key, 'order_number' => config('webconfig.app_inv_prefix').$order->order_number, 'order_total' => Common::currency($order->order_total),
+                             'tax' => Common::currency($order->tax),'subtotal' => Common::currency($orderItem->item_subtotal),'shipping' => Common::currency($paymentDetails['delivery_cost']['cprice']),'order_datetime' => $order->order_datetime,
+                             'item_name' => $orderItemLang->item_name
+                ]; */
+            }
+              
+            $user = User::find($this->userDetails->user_id);
+            $deviceToken = $user->device_token;                    
+
+            if(request()->user()->user_type == USER_TYPE_CUSTOMER) {
+                $this->sendConfirmationMail($order->order_key);
+            }
+
+            /* if(request()->user()->user_type === USER_TYPE_CORPORATES) {
+                $order = Order::findByKey($order->order_key)->first();
+                if($order->order_status === ORDER_APPROVED_STATUS_DELIVERED) {
+                    $this->sendConfirmationMail($order->order_key);
+                }
+            } */
+            
+            $responseData['payment_mode'] = request()->payment_option;
+            $responseData['payment_url'] = '';   
+
+            if(request()->user()->user_type === USER_TYPE_CUSTOMER) {
+                if(request()->coupon_code != null && request()->coupon_code != "") {
+                    $voucher = Voucher::where('promo_code',request()->coupon_code)->first();
+                    $voucherUsage = new VoucherUsage();
+                    $voucherUsage->voucher_id  = $voucher->voucher_id;
+                    $voucherUsage->beneficiary_type = $voucher->apply_promo_for; 
+                    
+                    if($voucher->promo_for_shops == PROMO_SHOPS_PARTICULAR) {
+                        $voucherUsage->beneficiary_id = $this->branchDetails->branch_id;
+                    }
+                    else if($voucher->promo_for_user == PROMO_USER_PARTICULAR) {
+                        $voucherUsage->beneficiary_id = $userDetails->user_id;
+                    }
+                    else if($voucher->promo_for_shops == PROMO_SHOPS_ALL || $voucher->promo_for_user == PROMO_USER_ALL){
+                        $voucherUsage->beneficiary_id = $userDetails->user_id;
+                    }
+                    $voucherUsage->used_date = $order->order_datetime;
+                    $voucherUsage->order_id = $order->order_id;
+                    if($order->payment_type == PAYMENT_OPTION_COD){
+                        $voucherUsage->status = ITEM_ACTIVE;
+                    }
+                    $voucherUsage->save(); 
+                } 
+            }
+            
+            switch(request()->payment_option) {
+                case PAYMENT_OPTION_ONLINE:
+                    $payableAmount = $paymentDetails['total']['cprice'];
+                    if(request()->corporate_voucher) {
+                        $payableAmount = $paymentDetails['total']['cprice'] - $paymentDetails['sub_total']['cprice'];
+                    }
+                    
+                    /*$response = SadadPaymentGateway::instance()
+                    ->setAmount($payableAmount)
+                    ->setCustomerName($this->userDetails->first_name)
+                    ->setCustomerMail($this->userDetails->email)
+                    ->setCustomerPhone($this->userDetails->phone_number);
+                    if(request()->is_web !== null) {
+                        $response = $response->setRequestFrom(request()->is_web);
+                    }
+                    $response = $response->makePayment();*/
+
+                    $response = CredimaxPaymentGateway::instance()
+                                ->setAmount($payableAmount)
+                                ->setCustomerId($this->userDetails->user_id)
+                                ->setOrderId($orderID);
+                    if(request()->is_web !== null) {
+                        $response = $response->setRequestFrom(request()->is_web);
+                    }
+                    $response = $response->makePayment();
+                    
+                    
+                    if($response !== null) {
+
+                        $paymentData = [
+                            'customer_name' => $this->userDetails->first_name,
+                            'customer_email' => $this->userDetails->email,
+                            'customer_phone_number' => $this->userDetails->phone_number,
+                            'price' => $payableAmount,
+                        ];
+
+                        $paymentGateway = new PaymentGateway();                    
+                        $paymentGateway = $paymentGateway->fill([
+                            'sent_data' => json_encode($paymentData),
+                            //'gateway_url' => $response['payment-url'],
+                            'gateway_url' => $response['PaymentURL']."PaymentID=".$response['PaymentID'],
+                            'received_data' => json_encode($response)
+                        ]);
+                        $paymentGateway->save();                                        
+
+                        $paymentGatewayID = $paymentGateway->getKey();
+
+                        $transactionData = [
+                            'payment_gateway_id' => $paymentGatewayID,
+                            'user_id' => $this->userDetails->user_id,
+                            'transaction_for' => TRANSACTION_FOR_ONLINE_BOOKING,
+                            'transaction_type' => TRANSACTION_TYPE_DEBIT,
+                            'amount' => $payableAmount,
+                            //'transaction_number' => $response['transaction-reference'],
+                            'transaction_number' => $response['PaymentID'],
+                            'status' => TRANSACTION_STATUS_PENDING
+                        ];
+                        $transaction = new Transaction();
+                        $transaction = $transaction->fill($transactionData);
+                        $transaction->save();
+                        //$responseData['payment_url'] =  $response['payment-url'];
+                        $responseData['payment_url'] =  $response['PaymentURL']."PaymentID=".$response['PaymentID'];
+                        $order = Order::find($orderID);
+                        $order->transaction_id = $transaction->getKey();
+                        $order->save();
+      
+                    }
+                break;
+
+                case PAYMENT_OPTION_COD:
+
+                
+                    (new CartController())->clearCart();
+
+                    if(request()->corporate_voucher === true) {
+                        
+                        $corporateOffer = CorporateVoucher::where(['corporate_voucher_key' => request()->corporate_voucher_code ])->first();                        
+                        if($corporateOffer !== null) {
+                            $corporateVoucherItem = CorporateVoucherItem::where(['corporate_voucher_id' => $corporateOffer->corporate_voucher_id])->first();
+                            $corporateVoucherItem->is_claimed = 1;
+                            $corporateVoucherItem->claimed_at = date('Y-m-d H:i:s');
+                            $corporateVoucherItem->save();
+                        }
+                    }
+                    
+                    $vendor = Vendor::find($this->branchDetails->vendor_id); 
+                    $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+                    $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
+                    
+                    if($vendor->web_app_id !== null) {
+                        $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
+                    } 
+                
+                    if(!$oneSignalCustomer || !$oneSignalVendor) {
+                        $this->commonError(__("apimsg.Notification not send") );
+                    }
+
+                break;
+
+                case PAYMENT_OPTION_WALLET:
+                
+                    if(request()->corporate_voucher === true) {
+                        $corporateOffer = CorporateVoucher::where(['corporate_voucher_key' => request()->corporate_voucher_code ])->first();
+                        if($corporateOffer !== null) {
+                            $corporateVoucherItem = CorporateVoucherItem::where(['corporate_voucher_id' => $corporateOffer->corporate_voucher_id])->first();
+                            $corporateVoucherItem->is_claimed = 1;
+                            $corporateVoucherItem->claimed_at = date('Y-m-d H:i:s');
+                            $corporateVoucherItem->save();
+                        }
+                    }
+                    $transactionData = [
+                        'user_id' => $this->userDetails->user_id,
+                        'transaction_for' => TRANSACTION_FOR_WALLET_BOOKING,
+                        'transaction_type' => TRANSACTION_TYPE_DEBIT,
+                        'amount' => $paymentDetails['total']['cprice'],
+                        'transaction_number' => Common::generateRandomString(Transaction::tableName(), 'transaction_number', $length = 32),
+                        'status' => TRANSACTION_STATUS_SUCCESS
+                    ];
+
+
+                    $user = User::find($this->userDetails->user_id);
+
+                    if($user->wallet_amount < $paymentDetails['total']['cprice']){
+
+                        $payableAmount = $paymentDetails['total']['cprice'] - $user->wallet_amount;
+                        
+                        /*$response = SadadPaymentGateway::instance()
+                        ->setAmount($payableAmount)
+                        ->setCustomerName($this->userDetails->first_name)
+                        ->setCustomerMail($this->userDetails->email)
+                        ->setCustomerPhone($this->userDetails->phone_number);
+                        if(request()->is_web !== null) {
+                            $response = $response->setRequestFrom(request()->is_web);
+                        }
+                        $response = $response->makePayment();*/
+
+                        $response = CredimaxPaymentGateway::instance()
+                                ->setAmount($payableAmount)
+                                ->setCustomerId($this->userDetails->user_id)
+                                ->setOrderId($orderID);
+                        if(request()->is_web !== null) {
+                            $response = $response->setRequestFrom(request()->is_web);
+                        }
+                        $response = $response->makePayment();
+                        
+                        if($response !== null) {
+                            $paymentData = [
+                                'customer_name' => $this->userDetails->first_name,
+                                'customer_email' => $this->userDetails->email,
+                                'customer_phone_number' => $this->userDetails->phone_number,
+                                'price' => $payableAmount,
+                            ];
+
+                            $paymentGateway = new PaymentGateway();                    
+                            $paymentGateway = $paymentGateway->fill([
+                                'sent_data' => json_encode($paymentData),
+                                //'gateway_url' => $response['payment-url'],
+                                'gateway_url' => $response['PaymentURL']."PaymentID=".$response['PaymentID'],
+                                'received_data' => json_encode($response)
+                            ]);
+                            $paymentGateway->save();                                        
+
+                            $paymentGatewayID = $paymentGateway->getKey();
+
+                            $transactionData = [
+                                'payment_gateway_id' => $paymentGatewayID,
+                                'user_id' => $this->userDetails->user_id,
+                                'transaction_for' => TRANSACTION_FOR_ONLINE_BOOKING,
+                                'transaction_type' => TRANSACTION_TYPE_DEBIT,
+                                'amount' => $payableAmount,
+                                //'transaction_number' => $response['transaction-reference'],
+                                'transaction_number' => $response['PaymentID'],
+                                'status' => TRANSACTION_STATUS_PENDING
+                            ];
+                            $transaction = new Transaction();
+                            $transaction = $transaction->fill($transactionData);
+                            $transaction->save();
+                            //$responseData['payment_url'] =  $response['payment-url'];
+                            $responseData['payment_url'] = $response['PaymentURL']."PaymentID=".$response['PaymentID'];
+                            $order = Order::find($orderID);
+                            $order->transaction_id = $transaction->getKey();
+                            $order->payment_type = PAYMENT_OPTION_WALLET_AND_ONLINE;
+                            $order->wallet_amount_used = $user->wallet_amount;
+                            $order->save();          
+                        }
+                    }else{
+                        $vendor = Vendor::find($this->branchDetails->vendor_id);
+                        $transaction = new Transaction();
+                        $transaction = $transaction->fill($transactionData);
+                        $transaction->save();
+                        
+                        $user->wallet_amount = $user->wallet_amount - $paymentDetails['total']['cprice'];
+                        $user->save();
+                        $order = Order::find($orderID);
+                        $order->transaction_id = $transaction->getKey();
+                        $order->payment_status = ORDER_PAYMENT_STATUS_SUCCESS;
+                        $order->save();
+                        (new CartController())->clearCart();
+
+                        if($order->payment_status = ORDER_PAYMENT_STATUS_SUCCESS) {
+                            $voucherUsageStatus = VoucherUsage::where(['order_id' => $order->order_id])->first();
+                            if($voucherUsageStatus !== null) {
+                                $voucherUsageStatus->status = ITEM_ACTIVE;
+                                $voucherUsageStatus->save(); 
+                            }
+                        }
+
+                        $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+                        $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
+                        if($vendor->web_app_id !== null) {
+                            $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
+                        } 
+                        if(!$oneSignalCustomer || !$oneSignalVendor) {
+                            $this->commonError(__("apimsg.Notification not send") );
+                        }
+                    }
+                break;
+                
+                case CORPORATE_BOOKING_PAYMENT_ONLINE:
+                    $payableAmount = $paymentDetails['total']['cprice'];
+                    if(request()->corporate_voucher) {
+                        $payableAmount = $paymentDetails['total']['cprice'] - $paymentDetails['sub_total']['cprice'];
+                    }
+                    
+                    $corporateUserDetails = User::select(User::tableName().'.user_id',UserCorporate::tableName().'.*')
+                                            ->leftjoin(UserCorporate::tableName(),User::tableName().'.email',UserCorporate::tableName().'.office_email')
+                                            ->where([UserCorporate::tableName().'.office_email' => $this->userDetails->email,UserCorporate::tableName().'.is_booked' => 0])
+                                            ->orderBy(UserCorporate::tableName().'.user_corporate_id','desc')
+                                            ->first();
+                    
+                    $response = SadadPaymentGateway::instance()
+                    ->setAmount($payableAmount)
+                    ->setCustomerName($corporateUserDetails->corporate_name)
+                    ->setCustomerMail($corporateUserDetails->office_email)
+                    ->setCustomerPhone($corporateUserDetails->mobile_number)
+                    ->setDescription($corporateUserDetails->voucher_description);
+                    if(request()->is_web !== null) {
+                        $response = $response->setRequestFrom(request()->is_web);
+                    }
+                    $response = $response->makePayment();
+                    if($response !== null) {
+                            
+                        $paymentData = [
+                            'customer_name' => $corporateUserDetails->corporate_name,
+                            'customer_email' => $corporateUserDetails->office_email,
+                            'customer_phone_number' => $corporateUserDetails->mobile_number,
+                            'price' => $payableAmount,
+                        ];
+                        
+                        $paymentGateway = new PaymentGateway();                    
+                        $paymentGateway = $paymentGateway->fill([
+                            'sent_data' => json_encode($paymentData),
+                            'gateway_url' => $response['payment-url'],
+                            'received_data' => json_encode($response)
+                        ]);
+                        
+                        $paymentGateway->save();                                        
+
+                        $paymentGatewayID = $paymentGateway->getKey();
+
+                        $transactionData = [
+                            'payment_gateway_id' => $paymentGatewayID,
+                            'user_id' => $corporateUserDetails->user_id,
+                            'transaction_for' => TRANSACTION_FOR_ONLINE_BOOKING,
+                            'transaction_type' => TRANSACTION_TYPE_DEBIT,
+                            'amount' => $payableAmount,
+                            'transaction_number' => $response['transaction-reference'],
+                            'status' => TRANSACTION_STATUS_PENDING
+                        ];
+                        $transaction = new Transaction();
+                        $transaction = $transaction->fill($transactionData);
+                        $transaction->save();
+                        $responseData['payment_url'] =  $response['payment-url'];
+                        $order = Order::find($orderID);
+                        $order->transaction_id = $transaction->getKey();
+                        $order->save();
+                    } 
+                    if($order) {
+                        $this->userCorporate->is_booked = 1;
+                        $this->userCorporate->order_id = $orderID;
+                        $this->userCorporate->save();
+                    }
+                break; 
+                case CORPORATE_BOOKING_PAYMENT_LPO:
+                    $this->userCorporate->is_booked = 1;
+                    $this->userCorporate->order_id = $orderID;
+                    $this->userCorporate->save();
+                    break;
+                case CORPORATE_BOOKING_PAYMENT_CREDIT:
+                    (new CartController())->clearCart();
+                    $this->userCorporate->is_booked = 1;
+                    $this->userCorporate->order_id = $orderID;
+                    $this->userCorporate->save();
+                    break;
+            }
+            DB::commit();
+            /*
+            This code not needed this functionality
+            if(request()->order_type == ORDER_TYPE_DELIVERY) {
+                $deliveryboyResult = $this->saveOrderOnDeliveryBoy($orderKey);
+                $response = Common::compressData($deliveryboyResult);            
+                if($response->status != HTTP_SUCCESS) {
+                    return $this->commonError("Order place successfully. But delivery boy order not placed");
+                }
+            } */
+            $this->setMessage(__('apimsg.Order placed successfully') );
+            return $this->asJson($responseData);
+        } catch(Exception $e) {
+            DB::rollback();
+            throw $e->getMessage();
+        }
+    }
+    
+    /**
+     * 
      * Place order
      */
     public function placeOrder()

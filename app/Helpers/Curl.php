@@ -102,6 +102,7 @@ class Curl
             'Content-Type: '.$this->contentType,
             'Authorization: '.config('webconfig.auth_token'),
             'Accept-Language: '.$this->lang,
+            'company-code: '.config('webconfig.credimaxpay_company_code'),
         ];
     }
 
