@@ -59,6 +59,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
      */
     Route::post('payment-gateway/success','PaymentGatewayController@success')->middleware('localization');
     Route::post('payment-gateway/failiur','PaymentGatewayController@failiur')->middleware('localization');
+    Route::post('payment-gateway/credimax-success','PaymentGatewayController@credimaxSuccess')->middleware('localization');
+    Route::post('payment-gateway/credimax-failure','PaymentGatewayController@credimaxFailure')->middleware('localization');
+    Route::post('place-order-credimax','OrderController@placeOrderCredimax')->middleware('localization');        
 
     Route::group(['middleware' => ['auth:'.GUARD_USER_API] ],function()
     {
