@@ -358,10 +358,11 @@ class PaymentGatewayController extends Controller
             {
                 return $this->commonError(__("apimsg.Payment Failed"));  
             }
+        }
         else
         {
             return $this->commonError(__("apimsg.Payment Failed"));  
-        }
+        }       
     }
 }
 
