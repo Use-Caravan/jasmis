@@ -60,11 +60,29 @@
         </div>
         
         @if($model->exists)
-        <div class = "clearfix">
+        <div class = "clearfix"></div>
         <div class="form-group {{ ($errors->has("card_image")) ? 'has-error' : '' }}">                    
             <div class="col-md-12">                          
             {{ Form::label("card_image", __('admincrud.Exist Image')."") }}
             <img src="{{ FileHelper::loadImage($model->card_image) }}" style="width: 150px;">
+            </div>
+        </div>
+        @endif
+        <div class="form-group {{ ($errors->has("popup_image")) ? 'has-error' : '' }}">                    
+            <div class="col-md-12">                          
+            {{ Form::label("popup_image", __('admincrud.Popup Image'), ['class' => (!$model->exists) ? 'required' : '']) }}
+            {{ Form::file("popup_image", ['class' => 'form-control',"accept" => "image/*"]) }}
+            @if($errors->has("popup_image"))
+                <span class="help-block error-help-block">{{ $errors->first("popup_image") }}</span>
+            @endif  
+            </div>
+        </div>
+        @if($model->exists)
+        <div class = "clearfix"></div>
+        <div class="form-group {{ ($errors->has("popup_image")) ? 'has-error' : '' }}">                    
+            <div class="col-md-12">                          
+            {{ Form::label("popup_image", __('admincrud.Popup Image')."") }}
+            <img src="{{ FileHelper::loadImage($model->popup_image) }}" style="width: 150px;">
             </div>
         </div>
         @endif

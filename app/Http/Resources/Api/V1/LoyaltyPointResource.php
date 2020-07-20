@@ -84,6 +84,13 @@ class LoyaltyPointResource extends JsonResource
                 }                
                 return  FileHelper::loadImage( ($result === null) ? '' :  $result->card_image );
             }), 
+            'popup_image' => $this->when(true,function() {
+                $result = LoyaltyLevel::select('popup_image')->where('from_point','<=',(int)$this->total_loyalty_points)->where('to_point','>=',(int)$this->total_loyalty_points)->first();                
+                if($result === null) {
+                    $result = LoyaltyLevel::select('popup_image')->orderBy('loyalty_level_id','asc')->first();                  
+                }                
+                return  FileHelper::loadImage( ($result === null) ? '' :  $result->popup_image );
+            }), 
         ];
     }
     

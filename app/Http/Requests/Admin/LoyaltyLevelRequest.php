@@ -33,10 +33,12 @@ class LoyaltyLevelRequest extends FormRequest
 
         switch ($this->method()) {
             case 'POST':
-                $rules["card_image"] = 'required|mimes:jpeg,jpg,png|dimensions:width=550,height=356';
+                $rules["card_image"]  = 'required|mimes:jpeg,jpg,png|dimensions:width=550,height=356';
+                $rules["popup_image"] = 'required|mimes:jpeg,jpg,png';
             break;
             case 'PUT':
-                $rules["card_image"] = 'nullable|mimes:jpeg,jpg,png|dimensions:width=550,height=356';
+                $rules["card_image"]  = 'nullable|mimes:jpeg,jpg,png|dimensions:width=550,height=356';
+                $rules["popup_image"] = 'nullable|mimes:jpeg,jpg,png';
             case 'PATCH':            
         }
         return $rules;

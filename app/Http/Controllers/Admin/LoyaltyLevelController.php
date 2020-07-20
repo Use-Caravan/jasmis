@@ -99,6 +99,12 @@ class LoyaltyLevelController extends Controller
                 $cardImage = FileHelper::uploadFile($files,$destinationPath);
                 $model->card_image = $cardImage;
             }
+            if($request->file('popup_image')) {
+                $files = $request->file('popup_image');
+                $destinationPath = APP_POPUP_IMAGE_PATH; 
+                $popupImage = FileHelper::uploadFile($files,$destinationPath);
+                $model->popup_image = $popupImage;
+            }
             $model->save();
             Common::log("Create","Loyalty Level has been saved",$model);               
             DB::commit();             
@@ -151,7 +157,8 @@ class LoyaltyLevelController extends Controller
         try {
             $model = LoyaltyLevel::findByKey($id);        
 
-            $existsImage = $model->card_image;
+            $existsImage       = $model->card_image;
+            $existspopupImage  = $model->popup_image;
             $model->fill($request->all());            
             if($request->file('card_image')) {
                 $files = $request->file('card_image');
@@ -159,6 +166,13 @@ class LoyaltyLevelController extends Controller
                 $cardImage = FileHelper::uploadFile($files,$destinationPath);
                 FileHelper::deleteFile($existsImage);
                 $model->card_image = $cardImage;
+            }
+            if($request->file('popup_image')) {
+                $files = $request->file('popup_image');
+                $destinationPath = APP_POPUP_IMAGE_PATH; 
+                $popupImage = FileHelper::uploadFile($files,$destinationPath);
+                FileHelper::deleteFile($existspopupImage);
+                $model->popup_image = $popupImage;
             }
             $model->save();
             Common::log("Update","Loyalty Level has been updated",$model);        

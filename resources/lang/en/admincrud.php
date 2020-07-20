@@ -378,6 +378,7 @@ return [
       'From Point' => 'From Point',
       'To Point' => 'To Point', 
       'Card Image' => "Card Image",
+      'Popup Image' => "Popup Image",
       'Exist Image' => 'Exist Image',
       'Redeem Amount Per Point' => 'Redeem Amount Per Point',
       'Loyalty Level added successfully' => 'Loyalty Level added successfully',

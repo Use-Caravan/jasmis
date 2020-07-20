@@ -110,6 +110,7 @@
     const ORDER_ITEM_PATH = 'gallery/order-items';
 
     const APP_LOYALTY_LEVEL_PATH = 'gallery/loyalty-level';
+    const APP_POPUP_IMAGE_PATH   = 'gallery/popup';
 
     /**
      * Gender
