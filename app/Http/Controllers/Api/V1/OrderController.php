@@ -1608,7 +1608,9 @@ class OrderController extends Controller
             'is_italic' => IS_ITALIC,
             'is_line' => IS_LINE, 
         ];
-        //array_push($responseData['payment_details'], $vatDetails);
+        /** Push vat details in payment details if its > 0 only **/
+        if( $branchDetails->vendor_tax > 0 )
+            array_push($responseData['payment_details'], $vatDetails);
         $responseData['vat_tax'] = $vatDetails;
 
         $serviceTaxAmount = 0;
