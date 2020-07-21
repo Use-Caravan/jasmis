@@ -1609,7 +1609,7 @@ class OrderController extends Controller
             'is_line' => IS_LINE, 
         ];
         //array_push($responseData['payment_details'], $vatDetails);
-        //$responseData['vat_tax'] = $vatDetails;
+        $responseData['vat_tax'] = $vatDetails;
 
         $serviceTaxAmount = 0;
         if($branchDetails->vendor_service_tax !== null && $branchDetails->vendor_service_tax > 0) {
