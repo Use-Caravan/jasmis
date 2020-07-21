@@ -175,21 +175,20 @@ class PaymentGatewayController extends Controller
     /** Success redirect url from credimax **/
     public function credimaxSuccess(Request $request) 
     {   
-        //echo 'success';exit;
         $orderID = isset( $request->order_id ) ? $request->order_id : "";
         if( !empty( $orderID ) )
         {
-            $response = CredimaxPaymentGateway::instance()->setOrderId($order_id);
+            $response = CredimaxPaymentGateway::instance()->setOrderId($orderID);
             $response = $response->getPaymentDetails();
-
             if( $response["status"] == 1 && !empty( $response["paymnet_requests"] ) )
             {
+                $response["paymnet_requests"] = $response["paymnet_requests"][0];
                 if( $response["paymnet_requests"]["status"] == "SUCCESS" )
                 {
-                    if( $response["order_id"] == $orderID )
+                    if( $response["paymnet_requests"]["order_id"] == $orderID )
                     {
                         if( isset( $response["paymnet_requests"]["payment_response"]["tnx_id"] ) ) {
-                            $transaction = Transaction::where('transaction_number', $response["paymnet_requests"]["tnx_id"])->first();
+                            $transaction = Transaction::where('transaction_number', $response["paymnet_requests"]["payment_response"]["tnx_id"])->first();
                             if($transaction !== null) {
                                 $transactionID = $transaction->transaction_id;
                                 $transactionNumber = $transaction->transaction_number;
@@ -290,79 +289,81 @@ class PaymentGatewayController extends Controller
         }        
     }
 
-    public function credimaxFailure(Request $request) 
+    public function test() 
     {   
-        //echo 'Failure';exit;$orderID = isset( $request->order_id ) ? $request->order_id : "";
-        $orderID = isset( $request->order_id ) ? $request->order_id : "";
+        echo 'test';exit;
+    }
+
+    /** Credimax failure redirect URL **/
+    public function credimaxFailure( Request $request ) 
+    {   
+        $orderID = $order_id = isset( $request->order_id ) ? $request->order_id : "";
         if( !empty( $orderID ) )
         {
             $response = CredimaxPaymentGateway::instance()->setOrderId($order_id);
             $response = $response->getPaymentDetails();
-
+            $transactionNumber = null;
             if( $response["status"] == 1 && !empty( $response["paymnet_requests"] ) )
             {
-                if( $response["paymnet_requests"]["status"] != "SUCCESS" )
+                $response["paymnet_requests"] = $response["paymnet_requests"][0];
+                if( $response["paymnet_requests"]["status"] != "SUCCESS" || $response["paymnet_requests"]["status"] == "SUCCESS" )
                 {
-                    if( $response["order_id"] == $orderID )
+                    if( $response["paymnet_requests"]["order_id"] == $orderID )
                     {
                         if( isset( $response["paymnet_requests"]["payment_response"]["tnx_id"] ) ) {
-                            $transaction = Transaction::where('transaction_number', $response["paymnet_requests"]["tnx_id"])->first();
-                            if($transaction !== null) {
-                                $transactionNumber = $transaction->transaction_number;
-                                $transactionID = $transaction->transaction_id;
-                                $transaction->status = TRANSACTION_STATUS_FAILED;
-                                $transaction->save();
-                                $paymentGateway = PaymentGateway::find($transaction->payment_gateway_id);
-                                $paymentGateway->response_received_data = json_encode($request->all());
-                                $paymentGateway->status = ORDER_PAYMENT_STATUS_FAILURE;
-                                $paymentGateway->save();
-
-                                switch($transaction->transaction_for) {
-                                    case TRANSACTION_FOR_ONLINE_BOOKING:
-                                        $order = Order::where('transaction_id',$transactionID)->first();
-                                        $orderkey = $order->order_key;
-                                        $order->payment_status = ORDER_PAYMENT_STATUS_FAILURE;
-                                        $order->save();
-
-                                        if($request->is_web == true || $request->is_web == 1) {
-                                            return redirect()->route('frontend.failed',['order_key' => $orderkey]);
-                                        } else {
-                                            return $this->commonError(__("apimsg.Payment cannot capture"));
-                                        }
-                                    break;
-                                    case TRANSACTION_FOR_ADD_TO_WALLET:
-                                        if($request->is_web == true || $request->is_web == 1) {
-
-                                            return redirect()->route('frontend.wallet',['transaction_number' => $transactionNumber]);
-                                        } else {
-                                            return $this->commonError(__("apimsg.Payment cannot capture"));
-                                        }
-                                    break;
-                                }                
-                            } else {
-                                return $this->commonError(__("apimsg.Transaction is not found")); 
-                            }            
-                        } else {
-                            return $this->commonError(__("apimsg.Payment process is not working currently"));
+                            $transaction = Transaction::where('transaction_number', $response["paymnet_requests"]["payment_response"]["tnx_id"])->first();
                         }
                     }
-                    else {
-                        return $this->commonError(__("apimsg.Invalid Payment"));    
-                    }
-                }
-                else {
-                    return $this->commonError(__("apimsg.Payment Failed"));    
                 }
             }
             else
             {
-                return $this->commonError(__("apimsg.Payment Failed"));  
-            }
+                $order_det = Order::where('order_id', $orderID)->first();
+                if($order_det !== null) {
+                    $transaction_id = $order_det->transaction_id;
+                    if( isset( $transaction_id ) && $transaction_id > 0 ) {
+                        $transaction = Transaction::where('transaction_id', $transaction_id)->first();        
+                    }
+                }
+            }   
+            if($transaction !== null) {
+                $transactionNumber = $transaction->transaction_number;
+                $transactionID = $transaction->transaction_id;
+                $transaction->status = TRANSACTION_STATUS_FAILED;
+                $transaction->save();
+                $paymentGateway = PaymentGateway::find($transaction->payment_gateway_id);
+                $paymentGateway->response_received_data = json_encode($request->all());
+                $paymentGateway->status = ORDER_PAYMENT_STATUS_FAILURE;
+                $paymentGateway->save();
+
+                switch($transaction->transaction_for) {
+                    case TRANSACTION_FOR_ONLINE_BOOKING:
+                        $order = Order::where('transaction_id',$transactionID)->first();
+                        $orderkey = $order->order_key;
+                        $order->payment_status = ORDER_PAYMENT_STATUS_FAILURE;
+                        $order->save();
+
+                        if($request->is_web == true || $request->is_web == 1) {
+                            return redirect()->route('frontend.failed',['order_key' => $orderkey]);
+                        } else {
+                            return $this->commonError(__("apimsg.Payment cannot capture"));
+                        }
+                    break;
+                    case TRANSACTION_FOR_ADD_TO_WALLET:
+                        if($request->is_web == true || $request->is_web == 1) {
+
+                            return redirect()->route('frontend.wallet',['transaction_number' => $transactionNumber]);
+                        } else {
+                            return $this->commonError(__("apimsg.Payment cannot capture"));
+                        }
+                    break;
+                }                
+            } else {
+                return $this->commonError(__("apimsg.Transaction is not found")); 
+            }            
+        } else {
+            return $this->commonError(__("apimsg.Payment process is not working currently"));
         }
-        else
-        {
-            return $this->commonError(__("apimsg.Payment Failed"));  
-        }       
     }
 }
 
