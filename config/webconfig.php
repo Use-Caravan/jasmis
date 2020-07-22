@@ -147,7 +147,7 @@ return [
     "credimaxpay_benefit_checkout_url" => "https://api.credimaxpay.com/api/benefit_checkout",
     "credimaxpay_company_code" => "iRSn0PAEcsKwHpKCICx8vjLEsBAk0SltAXWx4b83eXdZVZ9OXSb0OOB1SOO9NWh8",
     "credimaxpay_payment_details_url" => "https://api.credimaxpay.com/api/orderPaymentDetails",
-    "credimax_payment_gateway_success_url" => "https://caravan.brigita.co/api/v1/payment-gateway/credimax-success",
-    "credimax_payment_gateway_failure_url" => "https://caravan.brigita.co/api/v1/payment-gateway/credimax-failure",
+    "credimax_payment_gateway_success_url" => "/api/v1/payment-gateway/credimax-success",//https://caravan.brigita.co
+    "credimax_payment_gateway_failure_url" => "/api/v1/payment-gateway/credimax-failure",
 ];
 

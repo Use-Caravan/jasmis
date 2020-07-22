@@ -336,7 +336,9 @@ class CartController extends Controller
                 'is_italic' => IS_ITALIC,
                 'is_line' => IS_LINE, 
             ];
-            array_push($cart['payment_details'], $vatDetails);            
+            /** Push vat details in payment details if its > 0 only **/
+            if( $branchDetails->tax > 0 )
+                array_push($cart['payment_details'], $vatDetails);            
 
             /** Service tax amount */
             $serviceTaxAmount = 0;
