@@ -30,6 +30,13 @@ class PaymentGatewayController extends Controller
 {
     public function success(Request $request) 
     {   
+        $orderID = isset( $request->order_id ) ? $request->order_id : "";
+        if( !empty( $orderID ) )
+        {
+            $response = CredimaxPaymentGateway::instance()->setOrderId($order_id);
+            $response = $response->getPaymentDetails();
+        }
+                    
         if($request->TransactionIdentifier != null && $request->TransactionIdentifier != '') {
             $transaction = Transaction::where('transaction_number',$request->TransactionIdentifier)->first();
             if($transaction !== null) {
@@ -171,7 +178,7 @@ class PaymentGatewayController extends Controller
             return $this->commonError(__("apimsg.Payment process is not working currently"));
         }
     }
-    
+
     /** Success redirect url from credimax **/
     public function credimaxSuccess(Request $request) 
     {   
@@ -306,7 +313,7 @@ class PaymentGatewayController extends Controller
             if( $response["status"] == 1 && !empty( $response["paymnet_requests"] ) )
             {
                 $response["paymnet_requests"] = $response["paymnet_requests"][0];
-                if( $response["paymnet_requests"]["status"] != "SUCCESS" || $response["paymnet_requests"]["status"] == "SUCCESS" )
+                if( $response["paymnet_requests"]["status"] != "SUCCESS" )
                 {
                     if( $response["paymnet_requests"]["order_id"] == $orderID )
                     {
@@ -365,5 +372,6 @@ class PaymentGatewayController extends Controller
             return $this->commonError(__("apimsg.Payment process is not working currently"));
         }
     }
+                    
 }
 

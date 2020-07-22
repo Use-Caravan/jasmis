@@ -60,9 +60,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
     Route::post('payment-gateway/success','PaymentGatewayController@success')->middleware('localization');
     Route::post('payment-gateway/failiur','PaymentGatewayController@failiur')->middleware('localization');
     Route::post('payment-gateway/credimax-success','PaymentGatewayController@credimaxSuccess')->middleware('localization');
-    Route::post('payment-gateway/credimax-failure','PaymentGatewayController@credimaxFailure')->middleware('localization');
-    Route::post('place-order-credimax','OrderController@placeOrderCredimax')->middleware('localization');        
-
+    Route::post('payment-gateway/credimax-failure','PaymentGatewayController@credimaxFailure');
+    
     Route::group(['middleware' => ['auth:'.GUARD_USER_API] ],function()
     {
         Route::get('logout','AuthController@logout')->middleware('localization');       
@@ -80,7 +79,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
         Route::get('my-order/{order_key}','OrderController@show')->middleware('localization');
         Route::get('my-order-reorder','OrderController@reOrder')->middleware('localization');
         Route::post('calculate-data','OrderController@calculateData')->middleware('localization');
-        Route::post('place-order','OrderController@placeOrder')->middleware('localization');        
+        Route::post('place-order','OrderController@placeOrder')->middleware('localization');   
+        
+        Route::post('place-order-credimax','OrderController@placeOrderCredimax')->middleware('localization');
 
         Route::post('cart-update','CartController@userCart')->middleware('localization');
         Route::post('cart-quantity-update','CartController@updateQuantity')->middleware('localization');
