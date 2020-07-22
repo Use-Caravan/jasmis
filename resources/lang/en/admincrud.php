@@ -748,7 +748,9 @@ return [
      * Delivery Boy Configuration
      */
     'Delivery boy Configuration' => 'Delivery boy Configuration',
-    'Order Accept Time Limit' => 'Order Accept Time Limit',
+    'First Cut Off Time Limit' => 'First Cut Off Time Limit',
+    'Second Cut Off Time Limit' => 'Second Cut Off Time Limit',
+    //'Order Accept Time Limit' => 'Order Accept Time Limit',
     'Order Request Radius' => 'Order Request Radius',
     'Order Assign Type' => 'Order Assign Type',
     'Delivery boy URL' => 'Delivery boy URL',

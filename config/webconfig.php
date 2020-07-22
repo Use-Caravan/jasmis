@@ -104,6 +104,7 @@ return [
      * Delivery boy Configuration 
      * 
      */
+     'first_cut_off_time_limit' => 0,
      'order_accept_time_limit' => 0,
      'request_radius' => 0,
      'order_assign_type' => 1,

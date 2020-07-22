@@ -15,6 +15,7 @@ class DeliveryboySettingRequest extends FormRequest
     public function rules()
     {
         return [
+            'first_cut_off_time_limit'          => 'required|numeric',
             'order_accept_time_limit'          => 'required|numeric',
             'request_radius'          => 'required|numeric',
             'order_assign_type'       => 'required',

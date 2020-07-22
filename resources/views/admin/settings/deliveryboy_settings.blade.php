@@ -16,11 +16,20 @@
           @endphp
           {{ Form::open(['url' => route('admin-settings-save'), 'id' => 'app-settings-form', 'class' => 'form-horizontal', 'method' => 'POST', 'enctype' => 'multipart/form-data' ]) }}          
           {{ Form::hidden('config_name',DELIVERY_BOY) }}
-            <div class="box-body">                 
+            <div class="box-body">  
+                <div class="form-group {{ ($errors->has('first_cut_off_time_limit')) ? 'has-error' : '' }}">
+                    <div class="col-md-12">
+                        {{ Form::label("first_cut_off_time_limit", __('admincrud.First Cut Off Time Limit'), ['class' => 'required']) }}
+                        {{ Form::text('first_cut_off_time_limit', config('webconfig.first_cut_off_time_limit'), ['class' => 'form-control','placeholder' => __('admincrud.First Cut Off Time Limit') ]  ) }}
+                        @if($errors->has("first_cut_off_time_limit"))
+                            <span class="help-block error-help-block">{{ $errors->first("first_cut_off_time_limit") }}</span>
+                        @endif 
+                    </div>
+                </div>
                 <div class="form-group {{ ($errors->has('order_accept_time_limit')) ? 'has-error' : '' }}">
                     <div class="col-md-12">
-                        {{ Form::label("order_accept_time_limit", __('admincrud.Order Accept Time Limit'), ['class' => 'required']) }}
-                        {{ Form::text('order_accept_time_limit', config('webconfig.order_accept_time_limit'), ['class' => 'form-control','placeholder' => __('admincrud.Order Accept Time Limit') ]  ) }}
+                        {{ Form::label("order_accept_time_limit", __('admincrud.Second Cut Off Time Limit'), ['class' => 'required']) }}
+                        {{ Form::text('order_accept_time_limit', config('webconfig.order_accept_time_limit'), ['class' => 'form-control','placeholder' => __('admincrud.Second Cut Off Time Limit') ]  ) }}
                         @if($errors->has("order_accept_time_limit"))
                             <span class="help-block error-help-block">{{ $errors->first("order_accept_time_limit") }}</span>
                         @endif 
