@@ -2365,8 +2365,10 @@ class OrderController extends Controller
                     'vendor_area' => $areaName,
                     'vendor_city' => $cityName,
                     'vendor_country' => $countryName,
-                    'vendor_mobile' => ($value->contact_number === null) ? '' : $value->contact_number,
-                    'vendor_name' => ($vendor->branch_name === null) ? '' : $vendor->branch_name,
+                    //'vendor_mobile' => ($value->contact_number === null) ? '' : $value->contact_number,
+                    //'vendor_name' => ($vendor->branch_name === null) ? '' : $vendor->branch_name,
+                    'vendor_mobile' => ($vendor->branch_contact_number === null) ? '' : $vendor->branch_contact_number,
+                    'vendor_name' => ($value->branch_name === null) ? '' : $value->branch_name,
                 ],
             ];
             array_push($deliveryboyData['pickup_location']['details'],$details);
@@ -2402,6 +2404,7 @@ class OrderController extends Controller
             ];
             array_push($deliveryboyData['delivery_location']['details'],$details);
         }
+        //print_r($deliveryboyData);exit;
         $url = config('webconfig.deliveryboy_url')."/api/v1/order/create?company_id=".config('webconfig.company_id');        
         $postData = json_encode($deliveryboyData);   
         $data = Curl::instance()->action('POST')->setUrl($url)->setContentType('text/plain')->send($postData);

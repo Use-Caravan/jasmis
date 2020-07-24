@@ -129,12 +129,20 @@ class Order extends CommonOrder
             });        
         }
         
-        $orders = $orders->where(function($orders) {
+        /*$orders = $orders->where(function($orders) {
             $orders->where('payment_type', '<>', PAYMENT_OPTION_ONLINE)
                 ->orWhere(function ($query) {
                     $query->where('payment_type', '=', PAYMENT_OPTION_ONLINE)
                           ->where('payment_status', '=', ORDER_PAYMENT_STATUS_SUCCESS);
                 });
+        });*/
+        
+        /** Show payment success orders only for payment type online, wallet **/
+        $orders = $orders->where(function($orders) {
+        $orders->where([
+                Order::tableName().'.payment_status' => ORDER_PAYMENT_STATUS_SUCCESS,
+                [Order::tableName().'.payment_type', '<>', PAYMENT_OPTION_COD]
+            ])->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_COD);
         });
 
         $orders = $orders->groupBy('order_id');

@@ -107,13 +107,15 @@ class Item extends CommonItem
                     * sin( radians( circle_latitude ) ) ) ) as distance"),
                 ])
                 ->leftJoin(DeliveryArea::tableName(),BranchDeliveryArea::tableName().".delivery_area_id",DeliveryArea::tableName().".delivery_area_id")
+                ->leftJoin(Branch::tableName(),Branch::tableName().".branch_id",BranchDeliveryArea::tableName().".branch_id")
                 ->havingRaw("distance <=  ".DeliveryArea::tableName().".zone_radius")
                 ->where([
                     DeliveryArea::tableName().".zone_type" => DELIVERY_AREA_ZONE_CIRCLE,
                     DeliveryArea::tableName().".status" => ITEM_ACTIVE,
                 ])
                 ->groupBy(BranchDeliveryArea::tableName().".branch_id")
-                ->whereNull(DeliveryArea::tableName().".deleted_at")->get();
+                ->whereNull(DeliveryArea::tableName().".deleted_at")
+                ->whereNull(Branch::tableName().".deleted_at")->get();
 
 
                 if($deliveryAreasCircle !== null) {                
@@ -131,11 +133,13 @@ class Item extends CommonItem
                     BranchDeliveryArea::tableName().".branch_id",                
                 ])
                 ->leftJoin(DeliveryArea::tableName(),BranchDeliveryArea::tableName().".delivery_area_id",DeliveryArea::tableName().".delivery_area_id")
+                ->leftJoin(Branch::tableName(),Branch::tableName().".branch_id",BranchDeliveryArea::tableName().".branch_id")
                 ->where([
                     DeliveryArea::tableName().".zone_type" => DELIVERY_AREA_ZONE_POLYGON,
                     DeliveryArea::tableName().".status" => ITEM_ACTIVE,
                 ])
                 ->whereNull(DeliveryArea::tableName().".deleted_at")
+                ->whereNull(Branch::tableName().".deleted_at")
                 ->whereRaw("ST_CONTAINS(".DeliveryArea::tableName().".zone_latlng, Point(".request()->latitude.", ".request()->longitude."))")
                 ->groupBy(BranchDeliveryArea::tableName().".branch_id")->get(); 
                             
@@ -196,10 +200,20 @@ class Item extends CommonItem
 
                 // $sort_by_distance = collect($distance_array)->sortBy('distance');
                 // $unique_vendors = $sort_by_distance->unique('vendor_id');
-                $nearest = [];
+                /*$nearest = [];
                 foreach ($distance_array as $sort) {
                     array_push($nearest,$sort['branch_id']);
+                }*/
+                $sort_by_distance = collect($distance_array)->sortBy('distance');
+                $unique_vendors = $sort_by_distance->unique('vendor_id');
+                $nearest = [];
+                foreach ($unique_vendors as $sort) {
+                    array_push($nearest,$sort['branch_id']);
                 }
+                //print_r($nearest);exit;
+                $query = $query->whereIn(Branch::tableName().".branch_id", $nearest);
+                //echo '<pre>'; var_dump($query->toSql()); exit;
+                //print_r($query->get());exit;
 
                 if(request()->item_name !== null) {
                     $query->orwhere("IL.item_name", 'like' , "%".request()->item_name."%")->whereIn(Branch::tableName().".branch_id", $nearest);
@@ -207,6 +221,13 @@ class Item extends CommonItem
                 }
 
             }
+            else
+            {
+                $query->whereNull(Branch::tableName().".deleted_at");
+            }
+            //echo '<pre>'; var_dump($query->toSql()); exit;
+            //print_r($deliveryBranchIDs);exit;
+                
             if(request()->category_id !== null) {
                 $query->where([Item::tableName().'.category_id' => request()->category_id]);
             }    
