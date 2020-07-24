@@ -18,7 +18,7 @@ class Order extends CommonOrder
             DB::raw("CONCAT(first_name,' ',last_name) as customer_name"),
         ])
         ->leftJoin(Vendor::tableName(),Order::tableName().".vendor_id",'=',Vendor::tableName().".vendor_id")
-        ->leftJoin(User::tableName(),Order::tableName().".user_id",'=',User::tableName().".user_id");
+        ->leftJoin(User::tableName(),Order::tableName().".user_id",'=',User::tableName().".user_id")->whereNotNull(User::tableName().".user_id");
 
         $orders = $orders->where([
             Order::tableName().'.status' => ITEM_ACTIVE,
