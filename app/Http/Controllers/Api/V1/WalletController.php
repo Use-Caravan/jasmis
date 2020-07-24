@@ -14,6 +14,7 @@ use App\{
     Api\UserLoyaltyCredit,
     Api\LoyaltyLevel,
     Helpers\SadadPaymentGateway,
+    Helpers\CredimaxPaymentGateway,
     PaymentGateway
 };
 use Auth;
@@ -39,7 +40,7 @@ class WalletController extends Controller
         try {
             $userID = Auth::user()->user_id;            
 
-            $response = SadadPaymentGateway::instance()
+            /*$response = SadadPaymentGateway::instance()
                 ->setAmount(request()->amount)
                 ->setCustomerName(Auth::user()->first_name)
                 ->setCustomerMail(Auth::user()->email)
@@ -47,48 +48,64 @@ class WalletController extends Controller
                 if(request()->is_web !== null) {
                     $response = $response->setRequestFrom(request()->is_web);
                 }
-                $response = $response->makePayment();
-                if($response !== null) {
+                $response = $response->makePayment();*/
 
-                    $paymentData = [
-                        'customer_name' => Auth::user()->first_name,
-                        'customer_email' => Auth::user()->email,
-                        'customer_phone_number' => Auth::user()->phone_number,
-                        'price' => request()->amount,
-                    ];
+            /** Add payment gateway details in PaymentGateway table and get id to send as order_id to credimax payment gateway **/
+            $paymentData = [
+                'customer_name' => Auth::user()->first_name,
+                'customer_email' => Auth::user()->email,
+                'customer_phone_number' => Auth::user()->phone_number,
+                'price' => request()->amount,
+            ];
 
-                    $paymentGateway = new PaymentGateway();                    
-                    $paymentGateway = $paymentGateway->fill([
-                        'sent_data' => json_encode($paymentData),
-                        'gateway_url' => $response['payment-url'],
-                        'received_data' => json_encode($response)
-                    ]);
-                    $paymentGateway->save();                    
-                    $transactionData = [
-                        'payment_gateway_id' => $paymentGateway->getKey(),
-                        'user_id' => Auth::user()->user_id,
-                        'transaction_for' => TRANSACTION_FOR_ADD_TO_WALLET,
-                        'transaction_type' => TRANSACTION_TYPE_CREDIT,
-                        'amount' => request()->amount,
-                        'transaction_number' => $response['transaction-reference'],
-                        'status' => TRANSACTION_STATUS_PENDING
-                    ];
-                    $transaction = new Transaction();
-                    $transaction = $transaction->fill($transactionData);
-                    $transaction->save();
-                    DB::commit();                    
+            $paymentGateway = new PaymentGateway();                    
+            $paymentGateway = $paymentGateway->fill([
+                'sent_data' => json_encode($paymentData)
+            ]);
+            $paymentGateway->save();                    
+            $payment_gateway_id = $paymentGateway->getKey();
 
-                    $data = [
-                        'payment_url' => $response['payment-url'],
-                        'transaction_reference' => $response['transaction-reference']
-                    ];                    
-                    $this->setMessage( __("apimsg.Payment invoice is generated. Make payment by online") );
-                    return $this->asJson($data);
+            $response = CredimaxPaymentGateway::instance()
+                                ->setAmount(request()->amount)
+                                ->setCustomerId($userID)
+                                ->setOrderId($payment_gateway_id);
+            if(request()->is_web !== null) {
+                $response = $response->setRequestFrom(request()->is_web);
+            }
+            $response = $response->makeWalletPayment();
+            //print_r($response);exit;
+            if($response !== null) {
+                $payment_gateway = PaymentGateway::find($payment_gateway_id);
+                $payment_gateway->gateway_url = $response['PaymentURL']."PaymentID=".$response['PaymentID'];
+                $payment_gateway->received_data = json_encode($response);
+                $payment_gateway->save();  
 
-                    /* $user = User::find($userID);
-                    $user->wallet_amount = ( (double)$user->wallet_amount + request()->amount);
-                    $user->save(); */
-                }            
+                $transactionData = [
+                    'payment_gateway_id' => $payment_gateway_id,//$paymentGateway->getKey(),
+                    'user_id' => Auth::user()->user_id,
+                    'transaction_for' => TRANSACTION_FOR_ADD_TO_WALLET,
+                    'transaction_type' => TRANSACTION_TYPE_CREDIT,
+                    'amount' => request()->amount,
+                    //'transaction_number' => $response['transaction-reference'],
+                    'transaction_number' => $response['PaymentID'],
+                    'status' => TRANSACTION_STATUS_PENDING
+                ];
+                $transaction = new Transaction();
+                $transaction = $transaction->fill($transactionData);
+                $transaction->save();
+                DB::commit();                    
+                //print_r($transactionData);exit;
+                $data = [
+                    'payment_url' => $response['PaymentURL']."PaymentID=".$response['PaymentID'],
+                    'transaction_reference' => $response['PaymentID']
+                ];   //print_r($data);exit;                 
+                $this->setMessage( __("apimsg.Payment invoice is generated. Make payment by online") );
+                return $this->asJson($data);
+
+                /* $user = User::find($userID);
+                $user->wallet_amount = ( (double)$user->wallet_amount + request()->amount);
+                $user->save(); */
+            }            
         } catch (\Throwable $e) {
             DB::rollback();
             throw $e;

@@ -2388,18 +2388,27 @@ class OrderController extends Controller
         $languages = Common::getLanguages();
         foreach($languages as $key => $value) {
             $address = implode(", ", [ ($userAddress->address_line_one === null) ? '' : $userAddress->address_line_one , ($userAddress->address_line_two === null) ? '' : $userAddress->address_line_two ]);
+            $country = CountryLang::where(['language_code' => $value, 'country_id' => $userAddress->country_id])->first();
+            $countryName = ($country === null) ? '' : $country->country_name;
+
+            $city = CityLang::where(['language_code' => $value, 'city_id' => $userAddress->city_id])->first();
+            $cityName = ($city === null) ? '' : $city->city_name;
+
+            $area = AreaLang::where(['language_code' => $value, 'area_id' => $userAddress->area_id])->first();
+            $areaName = ($area === null) ? '' : $area->area_name;
+
             $details = [
                 'lang' => $key,
                 'details' => [
                     'address' => ($address === null) ? '' : $address,
-                    'apartment' => '',
-                    'area' => '',
-                    'city' => '',
+                    'apartment' => ($userAddress->apartment === null) ? '' : $userAddress->apartment,
+                    'area' => ($userAddress->area === null) ? '' : $userAddress->area,
+                    'city' => $cityName,
                     'company' => ($userAddress->company === null) ? '' : $userAddress->company,
-                    'country' => '',
+                    'country' => $countryName,
                     'flat_no' => '',
                     'landmark' => ($userAddress->landmark === null) ? '' : $userAddress->landmark,
-                    'street_name' => '',
+                    'street_name' => ($userAddress->street === null) ? '' : $userAddress->street,
                 ],
             ];
             array_push($deliveryboyData['delivery_location']['details'],$details);

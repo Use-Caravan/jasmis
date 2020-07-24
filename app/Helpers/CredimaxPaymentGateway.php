@@ -113,6 +113,27 @@ class CredimaxPaymentGateway
         $response = Curl::instance()->action("POST")->setUrl($url)->send($data);
         return json_decode($response,true);
     }
+    
+    /**
+     * @return array response of payment gateway
+     * Do C Pocket - Add wallet payment
+     */
+    public function makeWalletPayment()
+    {        
+        $data = [
+            "customer_id" => $this->customerId,
+            "order_id" => $this->orderId,
+            "grand_total" => $this->amount,
+            "currency_code" => "BD",
+            "payment_type" => 2,
+            "success_redirect_url" => url('/').config('webconfig.credimax_payment_gateway_wallet_success_url')."?is_web=$this->is_web&order_id=$this->orderId",
+            "failed_redirect_url" => url('/').config('webconfig.credimax_payment_gateway_wallet_failure_url')."?is_web=$this->is_web&order_id=$this->orderId",
+        ];
+        $data = json_encode($data);    
+        $url = config('webconfig.credimaxpay_benefit_checkout_url');        
+        $response = Curl::instance()->action("POST")->setUrl($url)->send($data);
+        return json_decode($response,true);
+    }
 
     /**
      * @return array response of payment gateway
