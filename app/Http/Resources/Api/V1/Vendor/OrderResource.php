@@ -8,6 +8,8 @@ use App\Http\Resources\Api\V1\Vendor\OrderItemResource;
 use App\Http\Resources\Api\V1\UserAddressResource;
 use Common;
 use App\Api\Order;
+use App\Api\Branch;
+use App\Api\BranchLang;
 use App\Api\UserAddress;
 use App\Api\AddressType;
 use App\Api\AddressTypeLang;
@@ -25,7 +27,10 @@ class OrderResource extends JsonResource
     {
         //return parent::toArray($request);
         return [
-            'order_key' => $this->order_key,            
+            'order_key' => $this->order_key, 
+            'branch_key' => Branch::where('branch_id',$this->branch_id)->value('branch_key'),
+            'branch_name' => BranchLang::where('branch_id',$this->branch_id)->value('branch_name'),
+            'arabic_branch_name' => BranchLang::where('branch_id',$this->branch_id)->where('language_code','ar')->value('branch_name'),
             'customer_name' => $this->customer_name,            
             'order_number' => ($this->order_number === null) ? '' : "#".config('webconfig.app_inv_prefix').$this->order_number,            
             'order_datetime' => Common::renderDate($this->order_datetime),
