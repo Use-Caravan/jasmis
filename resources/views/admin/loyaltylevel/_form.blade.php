@@ -70,7 +70,7 @@
         @endif
         <div class="form-group {{ ($errors->has("popup_image")) ? 'has-error' : '' }}">                    
             <div class="col-md-12">                          
-            {{ Form::label("popup_image", __('admincrud.Popup Image'), ['class' => (!$model->exists) ? 'required' : '']) }}
+            {{ Form::label("popup_image", __('admincrud.Popup Image')." ( 200W x 400H )", ['class' => (!$model->exists) ? 'required' : '']) }}
             {{ Form::file("popup_image", ['class' => 'form-control',"accept" => "image/*"]) }}
             @if($errors->has("popup_image"))
                 <span class="help-block error-help-block">{{ $errors->first("popup_image") }}</span>
