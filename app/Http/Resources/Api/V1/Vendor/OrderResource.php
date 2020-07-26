@@ -10,6 +10,8 @@ use Common;
 use App\Api\Order;
 use App\Api\Branch;
 use App\Api\BranchLang;
+use App\Api\vendor;
+use App\Api\vendorLang;
 use App\Api\UserAddress;
 use App\Api\AddressType;
 use App\Api\AddressTypeLang;
@@ -31,6 +33,11 @@ class OrderResource extends JsonResource
             'branch_key' => Branch::where('branch_id',$this->branch_id)->value('branch_key'),
             'branch_name' => BranchLang::where('branch_id',$this->branch_id)->value('branch_name'),
             'arabic_branch_name' => BranchLang::where('branch_id',$this->branch_id)->where('language_code','ar')->value('branch_name'),
+            'vendor_key' => Vendor::where('vendor_id',$this->vendor_id)->value('vendor_key'),
+            'vendor_name' => VendorLang::where('vendor_id',$this->vendor_id)->value('vendor_name'),
+            'arabic_vendor_name' => VendorLang::where('vendor_id',$this->vendor_id)->where('language_code','ar')->value('vendor_name'),
+            'delivery_street' => UserAddress::where('user_address_id',$this->user_address_id)->value('street'),
+            'delivery_area' => UserAddress::where('user_address_id',$this->user_address_id)->value('area'),
             'customer_name' => $this->customer_name,            
             'order_number' => ($this->order_number === null) ? '' : "#".config('webconfig.app_inv_prefix').$this->order_number,            
             'order_datetime' => Common::renderDate($this->order_datetime),

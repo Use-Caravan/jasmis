@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'JASMIS'),
+    'name' => env('APP_NAME', 'Caravan - Vendor Web Portal'),
 
     /*
     |--------------------------------------------------------------------------
