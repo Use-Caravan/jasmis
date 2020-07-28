@@ -47,7 +47,7 @@
         <div class="col-md-6">
             <div class="form-group {{ ($errors->has("minimum")) ? 'has-error' : '' }}">                                
                 {{ Form::label("minimum", __('admincrud.Minimum Quantity'), ['class' => 'required']) }}
-                {{ Form::text('minimum', ($model->minimum === null) ? 0 : $model->minimum, [
+                {{ Form::text('minimum', ($model->minimum === null) ? 1 : $model->minimum, [
                     'class' => 'form-control',
                     'onkeypress' => "return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 || event.charCode == 0",
                     'maxlength' => "6",

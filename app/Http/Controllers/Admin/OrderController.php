@@ -237,9 +237,29 @@ class OrderController extends Controller
             }
             
             deliveryBoyPlaceOrder:
+            $url = config('webconfig.deliveryboy_url')."/api/v1/driver/company?company_id=".config('webconfig.company_id');
+            $data = Curl::instance()->setUrl($url)->send();
+            $response = json_decode($data,true);
+            $deliveryboy = new Deliveryboy();
+            $driverslist = $response['data'];
+            //print_r($driverslist);
+            
             $response = (new APIOrderController())->saveOrderOnDeliveryBoy($request->order_key);
             $deliveryboyResponse = Common::compressData($response);
             if($deliveryboyResponse->status == HTTP_SUCCESS) {
+                /** Call node server auto assign driver API **/
+                //print_r($driverslist);exit;
+                $assign_driver_count = 0;
+                foreach($driverslist as $key => $value) {
+                    $order_key = $request->order_key;        
+                    $deliveryboy_key = $value['_id'];
+                    $url = config('webconfig.deliveryboy_url')."/api/v1/order/$order_key/assign_driver/$deliveryboy_key?company_id=".config('webconfig.company_id');
+                    $data = Curl::instance()->action(METHOD_PUT)->setUrl($url)->send();        
+                    $response_assign = json_decode($data,true);
+                    //print_r($response_assign);
+                    if( isset( $response_assign['status'] ) && $response_assign['status'] === HTTP_SUCCESS)
+                        $assign_driver_count++;          
+                }//echo $assign_driver_count;
                 goto changeStatus;
             } else {
                 return response()->json($response);
