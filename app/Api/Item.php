@@ -215,15 +215,25 @@ class Item extends CommonItem
                 //echo '<pre>'; var_dump($query->toSql()); exit;
                 //print_r($query->get());exit;
 
-                if(request()->item_name !== null) {
+                /*if(request()->item_name !== null) {
                     $query->orwhere("IL.item_name", 'like' , "%".request()->item_name."%")->whereIn(Branch::tableName().".branch_id", $nearest);
                     $query->orwhere("VL.vendor_name", 'like' , "%".request()->item_name."%")->whereIn(Branch::tableName().".branch_id", $nearest);
-                }
+                }*/
 
             }
             else
             {
                 $query->whereNull(Branch::tableName().".deleted_at");
+            }
+            
+            ItemLang::selectTranslation($query,'IL');
+            VendorLang::selectTranslation($query,'VL');
+            BranchLang::selectTranslation($query,'BRL');
+            if(request()->item_name !== null) {
+                $query = $query->Where("IL.item_name", 'like' , "%".request()->item_name."%")
+                               ->orWhere("branch_name", 'like' , "%".request()->item_name."%")
+                               ->orWhere("VL.vendor_name", 'like' , "%".request()->item_name."%")
+                               ->where([Vendor::tableName().".approved_status" => BRANCH_APPROVED_STATUS_APPROVED,Vendor::tableName().".approved_status" => ITEM_ACTIVE]);
             }
             //echo '<pre>'; var_dump($query->toSql()); exit;
             //print_r($deliveryBranchIDs);exit;

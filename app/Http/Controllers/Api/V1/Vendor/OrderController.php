@@ -51,6 +51,7 @@ use Storage;
 use Validator;
 use App\Vendor as CommonVendor;
 use App\Helpers\OneSignal;
+//use App\Helpers\Curl;
 
 class OrderController extends Controller
 {
@@ -139,11 +140,27 @@ class OrderController extends Controller
             $order->order_approved_datetime = date('Y-m-d H:i:s');
             $order->order_rejected_datetime = null;
             if($order->order_type === ORDER_TYPE_DELIVERY) {
+                $url = config('webconfig.deliveryboy_url')."/api/v1/driver/company?company_id=".config('webconfig.company_id');
+                $data = Curl::instance()->setUrl($url)->send();
+                $response = json_decode($data,true);
+                $driverslist = $response['data'];
+                //print_r($driverslist);
                 $saveOrderOnDeliveryBoy = (new APIOrderController)->saveOrderOnDeliveryBoy($order_key);
                 $response = Common::compressData($saveOrderOnDeliveryBoy);    
                 if($response->status != HTTP_SUCCESS) {
                     return $this->commonError($response->message);
                 }
+                $assign_driver_count = 0;
+                foreach($driverslist as $key => $value) {
+                    $deliveryboy_key = $value['_id'];
+                    $url = config('webconfig.deliveryboy_url')."/api/v1/order/$order_key/assign_driver/$deliveryboy_key?company_id=".config('webconfig.company_id');
+                    $data = Curl::instance()->action(METHOD_PUT)->setUrl($url)->send();        
+                    $response_assign = json_decode($data,true);
+                    //print_r($response_assign);
+
+                    if( isset( $response_assign['status'] ) && $response_assign['status'] === HTTP_SUCCESS)
+                        $assign_driver_count++;          
+                }//echo "assign_driver_count = ".$assign_driver_count;
             }
             $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." is accepted by restaurant."], [$userDetails->device_token], []);
         }
