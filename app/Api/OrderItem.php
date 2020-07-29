@@ -26,6 +26,10 @@ class OrderItem extends CommonOrderItem
                     LEFT JOIN order_ingredient AS OI ON OI.order_ingredient_id = OIL.order_ingredient_id
                     WHERE  OI.order_item_id = order_item.order_item_id AND language_code = "ar")
                  as arabic_ingredients'),
+               DB::raw(' 
+                    (SELECT `ingredient_price` FROM `order_ingredient` AS OIL 
+                    WHERE OIL.order_item_id = order_item.order_item_id)
+                 as ingredient_price'),
                 OrderItem::tableName().".item_quantity",
                 OrderItem::tableName().".item_subtotal"
             ])->where([
