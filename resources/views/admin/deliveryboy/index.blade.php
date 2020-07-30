@@ -39,7 +39,7 @@
                         </td>
                         <td>
                             <label class="switch" for="id_{{ $value['_id'] }}">
-                                <input type="checkbox" itemkey="{{ $value['_id'] }}" class="deliveryboy_status" id="id_{{ $value['_id'] }}" @if( $value['status'] === ITEM_ACTIVE ) checked="true" @endif >
+                                <input type="checkbox" itemkey="{{ $value['_id'] }}" class="deliveryboy_status" id="id_{{ $value['_id'] }}" @if( $value['status'] === ITEM_ACTIVE || $value['status'] === DRIVER_ACTIVE || $value['status'] === DRIVER_ONLINE) checked="true" @endif >
                                 <span class="slider"></span>
                             </label>
                         </td>
