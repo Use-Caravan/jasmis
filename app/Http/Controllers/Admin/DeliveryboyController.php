@@ -88,7 +88,7 @@ class DeliveryboyController extends Controller
             'country' => $request->country,
             'city' => $request->city,
             'password' => $request->password,
-            'is_approved' => true
+            'is_approved' => "true"
         ];
         $model = new Deliveryboy();
         $response = new Curl();
@@ -166,7 +166,7 @@ class DeliveryboyController extends Controller
             'country' => $request->country,
             'city' => $request->city,
             //'password' => $request->password,
-            'is_approved' => true,
+            'is_approved' => "true",
         ];
         $model = new Deliveryboy(); 
         $response = new Curl();
