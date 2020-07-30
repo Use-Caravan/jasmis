@@ -13,6 +13,7 @@ use App\Api\{
     LoyaltyLevelLang    
 };
 use App\Vendor;
+use App\VendorLang;
 use FileHelper;
 use Common;
 
@@ -38,7 +39,10 @@ class VendorResource extends JsonResource
             }),
             'username' => ($this->username === null) ? '' : $this->username,
             'email' => ($this->email === null) ? '' : $this->email,
-            'mobile_number' => (( request()->user() instanceof Vendor) ? ($this->mobile_number === null) ? '' : $this->mobile_number : ($this->phone_number === null) ? '' : $this->phone_number),
+            'mobile_number' => (( request()->user() instanceof Vendor) ? ($this->mobile_number === null) ? '' : $this->mobile_number : ($this->contact_number === null) ? '' : $this->contact_number),        
+            'vendor_name' => VendorLang::where('vendor_id',$this->vendor_id)->value('vendor_name'),
+            'vendor_logo' => VendorLang::where('vendor_id',$this->vendor_id)->value('vendor_logo'),
+            'vendor_address' => VendorLang::where('vendor_id',$this->vendor_id)->value('vendor_address'),
             'access_token' => ($this->access_token === null) ? $request->bearerToken() : $this->access_token,
         ];
     }

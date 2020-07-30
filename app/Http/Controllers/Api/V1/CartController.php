@@ -53,10 +53,10 @@ class CartController extends Controller
             }
             
             /** Delete if branch key is mismatch */
-            $exists = Cart::where(['user_id' => $userID])->first();
+           /* $exists = Cart::where(['user_id' => $userID])->first();
             if($exists !== null && ( $exists->branch_id != $branchDetails->branch_id )) {
                 $exists->delete();
-            }
+            }*/
             /** Delete if branch key is mismatch */
             
             $item = Item::findByKey($rawData['item_key']);
