@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Api\V1\IngredientGroupResource;
+use App\Http\Resources\Api\V1\IngredientCompulsoryGroupResource;
 use App\Api\IngredientGroup;
 use App\Api\Cart;
 use App\Api\CartItem;
@@ -84,8 +85,26 @@ class ItemResource extends JsonResource
             'ingrdient_groups' =>  $this->when($this->item_id, function () {   
 
                 if(!isset(request()->auto_suggestion)){
-                    $ingredientGroupQuery = IngredientGroup::getIngredientGroups($this->item_id)->get();
-                    return IngredientGroupResource::collection($ingredientGroupQuery);
+                    $ingredientGroupQuery = IngredientGroup::getIngredientGroups($this->item_id)->where('minimum', 0)->get();                 
+                    if($ingredientGroupQuery[0]['minimum'] == 0){
+                    return IngredientGroupResource::collection($ingredientGroupQuery);}
+                    else
+                    {                         
+                        return [];                         
+                    }
+                }
+            }),
+                    
+            'ingredient_compulsory_groups' =>  $this->when($this->item_id, function () {   
+
+                if(!isset(request()->auto_suggestion)){
+                    $ingredientGroupQuery = IngredientGroup::getIngredientGroups($this->item_id)->where('minimum', 1)->get();           
+                    if($ingredientGroupQuery[0]['minimum'] == 1){
+                    return IngredientCompulsoryGroupResource::collection($ingredientGroupQuery);}
+                    else
+                    {
+                        return [];
+                    }
                 }
             }),
             'in_cart' => $this->when(true,function() {

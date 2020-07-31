@@ -80,7 +80,7 @@ class OrderController extends Controller
     
     public function showOrder($order_key) 
     {   
-        $orders = Order::getVendorOrders();
+        $orders = Order::getVendorShowOrders();
         $orders = $orders->where(Order::tableName().".order_key",$order_key);
         $orders = new OrderResource($orders->first());
         $this->setMessage(__('apimsg.Orders are fetched'));

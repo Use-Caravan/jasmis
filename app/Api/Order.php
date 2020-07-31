@@ -34,6 +34,30 @@ class Order extends CommonOrder
 
         return Self::scopeUser($orders);
     }    
+    
+    public static function getVendorShowOrders()
+    {
+        $orders = Order::select([
+            Order::tableName().".*",
+            DB::raw("CONCAT(first_name,' ',last_name) as customer_name"),
+        ])
+        ->leftJoin(Vendor::tableName(),Order::tableName().".vendor_id",'=',Vendor::tableName().".vendor_id")
+        ->leftJoin(User::tableName(),Order::tableName().".user_id",'=',User::tableName().".user_id");
+
+        $orders = $orders->where([
+            Order::tableName().'.status' => ITEM_ACTIVE,
+        ])->orderBy('order_id','desc');
+
+        
+        $orders = $orders->where(function($orders) {
+            $orders->where([
+                Order::tableName().'.payment_status' => ORDER_PAYMENT_STATUS_SUCCESS,
+                [Order::tableName().'.payment_type', '<>', PAYMENT_OPTION_COD]
+            ])->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_COD);
+        });
+
+        return Self::scopeUser($orders);
+    }    
 
     public static function getIncomingOrders()
     {

@@ -6,7 +6,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use App\Api\Ingredient;
 use App\Api\IngredientGroupLang;
 
-class IngredientGroupResource extends JsonResource
+class IngredientCompulsoryGroupResource extends JsonResource 
 {
     /**
      * Transform the resource into an array.
@@ -17,8 +17,6 @@ class IngredientGroupResource extends JsonResource
     public function toArray($requestIngredientGroupLang)
     {
         // return parent::toArray($request);
-        if($this->minimum == 0)
-        {
         return [
             'ingredient_group_id' => $this->ingredient_group_id,            
             'ingredient_group_key' => $this->ingredient_group_key,
@@ -35,11 +33,6 @@ class IngredientGroupResource extends JsonResource
                 }
             ),
         ];
-        }
-        else
-        {
-            return [];
-        }
     }
 
     /**
