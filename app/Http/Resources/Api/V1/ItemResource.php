@@ -85,26 +85,16 @@ class ItemResource extends JsonResource
             'ingrdient_groups' =>  $this->when($this->item_id, function () {   
 
                 if(!isset(request()->auto_suggestion)){
-                    $ingredientGroupQuery = IngredientGroup::getIngredientGroups($this->item_id)->where('minimum', 0)->get();                 
-                    if($ingredientGroupQuery[0]['minimum'] == 0){
-                    return IngredientGroupResource::collection($ingredientGroupQuery);}
-                    else
-                    {                         
-                        return [];                         
-                    }
+                    $ingredientGroupQuery = IngredientGroup::getIngredientGroups($this->item_id)->where('minimum', 0)->get();
+                    return IngredientGroupResource::collection($ingredientGroupQuery);
                 }
             }),
                     
             'ingredient_compulsory_groups' =>  $this->when($this->item_id, function () {   
 
                 if(!isset(request()->auto_suggestion)){
-                    $ingredientGroupQuery = IngredientGroup::getIngredientGroups($this->item_id)->where('minimum', 1)->get();           
-                    if($ingredientGroupQuery[0]['minimum'] == 1){
-                    return IngredientCompulsoryGroupResource::collection($ingredientGroupQuery);}
-                    else
-                    {
-                        return [];
-                    }
+                    $ingredientGroupQuery = IngredientGroup::getIngredientGroups($this->item_id)->where('minimum','>=', 1)->get();
+                    return IngredientCompulsoryGroupResource::collection($ingredientGroupQuery);
                 }
             }),
             'in_cart' => $this->when(true,function() {
