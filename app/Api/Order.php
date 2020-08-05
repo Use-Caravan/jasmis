@@ -55,23 +55,37 @@ class Order extends CommonOrder
                 [Order::tableName().'.payment_type', '<>', PAYMENT_OPTION_COD]
             ])->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_COD);
         });
-
+        //print_r($orders->get());exit;
         return Self::scopeUser($orders);
     }    
 
     public static function getIncomingOrders()
     {
         $orders = Self::getVendorOrders();
-        return $orders->where(Order::tableName().".order_status",ORDER_APPROVED_STATUS_PENDING);                
+        //return $orders->where(Order::tableName().".order_status",ORDER_APPROVED_STATUS_PENDING);  
+        /** For new order flow changes we have to show pending, driver requested, driver accepted orders also in vendor incoming orders list **/    
+        return $orders->whereIn(Order::tableName().".order_status",[
+                ORDER_APPROVED_STATUS_PENDING,
+                ORDER_DRIVER_REQUESTED,
+                ORDER_APPROVED_STATUS_DRIVER_ACCEPTED,
+                ORDER_APPROVED_STATUS_ASSIGNED_TO_DRIVER
+            ]);                
     }
 
     public static function getAcceptedOrders()
     {
         $orders = Self::getVendorOrders();
-        return $orders->whereIn(Order::tableName().".order_status",[
+        /*return $orders->whereIn(Order::tableName().".order_status",[
                 ORDER_APPROVED_STATUS_APPROVED,
                 ORDER_APPROVED_STATUS_PREPARING,
                 ORDER_APPROVED_STATUS_DRIVER_ACCEPTED,
+                ORDER_APPROVED_STATUS_READY_FOR_PICKUP,
+                ORDER_APPROVED_STATUS_DRIVER_PICKED_UP,
+            ]);*/
+        /** For new order flow changes no need to show driver accepted orders in vendor accepted orders list **/
+        return $orders->whereIn(Order::tableName().".order_status",[
+                ORDER_APPROVED_STATUS_APPROVED,
+                ORDER_APPROVED_STATUS_PREPARING,
                 ORDER_APPROVED_STATUS_READY_FOR_PICKUP,
                 ORDER_APPROVED_STATUS_DRIVER_PICKED_UP,
             ]);

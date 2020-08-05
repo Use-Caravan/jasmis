@@ -201,6 +201,13 @@ class OrderController extends Controller
                 $corporate_voucher_code = request()->corporate_voucher_code;
             }
 
+            /** Get order first_cut_off_time_limit, second_cut_off_time_limit settings to store in order table **/
+            $first_cut_off_time_limit = config('webconfig.first_cut_off_time_limit');
+            $second_cut_off_time_limit = config('webconfig.order_accept_time_limit');
+
+            $first_cut_off_time = date('Y-m-d H:i:s',strtotime( $first_cut_off_time_limit.' minutes', strtotime( $orderDateTime )));
+            $second_cut_off_time = date('Y-m-d H:i:s',strtotime( $second_cut_off_time_limit.' minutes', strtotime( $orderDateTime )));
+            //echo $first_cut_off_time;exit;
             $fillables = [                
                 'order_number'  => $orderNumber,
                 'order_booked_by' => request()->user()->user_type === USER_TYPE_CUSTOMER ? USER_TYPE_CUSTOMER : USER_TYPE_CORPORATES,
@@ -235,6 +242,8 @@ class OrderController extends Controller
                 'delivery_datetime' => (request()->asap == 1) ? date('Y-m-d H:i:s') : request()->delivery_date." ". date('H:i:s', strtotime(request()->delivery_time)),
                 'order_status' => ORDER_APPROVED_STATUS_PENDING,
                 'status' => ITEM_ACTIVE,
+                'first_cut_off_time' => $first_cut_off_time,
+                'second_cut_off_time' => $second_cut_off_time,
             ];
 
             $order = new Order();
@@ -248,6 +257,7 @@ class OrderController extends Controller
             DB::rollback();
             throw $e->getMessage();
         }
+        //echo $orderKey;exit;
         DB::beginTransaction();
         try {
             $userDetails = $this->userDetails;                                                          
@@ -729,6 +739,10 @@ class OrderController extends Controller
                     return $this->commonError("Order place successfully. But delivery boy order not placed");
                 }
             } */
+            
+            /** Create order in delivery boy and call node server auto assign driver API **/ 
+            $responseDataDeliveryBoy = $this->createOrderDeliveryBoy( $orderKey );
+            
             $this->setMessage(__('apimsg.Order placed successfully') );
             return $this->asJson($responseData);
         } catch(Exception $e) {
@@ -737,6 +751,43 @@ class OrderController extends Controller
         }
     }
     
+    /** Create order in delivery boy and call node server auto assign driver API **/ 
+    public function createOrderDeliveryBoy( $order_key )
+    {
+        //echo "hiuyuii";exit;
+        /** Call node server auto assign driver API **/                
+        $url = config('webconfig.deliveryboy_url')."/api/v1/driver/company?company_id=".config('webconfig.company_id');
+        $data = Curl::instance()->setUrl($url)->send();
+        $response = json_decode($data,true);
+        $driverslist = $response['data'];
+
+        //print_r($driverslist);
+        $response = $this->saveOrderOnDeliveryBoy($order_key);
+        //print_r($response);exit;
+        $deliveryboyResponse = Common::compressData($response);
+
+        if($deliveryboyResponse->status == HTTP_SUCCESS) {
+            $assign_driver_count = 0;
+            foreach($driverslist as $key => $value) {
+                $deliveryboy_key = $value['_id'];
+                $url = config('webconfig.deliveryboy_url')."/api/v1/order/$order_key/assign_driver/$deliveryboy_key?company_id=".config('webconfig.company_id');
+                $data = Curl::instance()->action(METHOD_PUT)->setUrl($url)->send();        
+                $response_assign = json_decode($data,true);
+                //print_r($response_assign);
+
+                if( isset( $response_assign['status'] ) && $response_assign['status'] === HTTP_SUCCESS)
+                    $assign_driver_count++;          
+            }//echo "assign_driver_count = ".$assign_driver_count;
+
+            if( $assign_driver_count > 0 )
+                return 1;
+            else
+                return 2;
+        } else {
+            return 0;
+        }
+    }
+
     /**
      * 
      * Place order

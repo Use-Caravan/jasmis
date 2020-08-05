@@ -401,11 +401,18 @@ class Order extends CModel
 
         switch($orderStatus) {
             case ORDER_APPROVED_STATUS_PENDING:                
+                //$statusList[ORDER_APPROVED_STATUS_APPROVED]  =  self::approvedStatus(ORDER_APPROVED_STATUS_APPROVED);
+                break; 
+            case ORDER_APPROVED_STATUS_DRIVER_ACCEPTED:
                 $statusList[ORDER_APPROVED_STATUS_APPROVED]  =  self::approvedStatus(ORDER_APPROVED_STATUS_APPROVED);
+                $statusList[ORDER_APPROVED_STATUS_REJECTED] = self::approvedStatus(ORDER_APPROVED_STATUS_REJECTED);
                 break;
-            case ORDER_APPROVED_STATUS_ASSIGNED_TO_DRIVER:
+            case ORDER_APPROVED_STATUS_APPROVED:
                 $statusList[ORDER_APPROVED_STATUS_PREPARING]  =  self::approvedStatus(ORDER_APPROVED_STATUS_PREPARING);
                 break;
+            /*case ORDER_APPROVED_STATUS_ASSIGNED_TO_DRIVER:
+                $statusList[ORDER_APPROVED_STATUS_PREPARING]  =  self::approvedStatus(ORDER_APPROVED_STATUS_PREPARING);
+                break;*/
             case ORDER_APPROVED_STATUS_PREPARING:
                 $statusList[ORDER_APPROVED_STATUS_READY_FOR_PICKUP]  =  self::approvedStatus(ORDER_APPROVED_STATUS_READY_FOR_PICKUP);                    
                 break;
@@ -414,10 +421,11 @@ class Order extends CModel
                 break;
         }
         if( $orderStatus !== ORDER_APPROVED_STATUS_REJECTED) {
-            $statusList[ORDER_APPROVED_STATUS_REJECTED] = self::approvedStatus(ORDER_APPROVED_STATUS_REJECTED);
+            //$statusList[ORDER_APPROVED_STATUS_REJECTED] = self::approvedStatus(ORDER_APPROVED_STATUS_REJECTED);
         }
         return $statusList;
     }
+
 
 
     public function corporateOrderStatus($orderStatus = null) 

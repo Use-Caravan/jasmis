@@ -121,7 +121,7 @@ class OrderController extends Controller
             array_push($availableChangeStatus, ORDER_APPROVED_STATUS_DELIVERED);
         }
 
-        if($order->order_type == ORDER_TYPE_DELIVERY && request()->order_status == ORDER_APPROVED_STATUS_PREPARING) {
+        if($order->order_type == ORDER_TYPE_DELIVERY && ( request()->order_status == ORDER_APPROVED_STATUS_PREPARING || request()->order_status == ORDER_APPROVED_STATUS_APPROVED ) ) {
             if($order->order_status !== ORDER_APPROVED_STATUS_DRIVER_ACCEPTED) {
                 return $this->commonError(__("apimsg.Order not accepted by the driver"));
             }            
@@ -139,7 +139,7 @@ class OrderController extends Controller
                 
             $order->order_approved_datetime = date('Y-m-d H:i:s');
             $order->order_rejected_datetime = null;
-            if($order->order_type === ORDER_TYPE_DELIVERY) {
+            /*if($order->order_type === ORDER_TYPE_DELIVERY) {
                 $url = config('webconfig.deliveryboy_url')."/api/v1/driver/company?company_id=".config('webconfig.company_id');
                 $data = Curl::instance()->setUrl($url)->send();
                 $response = json_decode($data,true);
@@ -161,7 +161,7 @@ class OrderController extends Controller
                     if( isset( $response_assign['status'] ) && $response_assign['status'] === HTTP_SUCCESS)
                         $assign_driver_count++;          
                 }//echo "assign_driver_count = ".$assign_driver_count;
-            }
+            }*/
             $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." is accepted by restaurant."], [$userDetails->device_token], []);
         }
         

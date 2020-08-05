@@ -61,7 +61,7 @@ class OrderController extends Controller
                                 return $model->paymentStatus($model->payment_status);
                             })
                         ->editColumn('order_status', function ($model) {
-                                $status = $model->orderStatus($model->order_status,$model->order_type);
+                                $status = $model->orderStatus($model->order_status,$model->order_type,$model->first_cut_off_time,$model->second_cut_off_time);
                                 return Form::select('order_status',$status, $model->order_status ,['class' => 'selectpicker order_status','route' => 'order.approvedstatus', 'id' => $model->{$model::uniqueKey()} ] );
                             })
                         ->editColumn('status', function ($model) {
@@ -72,13 +72,24 @@ class OrderController extends Controller
                                 $status = [
                                     ORDER_DRIVER_REQUESTED,
                                     ORDER_DRIVER_REJECTED,
-                                    ORDER_APPROVED_STATUS_APPROVED,
+                                    //ORDER_APPROVED_STATUS_APPROVED,
+                                    ORDER_APPROVED_STATUS_PENDING,
+				    ORDER_APPROVED_STATUS_ASSIGNED_TO_DRIVER
                                 ];
                                 if($model->order_type == ORDER_TYPE_DELIVERY) {
                                     if(in_array($model->order_status, $status)) {
-                                        $assignDelivery = '<a href="javascript:" id="'.$model->order_key.'_assignOrder" orderKey="'.$model->order_key.'" class="assignOrder" title="Assign Order"><i class="fa fa-motorcycle"></i></a>';
+                                        $current_time = date('Y-m-d H:i:s');
+                                        if( isset( $model->first_cut_off_time ) && isset( $model->second_cut_off_time ) && ( strtotime( $current_time ) > strtotime( $model->first_cut_off_time ) ) && ( strtotime( $current_time ) <= strtotime( $model->second_cut_off_time ) ) )
+                                        {
+                                            $assignDelivery = '<a href="javascript:" id="'.$model->order_key.'_assignOrder" orderKey="'.$model->order_key.'" class="assignOrder" title="Assign Order"><i class="fa fa-motorcycle"></i></a>';
+                                        }
+                                        if( isset( $model->first_cut_off_time ) && isset( $model->second_cut_off_time ) && ( strtotime( $current_time ) > strtotime( $model->first_cut_off_time ) ) && ( strtotime( $current_time ) > strtotime( $model->second_cut_off_time ) ) )
+                                        {
+                                            $this->cancelOrder( $model->order_key, $model->user_id, $model->item_total, $model->payment_type );
+                                        }
                                     }
                                 }
+                                
                                 $status = [
                                     ORDER_APPROVED_STATUS_DRIVER_PICKED_UP,
                                     ORDER_ONTHEWAY,
@@ -116,6 +127,43 @@ class OrderController extends Controller
         }
         $model = new Order;
         return view('admin.order.index',compact('model'));
+    }
+    
+    /** Change order status to rejected and refund to customer if order second cut off time limit exceed **/
+    public function cancelOrder( $order_key, $user_id, $item_total, $payment_type )
+    {
+        if( ( $user_id > 0 ) && !empty( $order_key ) && ( $item_total > 0 ) )
+        {
+            // Refund to customer while cancel order if payment type is online / cpocket / online & cpocket
+            if($payment_type == PAYMENT_OPTION_ONLINE || $payment_type == PAYMENT_OPTION_WALLET || $payment_type == PAYMENT_OPTION_WALLET_AND_ONLINE){
+                $user = User::find($user_id);
+                if( $user )
+                {
+                    $user->wallet_amount = ( (double)$user->wallet_amount + $item_total);
+                    $user->save();
+                }
+            }
+
+            /** Change order status to rejected **/
+            $model = Order::findByKey($order_key);
+            if( $model ){
+                $model->order_status = ORDER_APPROVED_STATUS_REJECTED;
+                if($model->save()){           
+                    //$response = ['status' => AJAX_SUCCESS,'msg'=> __('admincrud.Order approved status updated successfully') ];
+                    $orderStatus = (new Order)->convertWebtoDeliveryboystatus(ORDER_APPROVED_STATUS_REJECTED);
+                    $url = config('webconfig.deliveryboy_url')."/api/v1/order/$order_key/$orderStatus?company_id=".config('webconfig.company_id')."&from_driver=0";
+                    $data = Curl::instance()->action("PUT")->setUrl($url)->send([]);
+                    if($data === false) {
+                        $response['msg'] = 'Server not started';
+                        return response()->json($response);
+                    }
+                    $response = json_decode($data,true);
+                    if($response['status'] != HTTP_SUCCESS) {
+                        return response()->json($response);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -228,7 +276,8 @@ class OrderController extends Controller
             }
             if($model->order_type === ORDER_TYPE_DELIVERY) {
                 if($request->order_status == ORDER_APPROVED_STATUS_APPROVED) { 
-                    goto deliveryBoyPlaceOrder;                        
+                    //goto deliveryBoyPlaceOrder; 
+                    goto changeStatus;
                 } else if($request->order_status == ORDER_APPROVED_STATUS_PENDING || $request->order_status == ORDER_APPROVED_STATUS_REJECTED || $request->order_status == ORDER_APPROVED_STATUS_DELIVERED)                    
                      goto changeStatus;                        
                 } else {

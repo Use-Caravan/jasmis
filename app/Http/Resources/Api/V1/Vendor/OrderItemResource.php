@@ -6,6 +6,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Common;
 use FileHelper;
 use App\Api\OrderItem;
+use App\Api\IngredientGroup;
+use App\Http\Resources\Api\V1\IngredientViewOrderResource;
 
 class OrderItemResource extends JsonResource
 {
@@ -25,10 +27,11 @@ class OrderItemResource extends JsonResource
             'item_quantity' => $this->item_quantity,
             'item_image_path' => FileHelper::loadImage($this->item_image_path),
             'item_description' => $this->item_description,
-            //'ingredients' => ($this->ingredients === null) ? '' : $this->ingredients,
             'ingredients' => $this->when(
-                $this->order_id, function(){
-                    $orderItems = OrderItem::getOrderItems($this->order_id);                    
+                $this->order_item_id, function(){
+                    //$orderItems = OrderItem::getOrderItems($this->order_id); 
+		    $orderItems = OrderItem::getOrderItemsByItemId($this->order_item_id);
+		    //print_r($orderItems);exit;                   
                     return IngredientResource::collection($orderItems);
                 }
             ),
