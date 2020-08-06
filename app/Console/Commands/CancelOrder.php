@@ -97,7 +97,7 @@ class CancelOrder extends Command
                                             $this->info('Error in cancel order');
                                         } 
                                         else        
-                                            $this->info('Order cancelled successfully');
+                                            $this->info($response['status'].'Order cancelled successfully');
                                     }
                                 }
                                 else

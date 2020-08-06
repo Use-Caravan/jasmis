@@ -83,10 +83,10 @@ class OrderController extends Controller
                                         {
                                             $assignDelivery = '<a href="javascript:" id="'.$model->order_key.'_assignOrder" orderKey="'.$model->order_key.'" class="assignOrder" title="Assign Order"><i class="fa fa-motorcycle"></i></a>';
                                         }
-                                        if( isset( $model->first_cut_off_time ) && isset( $model->second_cut_off_time ) && ( strtotime( $current_time ) > strtotime( $model->first_cut_off_time ) ) && ( strtotime( $current_time ) > strtotime( $model->second_cut_off_time ) ) )
+                                        /*if( isset( $model->first_cut_off_time ) && isset( $model->second_cut_off_time ) && ( strtotime( $current_time ) > strtotime( $model->first_cut_off_time ) ) && ( strtotime( $current_time ) > strtotime( $model->second_cut_off_time ) ) )
                                         {
                                             $this->cancelOrder( $model->order_key, $model->user_id, $model->item_total, $model->payment_type );
-                                        }
+                                        }*/
                                     }
                                 }
                                 
