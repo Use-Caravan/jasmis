@@ -28,11 +28,16 @@ class OrderItemResource extends JsonResource
             'item_image_path' => FileHelper::loadImage($this->item_image_path),
             'item_description' => $this->item_description,
             'ingredients' => $this->when(
-                $this->order_item_id, function(){
+                /*$this->order_item_id, function(){
                     //$orderItems = OrderItem::getOrderItems($this->order_id); 
 		    $orderItems = OrderItem::getOrderItemsByItemId($this->order_item_id);
 		    //print_r($orderItems);exit;                   
                     return IngredientResource::collection($orderItems);
+                }*/
+                $this->order_item_id, function(){
+                    //$orderItems = OrderItem::getOrderItems($this->order_id); 
+		    $orderItems = OrderItem::getOrderItemsByItemId($this->order_item_id);
+		    return IngredientResource::collection($orderItems);			
                 }
             ),
         ];
