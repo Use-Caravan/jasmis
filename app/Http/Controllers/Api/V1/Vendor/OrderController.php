@@ -121,7 +121,8 @@ class OrderController extends Controller
             array_push($availableChangeStatus, ORDER_APPROVED_STATUS_DELIVERED);
         }
 
-        if($order->order_type == ORDER_TYPE_DELIVERY && ( request()->order_status == ORDER_APPROVED_STATUS_PREPARING || request()->order_status == ORDER_APPROVED_STATUS_APPROVED ) ) {
+        //if($order->order_type == ORDER_TYPE_DELIVERY && ( request()->order_status == ORDER_APPROVED_STATUS_PREPARING || request()->order_status == ORDER_APPROVED_STATUS_APPROVED ) ) {
+        if($order->order_type == ORDER_TYPE_DELIVERY && ( request()->order_status == ORDER_APPROVED_STATUS_APPROVED ) ) {
             if($order->order_status !== ORDER_APPROVED_STATUS_DRIVER_ACCEPTED) {
                 return $this->commonError(__("apimsg.Order not accepted by the driver"));
             }            

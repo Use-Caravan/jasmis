@@ -407,6 +407,10 @@ class Order extends CModel
                 $statusList[ORDER_APPROVED_STATUS_APPROVED]  =  self::approvedStatus(ORDER_APPROVED_STATUS_APPROVED);
                 $statusList[ORDER_APPROVED_STATUS_REJECTED] = self::approvedStatus(ORDER_APPROVED_STATUS_REJECTED);
                 break;
+            case ORDER_APPROVED_STATUS_ASSIGNED_TO_DRIVER:
+                $statusList[ORDER_APPROVED_STATUS_APPROVED]  =  self::approvedStatus(ORDER_APPROVED_STATUS_APPROVED);
+                $statusList[ORDER_APPROVED_STATUS_REJECTED] = self::approvedStatus(ORDER_APPROVED_STATUS_REJECTED);
+                break;
             case ORDER_APPROVED_STATUS_APPROVED:
                 $statusList[ORDER_APPROVED_STATUS_PREPARING]  =  self::approvedStatus(ORDER_APPROVED_STATUS_PREPARING);
                 break;

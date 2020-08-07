@@ -68,7 +68,7 @@ class Order extends CommonOrder
                 ORDER_APPROVED_STATUS_PENDING,
                 ORDER_DRIVER_REQUESTED,
                 ORDER_APPROVED_STATUS_DRIVER_ACCEPTED,
-                ORDER_APPROVED_STATUS_ASSIGNED_TO_DRIVER
+                ORDER_DRIVER_REJECTED
             ]);                
     }
 
@@ -84,6 +84,7 @@ class Order extends CommonOrder
             ]);*/
         /** For new order flow changes no need to show driver accepted orders in vendor accepted orders list **/
         return $orders->whereIn(Order::tableName().".order_status",[
+                ORDER_APPROVED_STATUS_ASSIGNED_TO_DRIVER,
                 ORDER_APPROVED_STATUS_APPROVED,
                 ORDER_APPROVED_STATUS_PREPARING,
                 ORDER_APPROVED_STATUS_READY_FOR_PICKUP,
