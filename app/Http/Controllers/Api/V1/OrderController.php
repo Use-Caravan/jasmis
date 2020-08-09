@@ -2286,17 +2286,40 @@ class OrderController extends Controller
 
             $address = ''; //$userAddress->address_line_one.($userAddress->address_line_two === null)? "" : ", ".$userAddress->address_line_two.($userAddress->landmark ===  null) ? '' : ",".$userAddress->landmark
             if($userAddress->address_line_one !== null) {
-                $address.= $userAddress->address_line_one;
+                $address.= $userAddress->address_line_one.", ";
             }
             if($userAddress->address_line_two !== null) {
-                $address.= ", ".$userAddress->address_line_two;
+                $address.= $userAddress->address_line_two.", ";
             }
             if($userAddress->landmark !== null) {
-                $address.= ", ".$userAddress->landmark;
+                $address.= $userAddress->landmark.", ";
             }
             if($userAddress->company !== null) {
-                $address.= ", ".$userAddress->company;
+                $address.= $userAddress->company.", ";
             }
+            if($userAddress->flat_no !== null) {
+                $address.= "Flat No : ".$userAddress->flat_no.", ";
+            }
+            if($userAddress->apartment !== null) {
+                $address.= "Apartment : ".$userAddress->apartment.", ";
+            }
+            if($userAddress->building !== null) {
+                $address.= "Building : ".$userAddress->building.", ";
+            }
+            if($userAddress->street !== null) {
+                $address.= "Street Name: ".$userAddress->street.", ";
+            }
+            if($userAddress->floor !== null) {
+                $address.= "Floor : ".$userAddress->floor.", ";
+            }
+            if($userAddress->block !== null) {
+                $address.= "Block : ".$userAddress->block.", ";
+            }
+            if($userAddress->area !== null) {
+                $address.= "Area : ".$userAddress->area;
+            }
+
+
             $itemDetails = [
                 'lang' => $key,
                 'details' => [
