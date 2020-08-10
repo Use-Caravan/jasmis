@@ -121,7 +121,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(),[
             'device_type'  => 'required|numeric|in:'.DEVICE_TYPE_ANDROID.','.DEVICE_TYPE_IOS.','.DEVICE_TYPE_WINDOWS,
             'device_token' => 'required_unless:device_type,'.DEVICE_TYPE_WEB,
-            'login_type'  => 'required|numeric|in:'.LOGIN_TYPE_GP.','.LOGIN_TYPE_FB.','.LOGIN_TYPE_APP,
+            'login_type'  => 'required|numeric|in:'.LOGIN_TYPE_GP.','.LOGIN_TYPE_FB,
             'social_token' => 'required_unless:login_type,'.LOGIN_TYPE_APP,
             'first_name' => 'nullable',
             'last_name' => 'nullable',
