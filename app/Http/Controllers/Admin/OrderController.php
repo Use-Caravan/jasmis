@@ -74,7 +74,7 @@ class OrderController extends Controller
                                     ORDER_DRIVER_REJECTED,
                                     //ORDER_APPROVED_STATUS_APPROVED,
                                     ORDER_APPROVED_STATUS_PENDING,
-				    ORDER_APPROVED_STATUS_ASSIGNED_TO_DRIVER
+				                    ORDER_APPROVED_STATUS_ASSIGNED_TO_DRIVER
                                 ];
                                 if($model->order_type == ORDER_TYPE_DELIVERY) {
                                     if(in_array($model->order_status, $status)) {
@@ -333,7 +333,7 @@ class OrderController extends Controller
             return response()->json($response);
 
             changeStatus:
-            if($request->order_status == ORDER_APPROVED_STATUS_DELIVERED) {
+            if($request->order_status == ORDER_APPROVED_STATUS_DELIVERED) {                
                 Order::addLoyaltyPoints($model);
             }
             // refund to customer 
@@ -346,6 +346,8 @@ class OrderController extends Controller
             }
             $model = Order::findByKey($order_key);
             $model->order_status = $request->order_status;
+            if($request->order_status == ORDER_APPROVED_STATUS_DELIVERED)
+                $model->payment_status = ORDER_PAYMENT_STATUS_SUCCESS;
             if($model->save()){
                
                 $response = ['status' => AJAX_SUCCESS,'msg'=> __('admincrud.Order approved status updated successfully') ];

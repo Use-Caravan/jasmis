@@ -2527,6 +2527,7 @@ class OrderController extends Controller
             break; 
             case NODE_ORDER_DELIVERED:
                 $orderModel->order_status = ORDER_APPROVED_STATUS_DELIVERED;
+                $orderModel->payment_status = ORDER_PAYMENT_STATUS_SUCCESS;
                 Order::addLoyaltyPoints($orderModel);
                 /* $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'Order Status'], ['en' => "Your order #".config('webconfig.app_inv_prefix').$orderStatus->order_number." has been delivered."], [$vendorDetails->device_token], []); */
                 $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$orderModel->order_number." has been delivered successful."], [$userDetails->device_token], []);
