@@ -399,10 +399,11 @@
     const DEVICE_TYPE_WINDOWS = 4;
 
     /** Login Types */
-    const LOGIN_TYPE_APP = 1;
-    const LOGIN_TYPE_GP = 4;
-    const LOGIN_TYPE_FB = 2;
-
+    const LOGIN_TYPE_APP   = 1;
+    const LOGIN_TYPE_APPLE = 2;
+    const LOGIN_TYPE_FB    = 3;
+    const LOGIN_TYPE_GP    = 4;   
+    
     /** OTP Verification status */
     const OTP_VERIFIED = 1;
     const OTP_UNVERIFIED = 2;
