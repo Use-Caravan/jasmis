@@ -775,7 +775,7 @@ class OrderController extends Controller
                 $response_assign = json_decode($data,true);
                 //print_r($response_assign);
 
-                if( isset( $response_assign['status'] ) && $response_assign['status'] === HTTP_SUCCESS)
+                if( isset( $response_a0sign['status'] ) && $response_assign['status'] === HTTP_SUCCESS)
                     $assign_driver_count++;          
             }//echo "assign_driver_count = ".$assign_driver_count;
 
@@ -2319,7 +2319,6 @@ class OrderController extends Controller
                 $address.= "Area : ".$userAddress->area;
             }
 
-
             $itemDetails = [
                 'lang' => $key,
                 'details' => [
@@ -2546,6 +2545,7 @@ class OrderController extends Controller
             break;
             case NODE_ORDER_DRIVER_DELIVERED:
                 $orderModel->order_status = ORDER_APPROVED_STATUS_DELIVERED;
+                $orderModel->payment_status = ORDER_PAYMENT_STATUS_SUCCESS;
                 Order::addLoyaltyPoints($orderModel);
                 /* $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'Order Status'], ['en' => "Your order #".config('webconfig.app_inv_prefix').$orderStatus->order_number." has been delivered."], [$vendorDetails->device_token], []); */
                 $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$orderModel->order_number." has been delivered successful."], [$userDetails->device_token], []);
