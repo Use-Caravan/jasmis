@@ -130,6 +130,8 @@ class OrderController extends Controller
      */
     public function placeOrderCredimax()
     {      
+        /*$orderKey = "5bgxd498Coe65OzW";
+        $deliveryboyResult = $this->saveOrderOnDeliveryBoy($orderKey);exit;*/
         /*$grand_total = 0.010;
         $customer_id = 5;
         $order_id = 10;
@@ -775,7 +777,7 @@ class OrderController extends Controller
                 $response_assign = json_decode($data,true);
                 //print_r($response_assign);
 
-                if( isset( $response_a0sign['status'] ) && $response_assign['status'] === HTTP_SUCCESS)
+                if( isset( $response_assign['status'] ) && $response_assign['status'] === HTTP_SUCCESS)
                     $assign_driver_count++;          
             }//echo "assign_driver_count = ".$assign_driver_count;
 
@@ -2276,9 +2278,13 @@ class OrderController extends Controller
                 'latitude' => $vendor->vendor_latitude,
                 'longitude' => $vendor->vendor_longitude
             ], */
-            'vendor_location' => [                
+            /*'vendor_location' => [                
                 'latitude' => $vendor->vendor_latitude,
                 'longitude' => $vendor->vendor_longitude                
+            ],*/
+            'vendor_location' => [                
+                'latitude' => $vendor->branch_latitude,
+                'longitude' => $vendor->branch_longitude                
             ],
         ];
         $languages = Common::getLanguages();
