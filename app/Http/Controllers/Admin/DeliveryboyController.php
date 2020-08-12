@@ -110,7 +110,7 @@ class DeliveryboyController extends Controller
             return redirect()->route('deliveryboy.index')->with('success', $response['message'] );
         } else {            
             //return redirect()->route('deliveryboy.create')->with('error', $response['message'])->withInput();
-            return redirect()->route('deliveryboy.index')->with('success', $response['message'] );
+            return redirect()->route('deliveryboy.index')->with('success', 'Driver details added successfully' );
         }
     }
 

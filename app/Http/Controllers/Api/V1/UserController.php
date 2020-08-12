@@ -45,7 +45,8 @@ class UserController extends Controller
             $userKey = request()->user()->user_key;
             $userId = request()->user()->user_id;            
             $validator = Validator::make(request()->all(),[
-                'phone_number' => "required|numeric|digits_between:8,15|unique:$userTable,phone_number,$userKey,user_key",
+                'phone_number' => "required|numeric|digits_between:8,15|unique:$userTable,phone_number,$userKey,user_key,deleted_at,NULL",
+                //'phone_number' => "required|numeric|digits_between:8,15|unique:$userTable,phone_number,$userKey,user_key",
                 'email' => "required|email",
                 'gender' => 'required|numeric|digits_between:1,2',
                 'dob' => 'required',
