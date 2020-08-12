@@ -65,11 +65,11 @@ class Order extends CommonOrder
         //return $orders->where(Order::tableName().".order_status",ORDER_APPROVED_STATUS_PENDING);  
         /** For new order flow changes we have to show pending, driver requested, driver accepted orders also in vendor incoming orders list **/    
         return $orders->whereIn(Order::tableName().".order_status",[
-                ORDER_APPROVED_STATUS_PENDING,
-                ORDER_DRIVER_REQUESTED,
+                //ORDER_APPROVED_STATUS_PENDING,
+                //ORDER_DRIVER_REQUESTED,
                 ORDER_APPROVED_STATUS_DRIVER_ACCEPTED,
-                ORDER_APPROVED_STATUS_ASSIGNED_TO_DRIVER,
-                ORDER_DRIVER_REJECTED
+                //ORDER_APPROVED_STATUS_ASSIGNED_TO_DRIVER,
+                //ORDER_DRIVER_REJECTED
             ]);                
     }
 

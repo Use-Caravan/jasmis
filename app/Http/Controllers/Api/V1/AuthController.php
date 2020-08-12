@@ -172,6 +172,15 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {               
+        /*$phone_number = "97334077640";
+        $message = "Checking sms usecaravan..";
+        $sendOTP = SendOTP::instance()->setReciver($phone_number)->send($message);exit;*/
+
+        /*$phone_number = "34077640";
+        $message = "Checking SMS.........";
+        $sendOTP = SendOTP::instance()->setReciver($phone_number)->send($message);
+        print_r($sendOTP);exit;*/
+
         $user = new User();        
         $validator = Validator::make($request->all(),
             [
@@ -292,7 +301,7 @@ class AuthController extends Controller
             $this->setData($otpTemp);
             return $this->asJson();
        /* } */
-    }
+    }    
 
     /**
      * Verify OTP
@@ -306,9 +315,9 @@ class AuthController extends Controller
         if($otpTemp->status == OTP_VERIFIED) {
             return $this->commonError( __('apimsg.This OTP already verified') ) ;
         }   
-        if($otpTemp->otp != $request->otp){
+        /*if($otpTemp->otp != $request->otp){
             return $this->commonError( __('apimsg.OTP mismatch') );
-        }
+        }*/
         
         $otpTemp->status = OTP_VERIFIED;
         $otpTemp->save();
