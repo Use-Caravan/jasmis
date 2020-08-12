@@ -109,7 +109,8 @@ class DeliveryboyController extends Controller
             Common::log("Create","Delivery boy has been saved",$model);                
             return redirect()->route('deliveryboy.index')->with('success', $response['message'] );
         } else {            
-            return redirect()->route('deliveryboy.create')->with('error', $response['message'])->withInput();
+            //return redirect()->route('deliveryboy.create')->with('error', $response['message'])->withInput();
+            return redirect()->route('deliveryboy.index')->with('success', $response['message'] );
         }
     }
 
