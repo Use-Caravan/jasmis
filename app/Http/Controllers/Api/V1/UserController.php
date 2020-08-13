@@ -48,14 +48,22 @@ class UserController extends Controller
                 'phone_number' => "required|numeric|digits_between:8,15|unique:$userTable,phone_number,$userKey,user_key,deleted_at,NULL",
                 //'phone_number' => "required|numeric|digits_between:8,15|unique:$userTable,phone_number,$userKey,user_key",
                 'email' => "required|email",
-                'gender' => 'required|numeric|digits_between:1,2',
-                'dob' => 'required',
+                //'gender' => 'required|numeric|digits_between:1,2',
+                //'dob' => 'required',
+                'gender' => 'numeric|digits_between:1,2',
             ]);
             if($validator->fails()) {
                 return $this->validateError($validator->errors());
             }
             $user = $user->find($userId);
-            $user = $user->fill(request()->except('current_password','new_password','confirm_password'));
+            //print_r(request()->except('current_password','new_password','confirm_password'));exit;
+            if( !empty(request()->dob) ) {
+                $user = $user->fill(request()->except('current_password','new_password','confirm_password'));
+                $user->dob = date('Y-m-d', strtotime(request()->dob));
+            }
+            else
+                $user = $user->fill(request()->except('current_password','new_password','confirm_password','dob'));
+            //print_r($user);exit;
             $user->save();
             $this->setMessage(__("apimsg.User details are updated"));
             $this->setData(new UserResource($user));
@@ -72,9 +80,10 @@ class UserController extends Controller
             $validator = Validator::make(request()->all(),[
                 'phone_number' => "required|numeric|digits_between:8,15",
                 'email' => "required|email",
-                'gender' => 'required|numeric|digits_between:1,2',
+                //'gender' => 'required|numeric|digits_between:1,2',
+                'gender' => 'numeric|digits_between:1,2',
                 'profile_picture' => 'nullable|image|mimes:jpeg,jpg,png|max:500',
-                'dob' => 'required',
+                //'dob' => 'required',
             ]);
             if($validator->fails()) {
                 return $this->validateError($validator->errors());
@@ -83,11 +92,18 @@ class UserController extends Controller
             if($user->profile_image !== null && request()->hasFile('profile_image')) {
                 FileHelper::deleteFile($user->profile_image,USER_PROFILE_IMAGE);                
             }
-            $user = $user->fill(request()->except('current_password','new_password','confirm_password'));
+            //$user = $user->fill(request()->except('current_password','new_password','confirm_password'));
+            if( !empty(request()->dob) ) {
+                $user = $user->fill(request()->except('current_password','new_password','confirm_password'));
+                $user->dob = date('Y-m-d', strtotime(request()->dob));
+            }
+            else
+                $user = $user->fill(request()->except('current_password','new_password','confirm_password','dob'));
+            
             if(request()->hasFile('profile_image')) {
                 $user->profile_image = FileHelper::uploadFile(request()->profile_image,USER_PROFILE_IMAGE);                
-            }            
-            $user->dob = date('Y-m-d', strtotime(request()->dob));
+            }           
+
             $user->save();
             $this->setMessage(__("apimsg.User details are updated"));
             $this->setData(new UserResource($user));
