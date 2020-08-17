@@ -40,10 +40,19 @@ class SendOTP
         $message = urlencode($this->message);
         $parameter = "user=$username&pass=$password&from=$from&to=$to&text=$message";
         // $url = "https://esms.etisalcom.net:9443/smsportal/services/SpHttp/sendsms?".$parameter;
-        $url ='http://smshorizon.co.in/api/sendsms.php?user=Jigno&apikey=Rpiptu4k1O3LDs8EHwST&mobile='.$to.'&message='.$message.'&senderid=iJIGNO&type=txt';
+        //$url ='http://smshorizon.co.in/api/sendsms.php?user=Jigno&apikey=Rpiptu4k1O3LDs8EHwST&mobile='.$to.'&message='.$message.'&senderid=iJIGNO&type=txt';
+        $url = "https://esms.etisalcom.net:9443/smsportal/services/SpHttp/sendsms?".$parameter;
+        //echo $url;exit;
+        /*$url = "https://esms.etisalcom.net:9443/smsportal/services/SpHttp/sendsms?user=jasmis&pass=J@sm1s123&from=CARAVAN&to=33539186&text=API+test+message+for+Jasmis&at=2018-10-22T13:00:00&url=http%3A%2F%2Fwww.example.com%2Fyourpage%3Fsender%3D%25from%26receiver%3D%25to%26dlrtime%3D%25time%26status%3D%25status&fid=A2018";*/
 
-        $data = Curl::instance()->setUrl($url)->send([],true);
-        if($data === HTTP_SUCCESS ){
+        //$data = Curl::instance()->setUrl($url)->send([],true);
+        $data = Curl::instance()->callAPI('GET', $url, false);
+        /*$response = json_decode($get_data, true);
+        $errors = $response['response']['errors'];
+        $data = $response['response']['data'][0];*/
+        //echo $data;exit;
+        //if($data === HTTP_SUCCESS ){
+        if( $data ){
             return true;
         }
         return false;
