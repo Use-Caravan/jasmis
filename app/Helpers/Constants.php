@@ -136,7 +136,7 @@
     const APP_CATEGORY_PATH = 'gallery/category';
 
     /** Payment Options */
-    const PAYMENT_OPTION_ONLINE = 1;
+    const PAYMENT_OPTION_ONLINE = 1;//Credimax with credit card
     const PAYMENT_OPTION_COD = 2;
     const PAYMENT_OPTION_WALLET = 3;
     const PAYMENT_OPTION_ALL = 4;
@@ -146,6 +146,9 @@
     const CORPORATE_BOOKING_PAYMENT_CREDIT = 6;
     const CORPORATE_BOOKING_PAYMENT_LPO = 7;
     const PAYMENT_OPTION_WALLET_AND_ONLINE = 8;
+
+    const PAYMENT_OPTION_CREDIT = 9;
+    const PAYMENT_OPTION_NET_BANKING = 10;
 
     /**
      * Vendor Commission type 

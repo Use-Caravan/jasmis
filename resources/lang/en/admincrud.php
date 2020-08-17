@@ -206,6 +206,8 @@ return [
     'CWallet' => 'C Pocket',
     'CWalletandonline' => 'C Pocket & Online',
     'Both' => 'Both',
+    'Debit Card' => 'Debit Card',
+    'Credit Card' => 'Credit Card',
     'Veg' => 'Veg',
     'Non Veg' => 'Non Veg',
     'Pickup' => 'Pickup',    

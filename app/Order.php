@@ -491,7 +491,9 @@ class Order extends CModel
     public function paymentTypes($paymentType = null)
     {   
         $options = [
-            PAYMENT_OPTION_ONLINE   => __('admincrud.Online'),
+            //PAYMENT_OPTION_ONLINE   => __('admincrud.Online'),
+            PAYMENT_OPTION_ONLINE   => __('admincrud.Debit Card'),
+            PAYMENT_OPTION_CREDIT => __('admincrud.Credit Card'),
             PAYMENT_OPTION_COD      => __('admincrud.COD'),
             PAYMENT_OPTION_WALLET     => __('admincrud.CWallet'),
             PAYMENT_OPTION_WALLET_AND_ONLINE     => __('admincrud.CWalletandonline'),

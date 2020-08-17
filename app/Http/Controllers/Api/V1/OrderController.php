@@ -130,18 +130,6 @@ class OrderController extends Controller
      */
     public function placeOrderCredimax()
     {      
-        /*$orderKey = "5bgxd498Coe65OzW";
-        $deliveryboyResult = $this->saveOrderOnDeliveryBoy($orderKey);exit;*/
-        /*$grand_total = 0.010;
-        $customer_id = 5;
-        $order_id = 10;
-        $response = CredimaxPaymentGateway::instance()
-                    ->setAmount($grand_total)
-                    ->setCustomerId($customer_id)
-                    ->setOrderId($order_id);
-        $response = $response->makePayment();
-        print_r($response);exit;*/
-
         $rules = [
             'branch_key'    => 'required|exists:branch,branch_key',
             'user_address_key'    => 'nullable|required_if:order_type,1|exists:user_address,user_address_key',
@@ -150,8 +138,11 @@ class OrderController extends Controller
             'payment_option'    => 'nullable|numeric',
             'delivery_date' => 'nullable|required_if:asap,0',
             'delivery_time' => 'nullable|required_if:asap,0',
-            'asap'    => 'nullable|numeric',                        
-        ];                       
+            'asap'    => 'nullable|numeric',          
+            //'temp_order_id' => 'required_if:payment_option,1|required_if:payment_option,9',
+            //'payment_status' => 'required_if:payment_option,1|required_if:payment_option,9',              
+        ];           
+
         //print_r($rules);exit;
         $validator = Validator::make(request()->all(),$rules);   
         //print_r($validator);exit;     
@@ -159,6 +150,9 @@ class OrderController extends Controller
             return $this->validateError($validator->errors());            
         }   
         //print_r($rules);exit;
+
+        //if( (request()->payment_option == 1) || (request()->payment_option == 9) || (request()->payment_option == 1) )            
+        
         $this->cartDetails = Cart::where(['user_id' => request()->user()->user_id])->first();
         //print_r($this->cartDetails);exit;
         $responseData = $this->checkoutQuotation(true);
@@ -1441,6 +1435,48 @@ class OrderController extends Controller
         if($responseData['status'] === false && $responseData['type'] === HTTP_UNPROCESSABLE) {
             return $this->prepareResponse();
         }
+
+        $temp_order_id = "";
+        $amount_to_pay = 0;
+        $online_payment = 0;
+        /** Create temporary order id and send in response to process payment in mobile app **/
+        if( request()->payment_option && ( ( request()->payment_option == PAYMENT_OPTION_ONLINE ) || ( request()->payment_option == PAYMENT_OPTION_CREDIT ) || ( request()->payment_option == PAYMENT_OPTION_WALLET ) ) )
+        {
+            $online_payment = 1;
+            $responseDataPayment = $this->checkoutQuotation(true);
+            $paymentDetails = $responseDataPayment['data'];
+                
+            if( request()->payment_option == PAYMENT_OPTION_WALLET )
+            {
+                $user = User::find(request()->user()->user_id);
+                
+                if($user->wallet_amount < $paymentDetails['total']['cprice'])
+                    $amount_to_pay = $paymentDetails['total']['cprice'] - $user->wallet_amount;                    
+                else
+                {
+                    $temp_order_id = "";
+                    $amount_to_pay = 0;
+                    $online_payment = 0;
+                }
+            }
+
+            if( $online_payment == 1 )
+            {
+                $paymentGateway = new PaymentGateway();                    
+                $paymentGateway->save();                    
+                $payment_gateway_id = $paymentGateway->getKey();
+                $temp_order_id = $payment_gateway_id;
+
+                $amount_to_pay = $paymentDetails['total']['cprice'];                
+            }                                
+        }
+
+        if( $amount_to_pay > 0 )
+            $amount_to_pay = number_format((float)$amount_to_pay, 3, '.', '');
+                    
+        $responseData['data']['temp_order_id'] = $temp_order_id;
+        $responseData['data']['amount_to_pay'] = $amount_to_pay;
+
         $this->setMessage(__("apimsg.Cart details are processed") );
         
         return $this->asJson($responseData['data']);
@@ -1472,6 +1508,7 @@ class OrderController extends Controller
                 'delivery_time' => date('H:i:s'),
             ]);
         }
+        //echo request()->delivery_time;exit;
         if(request()->delivery_date !== null && request()->delivery_time !== null) {
 
             /** Check the Order Time is available or not */
