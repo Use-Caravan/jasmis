@@ -315,9 +315,9 @@ class AuthController extends Controller
         if($otpTemp->status == OTP_VERIFIED) {
             return $this->commonError( __('apimsg.This OTP already verified') ) ;
         }   
-        /*if($otpTemp->otp != $request->otp){
+        if($otpTemp->otp != $request->otp){
             return $this->commonError( __('apimsg.OTP mismatch') );
-        }*/
+        }
         
         $otpTemp->status = OTP_VERIFIED;
         $otpTemp->save();
