@@ -105,8 +105,8 @@ class CredimaxPaymentGateway
             "grand_total" => $this->amount,
             "currency_code" => "BD",
             "payment_type" => 2,
-            "success_redirect_url" => url('/').config('webconfig.credimax_payment_gateway_success_url')."?is_web=$this->is_web&order_id=$this->orderId",
-            "failed_redirect_url" => url('/').config('webconfig.credimax_payment_gateway_failure_url')."?is_web=$this->is_web&order_id=$this->orderId",
+            "success_redirect_url" => url('/').config('webconfig.credimax_payment_gateway_success_url_debit')."?is_web=$this->is_web&order_id=$this->orderId",
+            "failed_redirect_url" => url('/').config('webconfig.credimax_payment_gateway_failure_url_debit')."?is_web=$this->is_web&order_id=$this->orderId",
         ];
         $data = json_encode($data);    
         $url = config('webconfig.credimaxpay_benefit_checkout_url');        

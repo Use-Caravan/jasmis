@@ -152,5 +152,7 @@ return [
     "credimax_payment_gateway_failure_url" => "/api/v1/payment-gateway/credimax-failure",
     "credimax_payment_gateway_wallet_success_url" => "/api/v1/payment-gateway/credimax-wallet-success",
     "credimax_payment_gateway_wallet_failure_url" => "/api/v1/payment-gateway/credimax-wallet-failure",
+    "credimax_payment_gateway_success_url_debit" => "/api/v1/payment-gateway/credimax-success-debit",
+    "credimax_payment_gateway_failure_url_debit" => "/api/v1/payment-gateway/credimax-failure-debit",
 ];
 
