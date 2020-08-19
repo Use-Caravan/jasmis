@@ -146,6 +146,7 @@ return [
     
     
     "credimaxpay_benefit_checkout_url" => "https://api.credimaxpay.com/api/benefit_checkout",
+    "credimaxpay_credit_card_checkout_url" => "https://api.credimaxpay.com/api/v2/checkout",
     "credimaxpay_company_code" => "iRSn0PAEcsKwHpKCICx8vjLEsBAk0SltAXWx4b83eXdZVZ9OXSb0OOB1SOO9NWh8",
     "credimaxpay_payment_details_url" => "https://api.credimaxpay.com/api/orderPaymentDetails",
     "credimax_payment_gateway_success_url" => "/api/v1/payment-gateway/credimax-success",

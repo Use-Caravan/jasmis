@@ -22,7 +22,8 @@ class OTPResource extends JsonResource
         //return parent::toArray($request);
         return [
             //'branch_id' => $this->branch_id,
-            'otp_temp_key' => $this->otp_temp_key,            
+            'otp_temp_key' => $this->otp_temp_key, 
+            'user_id' => $this->user_id,           
             'user_key' => User::find($this->user_id)->user_key,
             'otp' => $this->otp,            
         ];

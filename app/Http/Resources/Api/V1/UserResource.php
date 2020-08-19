@@ -29,6 +29,7 @@ class UserResource extends JsonResource
         //return parent::toArray($request);
         return [
             //'branch_id' => $this->branch_id,
+            'user_id' => $this->user_id,
             'user_key' => $this->user_key,            
             'first_name' => ($this->first_name === null) ? '' : $this->first_name,
             'last_name' => ($this->last_name === null) ? '' : $this->last_name,
