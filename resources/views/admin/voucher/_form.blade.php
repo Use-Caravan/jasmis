@@ -35,7 +35,7 @@
         </div>
         <div class="col-md-6"> 
             <div class="form-group {{ ($errors->has("value")) ? 'has-error' : '' }}">                    
-                {{ Form::label("value", __('admincrud.Value'), ['class' => 'required']) }}
+                {{ Form::label("value", __('admincrud.Value'), ['class' => 'required coupon_value']) }}
                 {{ Form::text("value", $model['value'], ['class' => 'form-control']) }} 
                 @if($errors->has("value"))
                     <span class="help-block error-help-block">{{ $errors->first("value") }}</span>
@@ -157,7 +157,13 @@
 
 <script> 
 $(document).ready(function(){
-    
+    var discount_type = $("input[name='discount_type']:checked").val();
+    if (discount_type == '1') {
+        $('.coupon_value').text('Value ( Enter as Percentage )');
+    }
+    else if (discount_type == '2') {
+        $('.coupon_value').text('Value ( Enter as Amount )');
+    }
     
     $('#expiry_date_picker').datetimepicker({    
          "minDate" : new Date(), 
@@ -208,6 +214,15 @@ $(document).ready(function(){
         else{
             $('#promo_for_particular_user').addClass('hide');            
         }        
+    });
+
+    $('input[type=radio][name=discount_type]').change(function() {
+        if (this.value == '1') {
+            $('.coupon_value').text('Value ( Enter as Percentage )');
+        }
+        else if (this.value == '2') {
+            $('.coupon_value').text('Value ( Enter as Amount )');
+        }
     });
 }); 
 </script>

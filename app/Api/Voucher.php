@@ -24,6 +24,7 @@ class Voucher extends CommonVoucher
                 Voucher::tableName().".value",
                 Voucher::tableName().".min_order_value",
                 Voucher::tableName().".expiry_date",
+                Voucher::tableName().".app_type",
                 VoucherBeneficiary::tableName().".beneficiary_id",
                 Branch::tableName().".branch_key",
                 Branch::tableName().".branch_slug",

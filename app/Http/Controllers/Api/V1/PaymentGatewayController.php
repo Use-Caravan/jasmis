@@ -330,7 +330,11 @@ class PaymentGatewayController extends Controller
                             'status' => TRANSACTION_STATUS_SUCCESS
                         ];
 
-                        $transaction = new Transaction();
+                        //$transaction = new Transaction();
+                        $transaction = Transaction::where('payment_gateway_id', $payment_gateway_id)->first();
+                        if($transaction === null)
+                            $transaction = new Transaction();
+                        
                         $transaction = $transaction->fill($transactionData);
                         $transaction->save();
                         $transactionID = $transaction->getKey();
@@ -755,6 +759,103 @@ class PaymentGatewayController extends Controller
         } else {
             return $this->commonError(__("apimsg.Payment process is not working currently"));
         }
+    }
+
+    /** Success redirect url from credimax for add wallet **/
+    public function credimaxWalletRedirect(Request $request) 
+    {   
+        $orderID = isset( $request->order_id ) ? $request->order_id : "";
+        if( !empty( $orderID ) )
+        {
+            $payment_gateway_id = $orderID;
+            $user_id = $paidAmount = $transaction_number = "";
+            $transaction_type = TRANSACTION_TYPE_DEBIT;
+            $transaction_status = TRANSACTION_STATUS_FAILED;
+            $payment_gateway_status = ORDER_PAYMENT_STATUS_FAILURE;
+            $payment_status = 0;
+
+            /** Get payment details by order id from credimax **/
+            $response = CredimaxPaymentGateway::instance()->setOrderId($orderID);
+            $response = $response->getPaymentDetails();
+            //print_r($response);exit;
+            if( $response["status"] == 1 && !empty( $response["paymnet_requests"] ) )
+            {
+                $response["paymnet_requests"] = $response["paymnet_requests"][0];
+                $user_id = ( $response["paymnet_requests"]["customer_id"] ) ? $response["paymnet_requests"]["customer_id"] : "";
+                $paidAmount = ( $response["paymnet_requests"]["amount"] ) ? $response["paymnet_requests"]["amount"] : ""; 
+                $transaction_number = ( $response["paymnet_requests"]["payment_response"]["tnx_id"] ) ? $response["paymnet_requests"]["payment_response"]["tnx_id"] : "";
+
+                $transaction_type = ( $response["paymnet_requests"]["payment_type"] ) ? $response["paymnet_requests"]["payment_type"] : TRANSACTION_TYPE_DEBIT;
+
+                if( $response["paymnet_requests"]["status"] == "SUCCESS" && $response["paymnet_requests"]["order_id"] == $orderID )
+                {
+                    $transaction_status = TRANSACTION_STATUS_SUCCESS;
+                    $payment_gateway_status = ORDER_PAYMENT_STATUS_SUCCESS;
+                    $payment_status = 1;
+                }        
+            }
+
+            $transactionData = [
+                'payment_gateway_id' => $payment_gateway_id,
+                //'user_id' => $user_id,
+                //'transaction_for' => TRANSACTION_FOR_ONLINE_BOOKING,
+                //'transaction_type' => $transaction_type,
+                //'amount' => $paidAmount,
+                'transaction_number' => $transaction_number,
+                'status' => $transaction_status
+            ];
+            //print_r($transactionData);exit;
+
+            $transaction = Transaction::where('payment_gateway_id', $payment_gateway_id)->first();
+            if($transaction === null)
+                $transaction = new Transaction();
+            else {
+                $transaction_type = $transaction->transaction_type;
+                $user_id = $transaction->user_id;
+                $paidAmount = $transaction->amount;
+            }            
+            
+            $transaction = $transaction->fill($transactionData);
+            $transaction->save();
+            $transactionID = $transaction->getKey();
+
+            $paymentGateway = PaymentGateway::find($payment_gateway_id);
+            $gateway_url = ($transaction_type == 2) ? config('webconfig.credimaxpay_benefit_checkout_url') : ( ($transaction_type == 1) ? config('webconfig.credimaxpay_credit_card_checkout_url') : "" );
+
+            $data = [
+                "customer_id" => $user_id,
+                "order_id" => $orderID,
+                "grand_total" => $paidAmount,
+                "currency_code" => "BD",
+                "payment_type" => $transaction_type
+            ];
+            $data = json_encode($data);
+
+            $paymentGateway->gateway_url = $gateway_url;
+            $paymentGateway->sent_data = $data;
+            $paymentGateway->response_received_data = json_encode($response);
+            $paymentGateway->status = $payment_gateway_status;
+            $paymentGateway->save(); 
+
+            if( $payment_status == 1 )
+            {
+                $user = User::find($user_id);
+                $user->wallet_amount = ( (double)$user->wallet_amount + $transaction->amount);
+                $user->save();                        
+                if($request->is_web == true || $request->is_web == 1) {
+                    return redirect()->route('frontend.wallet',['transaction_number' => $transactionNumber]);
+                } else {                            
+                    $this->setMessage(__("apimsg.Payment has been success."));
+                    return $this->asJson($response);
+                }                                    
+            } 
+            else {
+                return $this->commonError(__("apimsg.Payment Failed"));    
+            }
+        }
+        else {
+            return $this->commonError(__("apimsg.Transaction is not found"));    
+        }        
     }
 }
 

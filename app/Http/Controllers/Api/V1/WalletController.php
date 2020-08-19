@@ -29,6 +29,7 @@ class WalletController extends Controller
     {
         $validator = Validator::make(request()->all(),[
             'amount' => 'required|numeric',
+            //'transaction_type' => 'required|numeric',// 1 => Credit, 2 => Debit 
         ]);
         if($validator->fails()) {
             return $this->validateError($validator->errors());
@@ -65,29 +66,17 @@ class WalletController extends Controller
             $paymentGateway->save();                    
             $payment_gateway_id = $paymentGateway->getKey();
 
-            $response = CredimaxPaymentGateway::instance()
-                                ->setAmount(request()->amount)
-                                ->setCustomerId($userID)
-                                ->setOrderId($payment_gateway_id);
-            if(request()->is_web !== null) {
-                $response = $response->setRequestFrom(request()->is_web);
-            }
-            $response = $response->makeWalletPayment();
-            //print_r($response);exit;
-            if($response !== null) {
-                $payment_gateway = PaymentGateway::find($payment_gateway_id);
-                $payment_gateway->gateway_url = $response['PaymentURL']."PaymentID=".$response['PaymentID'];
-                $payment_gateway->received_data = json_encode($response);
-                $payment_gateway->save();  
-
+            /** If payment process handled in mobile app **/
+            if( isset( request()->transaction_type ) && request()->transaction_type > 0 )
+            {
                 $transactionData = [
                     'payment_gateway_id' => $payment_gateway_id,//$paymentGateway->getKey(),
                     'user_id' => Auth::user()->user_id,
                     'transaction_for' => TRANSACTION_FOR_ADD_TO_WALLET,
-                    'transaction_type' => TRANSACTION_TYPE_CREDIT,
+                    'transaction_type' => request()->transaction_type,
                     'amount' => request()->amount,
                     //'transaction_number' => $response['transaction-reference'],
-                    'transaction_number' => $response['PaymentID'],
+                    //'transaction_number' => $response['PaymentID'],
                     'status' => TRANSACTION_STATUS_PENDING
                 ];
                 $transaction = new Transaction();
@@ -96,15 +85,56 @@ class WalletController extends Controller
                 DB::commit();                    
                 //print_r($transactionData);exit;
                 $data = [
-                    'payment_url' => $response['PaymentURL']."PaymentID=".$response['PaymentID'],
-                    'transaction_reference' => $response['PaymentID']
+                    'temp_order_id' => $payment_gateway_id,
+                    'amount' => request()->amount
                 ];   //print_r($data);exit;                 
                 $this->setMessage( __("apimsg.Payment invoice is generated. Make payment by online") );
                 return $this->asJson($data);
+            }
+            else
+            {
+                $response = CredimaxPaymentGateway::instance()
+                                    ->setAmount(request()->amount)
+                                    ->setCustomerId($userID)
+                                    ->setOrderId($payment_gateway_id);
+                if(request()->is_web !== null) {
+                    $response = $response->setRequestFrom(request()->is_web);
+                }
+                $response = $response->makeWalletPayment();
+                //print_r($response);exit;
+                if($response !== null) {
+                    $payment_gateway = PaymentGateway::find($payment_gateway_id);
+                    $payment_gateway->gateway_url = $response['PaymentURL']."PaymentID=".$response['PaymentID'];
+                    $payment_gateway->received_data = json_encode($response);
+                    $payment_gateway->save();  
 
-                /* $user = User::find($userID);
-                $user->wallet_amount = ( (double)$user->wallet_amount + request()->amount);
-                $user->save(); */
+                    $transactionData = [
+                        'payment_gateway_id' => $payment_gateway_id,//$paymentGateway->getKey(),
+                        'user_id' => Auth::user()->user_id,
+                        'transaction_for' => TRANSACTION_FOR_ADD_TO_WALLET,
+                        'transaction_type' => TRANSACTION_TYPE_CREDIT,
+                        'amount' => request()->amount,
+                        //'transaction_number' => $response['transaction-reference'],
+                        'transaction_number' => $response['PaymentID'],
+                        'status' => TRANSACTION_STATUS_PENDING
+                    ];
+                    $transaction = new Transaction();
+                    $transaction = $transaction->fill($transactionData);
+                    $transaction->save();
+                    DB::commit();                    
+                    //print_r($transactionData);exit;
+                    $data = [
+                        'payment_url' => $response['PaymentURL']."PaymentID=".$response['PaymentID'],
+                        'transaction_reference' => $response['PaymentID']
+                    ];   //print_r($data);exit;                 
+                    $this->setMessage( __("apimsg.Payment invoice is generated. Make payment by online") );
+                    //print_r($this->asJson($data));exit;
+                    return $this->asJson($data);
+
+                    /* $user = User::find($userID);
+                    $user->wallet_amount = ( (double)$user->wallet_amount + request()->amount);
+                    $user->save(); */
+                }
             }            
         } catch (\Throwable $e) {
             DB::rollback();

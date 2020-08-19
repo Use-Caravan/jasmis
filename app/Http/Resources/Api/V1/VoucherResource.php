@@ -29,6 +29,7 @@ class VoucherResource extends JsonResource
             'limit_of_use' => $this->limit_of_use,
             'max_redeem_amount'    => $this->max_redeem_amount,
             'offer_value'    => $this->value,
+            'app_type'    => $this->app_type,
             'vendor_logo'    => FileHelper::loadImage($this->vendor_logo),
             'min_order_value' => $this->min_order_value,
             'expiry_date' => $this->expiry_date,            

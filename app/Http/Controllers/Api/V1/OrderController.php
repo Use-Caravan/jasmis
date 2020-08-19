@@ -125,6 +125,77 @@ class OrderController extends Controller
         return $this->asJson($orders);
     }
 
+    /** Check payment status for credit , debit card and c pocket with credit / debit **/ 
+    public function checkCredimaxPaymentStatus()
+    {
+        $orderID = request()->temp_order_id;
+        $payment_gateway_id = $orderID;
+        $user_id = $paidAmount = $transaction_number = "";
+        $transaction_type = TRANSACTION_TYPE_DEBIT;
+        $transaction_status = TRANSACTION_STATUS_FAILED;
+        $payment_gateway_status = ORDER_PAYMENT_STATUS_FAILURE;
+        $payment_status = 0;
+
+        /** Get payment details by order id from credimax **/
+        $response = CredimaxPaymentGateway::instance()->setOrderId($orderID);
+        $response = $response->getPaymentDetails();
+        if( $response["status"] == 1 && !empty( $response["paymnet_requests"] ) )
+        {
+            $response["paymnet_requests"] = $response["paymnet_requests"][0];
+            $user_id = ( $response["paymnet_requests"]["customer_id"] ) ? $response["paymnet_requests"]["customer_id"] : "";
+            $paidAmount = ( $response["paymnet_requests"]["amount"] ) ? $response["paymnet_requests"]["amount"] : ""; 
+            $transaction_number = ( $response["paymnet_requests"]["payment_response"]["tnx_id"] ) ? $response["paymnet_requests"]["payment_response"]["tnx_id"] : "";
+
+            $transaction_type = ( $response["paymnet_requests"]["payment_type"] ) ? $response["paymnet_requests"]["payment_type"] : TRANSACTION_TYPE_DEBIT;
+
+            if( $response["paymnet_requests"]["status"] == "SUCCESS" && $response["paymnet_requests"]["order_id"] == $orderID )
+            {
+                $transaction_status = TRANSACTION_STATUS_SUCCESS;
+                $payment_gateway_status = ORDER_PAYMENT_STATUS_SUCCESS;
+                $payment_status = 1;
+            }        
+        }
+                
+        $transactionData = [
+            'payment_gateway_id' => $payment_gateway_id,
+            'user_id' => $user_id,
+            'transaction_for' => TRANSACTION_FOR_ONLINE_BOOKING,
+            'transaction_type' => $transaction_type,
+            'amount' => $paidAmount,
+            'transaction_number' => $transaction_number,
+            'status' => $transaction_status
+        ];
+
+        $transaction = Transaction::where('payment_gateway_id', $payment_gateway_id)->first();
+        if($transaction === null)
+            $transaction = new Transaction();
+        
+        $transaction = $transaction->fill($transactionData);
+        $transaction->save();
+        $transactionID = $transaction->getKey();
+
+        $paymentGateway = PaymentGateway::find($payment_gateway_id);
+        $gateway_url = (request()->payment_option == PAYMENT_OPTION_ONLINE) ? config('webconfig.credimaxpay_benefit_checkout_url') : ( (request()->payment_option == PAYMENT_OPTION_CREDIT) ? config('webconfig.credimaxpay_credit_card_checkout_url') : "" );
+
+        $data = [
+            "customer_id" => request()->user()->user_id,
+            "order_id" => request()->temp_order_id,
+            "grand_total" => $paidAmount,
+            "currency_code" => "BD",
+            "payment_type" => (request()->payment_option == PAYMENT_OPTION_ONLINE) ? 2 : 1
+        ];
+        $data = json_encode($data);
+
+        $paymentGateway->gateway_url = $gateway_url;
+        $paymentGateway->sent_data = $data;
+        $paymentGateway->response_received_data = json_encode($response);
+        $paymentGateway->status = $payment_gateway_status;
+
+        $result = $paymentGateway->save(); 
+        
+        return array( "payment_status" => $payment_status, "payment_response" => $response, "transaction_id" => $transactionID );
+    }
+
     /**
      * Place order with credimax payment gateway
      */
@@ -151,7 +222,25 @@ class OrderController extends Controller
         }   
         //print_r($rules);exit;
 
-        //if( (request()->payment_option == 1) || (request()->payment_option == 9) || (request()->payment_option == 1) )            
+        $credimaxPaymentStatus = 0;
+        $transaction_id = 0;
+        if( ( (request()->payment_option == PAYMENT_OPTION_ONLINE) || (request()->payment_option == PAYMENT_OPTION_CREDIT) || (request()->payment_option == PAYMENT_OPTION_WALLET ) ) && isset( request()->temp_order_id ) && request()->temp_order_id > 0 )        
+        {
+            if( isset( request()->temp_order_id ) && request()->temp_order_id > 0 )
+            {
+                $credimaxPaymentResponse = $this->checkCredimaxPaymentStatus();
+                //print_r($credimaxPaymentResponse);exit;
+                $credimaxPaymentStatus = $credimaxPaymentResponse["payment_status"];
+                $transaction_id = $credimaxPaymentResponse["transaction_id"];
+
+                if( $credimaxPaymentStatus == 0 )
+                {
+                    $this->setMessage(__("apimsg.Payment cannot capture"));
+                    $data = $credimaxPaymentResponse["payment_response"];
+                    return $this->asJson($data);
+                }
+            }
+        }    
         
         $this->cartDetails = Cart::where(['user_id' => request()->user()->user_id])->first();
         //print_r($this->cartDetails);exit;
@@ -431,149 +520,81 @@ class OrderController extends Controller
             }
             
             switch(request()->payment_option) {
+                case PAYMENT_OPTION_CREDIT:
+                    $payableAmount = $paymentDetails['total']['cprice'];
+                    if(request()->corporate_voucher) {
+                        $payableAmount = $paymentDetails['total']['cprice'] - $paymentDetails['sub_total']['cprice'];
+                    }
+                    
+                    /** If order payment done in mobile app then update payment status, transaction id in order table **/
+                    if( isset( request()->temp_order_id ) && request()->temp_order_id > 0 && $credimaxPaymentStatus == 1 )      
+                    {
+                        if( $transaction_id > 0 )
+                        {
+                            $order = Order::find($orderID);
+                            $order->transaction_id = $transaction_id;
+                            $order->payment_status = ORDER_PAYMENT_STATUS_SUCCESS;
+                            $order->save();
+                        }
+
+                        /** Clear cart and send notificatio to user, vendor **/
+                        (new CartController())->clearCart();
+
+                        $vendor = Vendor::find($this->branchDetails->vendor_id); 
+                        $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+                        $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
+                        
+                        if($vendor->web_app_id !== null) {
+                            $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
+                        } 
+                    
+                        if(!$oneSignalCustomer || !$oneSignalVendor) {
+                            $this->commonError(__("apimsg.Notification not send") );
+                        }
+                    }
+                    break;
                 case PAYMENT_OPTION_ONLINE:
                     $payableAmount = $paymentDetails['total']['cprice'];
                     if(request()->corporate_voucher) {
                         $payableAmount = $paymentDetails['total']['cprice'] - $paymentDetails['sub_total']['cprice'];
                     }
                     
-                    /*$response = SadadPaymentGateway::instance()
-                    ->setAmount($payableAmount)
-                    ->setCustomerName($this->userDetails->first_name)
-                    ->setCustomerMail($this->userDetails->email)
-                    ->setCustomerPhone($this->userDetails->phone_number);
-                    if(request()->is_web !== null) {
-                        $response = $response->setRequestFrom(request()->is_web);
-                    }
-                    $response = $response->makePayment();*/
+                    /** If order payment done in mobile app then update payment status, transaction id in order table **/
+                    if( isset( request()->temp_order_id ) && request()->temp_order_id > 0 && $credimaxPaymentStatus == 1 )      
+                    {
+                        if( $transaction_id > 0 )
+                        {
+                            $order = Order::find($orderID);
+                            $order->transaction_id = $transaction_id;
+                            $order->payment_status = ORDER_PAYMENT_STATUS_SUCCESS;
+                            $order->save();
+                        }
 
-                    $response = CredimaxPaymentGateway::instance()
-                                ->setAmount($payableAmount)
-                                ->setCustomerId($this->userDetails->user_id)
-                                ->setOrderId($orderID);
-                    if(request()->is_web !== null) {
-                        $response = $response->setRequestFrom(request()->is_web);
-                    }
-                    $response = $response->makePayment();
-                    
-                    
-                    if($response !== null) {
+                        /** Clear cart and send notificatio to user, vendor **/
+                        (new CartController())->clearCart();
 
-                        $paymentData = [
-                            'customer_name' => $this->userDetails->first_name,
-                            'customer_email' => $this->userDetails->email,
-                            'customer_phone_number' => $this->userDetails->phone_number,
-                            'price' => $payableAmount,
-                        ];
-
-                        $paymentGateway = new PaymentGateway();                    
-                        $paymentGateway = $paymentGateway->fill([
-                            'sent_data' => json_encode($paymentData),
-                            //'gateway_url' => $response['payment-url'],
-                            'gateway_url' => $response['PaymentURL']."PaymentID=".$response['PaymentID'],
-                            'received_data' => json_encode($response)
-                        ]);
-                        $paymentGateway->save();                                        
-
-                        $paymentGatewayID = $paymentGateway->getKey();
-
-                        $transactionData = [
-                            'payment_gateway_id' => $paymentGatewayID,
-                            'user_id' => $this->userDetails->user_id,
-                            'transaction_for' => TRANSACTION_FOR_ONLINE_BOOKING,
-                            'transaction_type' => TRANSACTION_TYPE_DEBIT,
-                            'amount' => $payableAmount,
-                            //'transaction_number' => $response['transaction-reference'],
-                            'transaction_number' => $response['PaymentID'],
-                            'status' => TRANSACTION_STATUS_PENDING
-                        ];
-                        $transaction = new Transaction();
-                        $transaction = $transaction->fill($transactionData);
-                        $transaction->save();
-                        //$responseData['payment_url'] =  $response['payment-url'];
-                        $responseData['payment_url'] =  $response['PaymentURL']."PaymentID=".$response['PaymentID'];
-                        $order = Order::find($orderID);
-                        $order->transaction_id = $transaction->getKey();
-                        $order->save();
-      
-                    }
-                break;
-
-                case PAYMENT_OPTION_COD:
-
-                
-                    (new CartController())->clearCart();
-
-                    if(request()->corporate_voucher === true) {
+                        $vendor = Vendor::find($this->branchDetails->vendor_id); 
+                        $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+                        $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
                         
-                        $corporateOffer = CorporateVoucher::where(['corporate_voucher_key' => request()->corporate_voucher_code ])->first();                        
-                        if($corporateOffer !== null) {
-                            $corporateVoucherItem = CorporateVoucherItem::where(['corporate_voucher_id' => $corporateOffer->corporate_voucher_id])->first();
-                            $corporateVoucherItem->is_claimed = 1;
-                            $corporateVoucherItem->claimed_at = date('Y-m-d H:i:s');
-                            $corporateVoucherItem->save();
-                        }
-                    }
+                        if($vendor->web_app_id !== null) {
+                            $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
+                        } 
                     
-                    $vendor = Vendor::find($this->branchDetails->vendor_id); 
-                    $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
-                    $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
-                    
-                    if($vendor->web_app_id !== null) {
-                        $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
-                    } 
-                
-                    if(!$oneSignalCustomer || !$oneSignalVendor) {
-                        $this->commonError(__("apimsg.Notification not send") );
-                    }
-
-                break;
-
-                case PAYMENT_OPTION_WALLET:
-                
-                    if(request()->corporate_voucher === true) {
-                        $corporateOffer = CorporateVoucher::where(['corporate_voucher_key' => request()->corporate_voucher_code ])->first();
-                        if($corporateOffer !== null) {
-                            $corporateVoucherItem = CorporateVoucherItem::where(['corporate_voucher_id' => $corporateOffer->corporate_voucher_id])->first();
-                            $corporateVoucherItem->is_claimed = 1;
-                            $corporateVoucherItem->claimed_at = date('Y-m-d H:i:s');
-                            $corporateVoucherItem->save();
+                        if(!$oneSignalCustomer || !$oneSignalVendor) {
+                            $this->commonError(__("apimsg.Notification not send") );
                         }
                     }
-                    $transactionData = [
-                        'user_id' => $this->userDetails->user_id,
-                        'transaction_for' => TRANSACTION_FOR_WALLET_BOOKING,
-                        'transaction_type' => TRANSACTION_TYPE_DEBIT,
-                        'amount' => $paymentDetails['total']['cprice'],
-                        'transaction_number' => Common::generateRandomString(Transaction::tableName(), 'transaction_number', $length = 32),
-                        'status' => TRANSACTION_STATUS_SUCCESS
-                    ];
-
-
-                    $user = User::find($this->userDetails->user_id);
-
-                    if($user->wallet_amount < $paymentDetails['total']['cprice']){
-
-                        $payableAmount = $paymentDetails['total']['cprice'] - $user->wallet_amount;
-                        
-                        /*$response = SadadPaymentGateway::instance()
-                        ->setAmount($payableAmount)
-                        ->setCustomerName($this->userDetails->first_name)
-                        ->setCustomerMail($this->userDetails->email)
-                        ->setCustomerPhone($this->userDetails->phone_number);
-                        if(request()->is_web !== null) {
-                            $response = $response->setRequestFrom(request()->is_web);
-                        }
-                        $response = $response->makePayment();*/
-
+                    else
+                    {
                         $response = CredimaxPaymentGateway::instance()
-                                ->setAmount($payableAmount)
-                                ->setCustomerId($this->userDetails->user_id)
-                                ->setOrderId($orderID);
+                                    ->setAmount($payableAmount)
+                                    ->setCustomerId($this->userDetails->user_id)
+                                    ->setOrderId($orderID);
                         if(request()->is_web !== null) {
                             $response = $response->setRequestFrom(request()->is_web);
                         }
-                        $response = $response->makePayment();
+                        $response = $response->makePayment();                        
                         
                         if($response !== null) {
                             $paymentData = [
@@ -608,12 +629,149 @@ class OrderController extends Controller
                             $transaction = $transaction->fill($transactionData);
                             $transaction->save();
                             //$responseData['payment_url'] =  $response['payment-url'];
-                            $responseData['payment_url'] = $response['PaymentURL']."PaymentID=".$response['PaymentID'];
+                            $responseData['payment_url'] =  $response['PaymentURL']."PaymentID=".$response['PaymentID'];
                             $order = Order::find($orderID);
                             $order->transaction_id = $transaction->getKey();
-                            $order->payment_type = PAYMENT_OPTION_WALLET_AND_ONLINE;
-                            $order->wallet_amount_used = $user->wallet_amount;
                             $order->save();          
+                        }
+                    }
+                break;
+
+                case PAYMENT_OPTION_COD:                
+                    (new CartController())->clearCart();
+
+                    if(request()->corporate_voucher === true) {
+                        
+                        $corporateOffer = CorporateVoucher::where(['corporate_voucher_key' => request()->corporate_voucher_code ])->first();                        
+                        if($corporateOffer !== null) {
+                            $corporateVoucherItem = CorporateVoucherItem::where(['corporate_voucher_id' => $corporateOffer->corporate_voucher_id])->first();
+                            $corporateVoucherItem->is_claimed = 1;
+                            $corporateVoucherItem->claimed_at = date('Y-m-d H:i:s');
+                            $corporateVoucherItem->save();
+                        }
+                    }
+                    
+                    $vendor = Vendor::find($this->branchDetails->vendor_id); 
+                    $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+                    $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
+                    
+                    if($vendor->web_app_id !== null) {
+                        $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
+                    } 
+                
+                    if(!$oneSignalCustomer || !$oneSignalVendor) {
+                        $this->commonError(__("apimsg.Notification not send") );
+                    }
+
+                break;
+
+                case PAYMENT_OPTION_WALLET:                
+                    if(request()->corporate_voucher === true) {
+                        $corporateOffer = CorporateVoucher::where(['corporate_voucher_key' => request()->corporate_voucher_code ])->first();
+                        if($corporateOffer !== null) {
+                            $corporateVoucherItem = CorporateVoucherItem::where(['corporate_voucher_id' => $corporateOffer->corporate_voucher_id])->first();
+                            $corporateVoucherItem->is_claimed = 1;
+                            $corporateVoucherItem->claimed_at = date('Y-m-d H:i:s');
+                            $corporateVoucherItem->save();
+                        }
+                    }
+                    $transactionData = [
+                        'user_id' => $this->userDetails->user_id,
+                        'transaction_for' => TRANSACTION_FOR_WALLET_BOOKING,
+                        'transaction_type' => TRANSACTION_TYPE_DEBIT,
+                        'amount' => $paymentDetails['total']['cprice'],
+                        'transaction_number' => Common::generateRandomString(Transaction::tableName(), 'transaction_number', $length = 32),
+                        'status' => TRANSACTION_STATUS_SUCCESS
+                    ];
+
+                    $user = User::find($this->userDetails->user_id);
+
+                    if($user->wallet_amount < $paymentDetails['total']['cprice']){
+                        $payableAmount = $paymentDetails['total']['cprice'] - $user->wallet_amount;
+                        
+                        /** If order payment done in mobile app then update payment status, transaction id in order table **/
+                        if( isset( request()->temp_order_id ) && request()->temp_order_id > 0 && $credimaxPaymentStatus == 1 )      
+                        {
+                            if( $transaction_id > 0 )
+                            {
+                                $order = Order::find($orderID);
+                                $order->transaction_id = $transaction_id;
+                                $order->payment_status = ORDER_PAYMENT_STATUS_SUCCESS;
+                                $order->payment_type = PAYMENT_OPTION_WALLET_AND_ONLINE;
+                                $order->wallet_amount_used = $user->wallet_amount;
+                                $order->save();
+                            }
+
+                            /** Update user wallet amount as 0 **/
+                            $user->wallet_amount = 0;
+                            $user->save();
+                            
+                            /** Clear cart and send notificatio to user, vendor **/
+                            (new CartController())->clearCart();
+
+                            $vendor = Vendor::find($this->branchDetails->vendor_id); 
+                            $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+                            $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
+                            
+                            if($vendor->web_app_id !== null) {
+                                $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
+                            } 
+                        
+                            if(!$oneSignalCustomer || !$oneSignalVendor) {
+                                $this->commonError(__("apimsg.Notification not send") );
+                            }
+                        }
+                        else
+                        {
+                            $response = CredimaxPaymentGateway::instance()
+                                    ->setAmount($payableAmount)
+                                    ->setCustomerId($this->userDetails->user_id)
+                                    ->setOrderId($orderID);
+                            if(request()->is_web !== null) {
+                                $response = $response->setRequestFrom(request()->is_web);
+                            }
+                            $response = $response->makePayment();
+                            
+                            if($response !== null) {
+                                $paymentData = [
+                                    'customer_name' => $this->userDetails->first_name,
+                                    'customer_email' => $this->userDetails->email,
+                                    'customer_phone_number' => $this->userDetails->phone_number,
+                                    'price' => $payableAmount,
+                                ];
+
+                                $paymentGateway = new PaymentGateway();                    
+                                $paymentGateway = $paymentGateway->fill([
+                                    'sent_data' => json_encode($paymentData),
+                                    //'gateway_url' => $response['payment-url'],
+                                    'gateway_url' => $response['PaymentURL']."PaymentID=".$response['PaymentID'],
+                                    'received_data' => json_encode($response)
+                                ]);
+                                $paymentGateway->save();                                        
+
+                                $paymentGatewayID = $paymentGateway->getKey();
+
+                                $transactionData = [
+                                    'payment_gateway_id' => $paymentGatewayID,
+                                    'user_id' => $this->userDetails->user_id,
+                                    'transaction_for' => TRANSACTION_FOR_ONLINE_BOOKING,
+                                    'transaction_type' => TRANSACTION_TYPE_DEBIT,
+                                    'amount' => $payableAmount,
+                                    //'transaction_number' => $response['transaction-reference'],
+                                    'transaction_number' => $response['PaymentID'],
+                                    'status' => TRANSACTION_STATUS_PENDING
+                                ];
+                                $transaction = new Transaction();
+                                $transaction = $transaction->fill($transactionData);
+                                $transaction->save();
+                                //$responseData['payment_url'] =  $response['payment-url'];
+                                $responseData['payment_url'] = $response['PaymentURL']."PaymentID=".$response['PaymentID'];
+                                $order = Order::find($orderID);
+                                $order->transaction_id = $transaction->getKey();
+                                $order->payment_type = PAYMENT_OPTION_WALLET_AND_ONLINE;
+                                $order->wallet_amount_used = $user->wallet_amount;
+                                $order->save();
+                            }          
                         }
                     }else{
                         $vendor = Vendor::find($this->branchDetails->vendor_id);
@@ -1436,15 +1594,22 @@ class OrderController extends Controller
             return $this->prepareResponse();
         }
 
+        $responseDataPayment = $this->checkoutQuotation(true);
+        $paymentDetails = $responseDataPayment['data'];
+        
+        if(request()->corporate_voucher !== true) {
+            if($paymentDetails['sub_total']['cprice'] < $this->branchDetails->vendor_min_order_value) {                
+                return $this->commonError( __("apimsg.Order value should be greater than",['amount' => Common::currency($this->branchDetails->vendor_min_order_value)]) );
+            }
+        }
+
         $temp_order_id = "";
-        $amount_to_pay = 0;
+        $amount_to_pay = "0";
         $online_payment = 0;
         /** Create temporary order id and send in response to process payment in mobile app **/
         if( request()->payment_option && ( ( request()->payment_option == PAYMENT_OPTION_ONLINE ) || ( request()->payment_option == PAYMENT_OPTION_CREDIT ) || ( request()->payment_option == PAYMENT_OPTION_WALLET ) ) )
         {
             $online_payment = 1;
-            $responseDataPayment = $this->checkoutQuotation(true);
-            $paymentDetails = $responseDataPayment['data'];
                 
             if( request()->payment_option == PAYMENT_OPTION_WALLET )
             {
@@ -1474,7 +1639,7 @@ class OrderController extends Controller
         if( $amount_to_pay > 0 )
             $amount_to_pay = number_format((float)$amount_to_pay, 3, '.', '');
                     
-        $responseData['data']['temp_order_id'] = $temp_order_id;
+        $responseData['data']['temp_order_id'] = (string)$temp_order_id;
         $responseData['data']['amount_to_pay'] = $amount_to_pay;
 
         $this->setMessage(__("apimsg.Cart details are processed") );
@@ -1795,6 +1960,7 @@ class OrderController extends Controller
     public function itemCheckoutItemData($branchDetails)
     {        
         $items = [];
+        //print_r($branchDetails);exit;
         foreach($branchDetails['items'] as $key => $value) {
             $itemDetails = Item::getItems($value['item_key'])->first();
             
@@ -2232,7 +2398,6 @@ class OrderController extends Controller
         }
     }
 
-
     public function saveOrderOnDeliveryBoy($orderKey)
     {   
         $orderDetails = Order::findByKey($orderKey);  
@@ -2288,12 +2453,16 @@ class OrderController extends Controller
  
         $user = User::find($orderDetails->user_id);
         $userAddress = UserAddress::withTrashed()->find($orderDetails->user_address_id);
+
+        $payment_type = ( $orderDetails->payment_type == PAYMENT_OPTION_ONLINE || $orderDetails->payment_type == PAYMENT_OPTION_CREDIT ) ? PAYMENT_OPTION_ONLINE : $orderDetails->payment_type;
+
         $deliveryboyData = [ 
             'order_number' => $orderDetails->order_number,
             'order_key' => $orderKey,
             'vendor_key' => $vendor->vendor_key,
             'zipcode' => '',
-            'payment_mode' => $orderDetails->payment_type,
+            //'payment_mode' => $orderDetails->payment_type,
+            'payment_mode' => $payment_type,
             'amount' => $orderDetails->order_total,
             'order_time' => $orderDetails->order_datetime, 
             'delivery_time' => $orderDetails->delivery_datetime,
