@@ -455,6 +455,8 @@ return [
     'Voucher deleted successfully' => 'Voucher deleted successfully',
     'Voucher updated successfully' => 'Voucher updated successfully',
     'Voucher added successfully' => 'Voucher added successfully',
+    'Discount value should be less than maximum redeem amount' => 'Discount value should be less than maximum redeem amount',
+    'Discount value should be less than maximum redeem amount' => 'Discount value should be less than maximum redeem amount',
 
     /**
     * Payment Management

@@ -37,7 +37,8 @@ class VoucherController extends Controller
     public function index(Request $request)
     {   
         if($request->ajax()) {
-            $model = Voucher::getList();            
+            $model = Voucher::getList();    
+            //print_r($model->get());exit;        
             return DataTables::eloquent($model)
                         ->addIndexColumn()
                         ->editColumn('apply_promo_for', function ($model) {                                                         
@@ -112,7 +113,17 @@ class VoucherController extends Controller
     {   
         DB::beginTransaction();
         try {
-            
+            /** Discount value should be less than maximum redeem amount validation **/
+            if( $request->discount_type == 2 )
+            {
+                $max_redeem_amount = $request->max_redeem_amount;
+                $discount_value = $request->value;
+
+                if( $discount_value > $max_redeem_amount )
+                {
+                    return redirect()->route('voucher.create')->with('error', __('admincrud.Discount value should be less than maximum redeem amount') );
+                }
+            }
             $model = new Voucher();
             $model->fill($request->all());
             $expiryDate = $request->expiry_date;

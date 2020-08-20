@@ -43,7 +43,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
     Route::resource('voucher','VoucherController')->middleware('localization');
     Route::get('send-notification', 'EnquiryController@sendNotification')->middleware('localization');
     Route::get('voucher-branches','VoucherController@getVoucherBranches')->middleware('localization');
-    Route::get('get-vouchers','VoucherController@getVouchers')->middleware('localization');
+    //Route::get('get-vouchers','VoucherController@getVouchers')->middleware('localization');
     Route::get('offer', 'OfferController@getOffers')->middleware('localization');
     Route::resource('faq','FaqController')->middleware('localization');
     Route::get('get-near-branches/{vendor_key?}/{branch_key?}','BranchController@branchByVendor')->middleware('localization');
@@ -95,6 +95,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
 
         Route::get('loyalty-point','LoyaltyPointController@loyaltyPointDetails')->middleware('localization');
 
+        Route::get('get-vouchers','VoucherController@getVouchers')->middleware('localization');
     });
     Route::get('order-confirmation-mail/{order_key}','OrderController@sendConfirmationMail')->middleware('localization');
 

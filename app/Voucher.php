@@ -80,9 +80,9 @@ class Voucher extends CModel
     public function selectApplyPromo($value = null)
     {
         $applyPromo = [ 
-            VOUCHER_APPLY_PROMO_SHOPS => __('admincrud.Shops'), 
+            //VOUCHER_APPLY_PROMO_SHOPS => __('admincrud.Shops'), 
             VOUCHER_APPLY_PROMO_USERS => __('admincrud.Users'), 
-            PROMO_FOR_BOTH => __('admincrud.Both') 
+            //PROMO_FOR_BOTH => __('admincrud.Both') 
         ];
         if($value != null) {
             if($value == PROMO_FOR_BOTH) {

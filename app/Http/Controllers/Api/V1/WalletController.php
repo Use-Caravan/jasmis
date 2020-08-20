@@ -66,8 +66,9 @@ class WalletController extends Controller
             $paymentGateway->save();                    
             $payment_gateway_id = $paymentGateway->getKey();
 
+            $temp_order_id = "";
             /** If payment process handled in mobile app **/
-            if( isset( request()->transaction_type ) && request()->transaction_type > 0 )
+            if( isset( request()->transaction_type ) && request()->transaction_type > 0 && request()->transaction_type == 1 )
             {
                 $transactionData = [
                     'payment_gateway_id' => $payment_gateway_id,//$paymentGateway->getKey(),
@@ -86,7 +87,9 @@ class WalletController extends Controller
                 //print_r($transactionData);exit;
                 $data = [
                     'temp_order_id' => $payment_gateway_id,
-                    'amount' => request()->amount
+                    'amount' => request()->amount,
+                    'payment_url' => "",
+                    'transaction_reference' => ""
                 ];   //print_r($data);exit;                 
                 $this->setMessage( __("apimsg.Payment invoice is generated. Make payment by online") );
                 return $this->asJson($data);
@@ -124,8 +127,10 @@ class WalletController extends Controller
                     DB::commit();                    
                     //print_r($transactionData);exit;
                     $data = [
+                        'temp_order_id' => $payment_gateway_id,
                         'payment_url' => $response['PaymentURL']."PaymentID=".$response['PaymentID'],
-                        'transaction_reference' => $response['PaymentID']
+                        'transaction_reference' => $response['PaymentID'],
+                        'amount' => request()->amount
                     ];   //print_r($data);exit;                 
                     $this->setMessage( __("apimsg.Payment invoice is generated. Make payment by online") );
                     //print_r($this->asJson($data));exit;

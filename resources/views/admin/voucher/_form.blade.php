@@ -37,6 +37,7 @@
             <div class="form-group {{ ($errors->has("value")) ? 'has-error' : '' }}">                    
                 {{ Form::label("value", __('admincrud.Value'), ['class' => 'required coupon_value']) }}
                 {{ Form::text("value", $model['value'], ['class' => 'form-control']) }} 
+                <span class="help-block error-help-block error-discount-value"></span>
                 @if($errors->has("value"))
                     <span class="help-block error-help-block">{{ $errors->first("value") }}</span>
                 @endif                    
@@ -105,7 +106,7 @@
             </div>
         </div>
        <div class = "clearfix"></div>
-        <div class="col-md-6 {{ ($model->apply_promo_for == VOUCHER_APPLY_PROMO_BOTH || $model->apply_promo_for == VOUCHER_APPLY_PROMO_SHOPS) ? '' : 'hide' }}" id = "promo_for_all_shops">
+        <!--<div class="col-md-6 {{ ($model->apply_promo_for == VOUCHER_APPLY_PROMO_BOTH || $model->apply_promo_for == VOUCHER_APPLY_PROMO_SHOPS) ? '' : 'hide' }}" id = "promo_for_all_shops">
             <div class="form-group {{ ($errors->has("promo_for_shops")) ? 'has-error' : '' }}">
             {{ Form::label("promo_for_shops", __('admincrud.Apply Promo For Shops'), ['class' => 'required']) }} 
             {{ Form::select('promo_for_shops', $model->selectPromoForShops(), $model->promo_for_shops ,['class' => 'selectpicker','id' => 'promo_for_all_shop','placeholder' => __('admincrud.Please choose promo for')] )}}
@@ -113,8 +114,9 @@
                     <span class="help-block error-help-block">{{ $errors->first("promo_for_shops") }}</span>
                 @endif 
             </div>
-        </div>            
-        <div class="pull-right  col-md-6 {{ ($model->apply_promo_for == VOUCHER_APPLY_PROMO_BOTH || $model->apply_promo_for == VOUCHER_APPLY_PROMO_USERS) ? '' : 'hide' }}" id = "promo_for_all_user">
+        </div>-->            
+        <!--<div class="pull-right  col-md-6 {{ ($model->apply_promo_for == VOUCHER_APPLY_PROMO_BOTH || $model->apply_promo_for == VOUCHER_APPLY_PROMO_USERS) ? '' : 'hide' }}" id = "promo_for_all_user">-->
+        <div class="col-md-6 {{ ($model->apply_promo_for == VOUCHER_APPLY_PROMO_BOTH || $model->apply_promo_for == VOUCHER_APPLY_PROMO_USERS) ? '' : 'hide' }}" id = "promo_for_all_user">
             <div class="form-group {{ ($errors->has("promo_for_user")) ? 'has-error' : '' }}">
             {{ Form::label("promo_for_user", __('admincrud.Apply Promo For Users'), ['class' => 'required']) }} 
             {{ Form::select('promo_for_user', $model->selectPromoForUser(),$model->promo_for_user ,['class' => 'selectpicker','id' => 'promo_for_all_users','placeholder' => __('admincrud.Please choose promo for')] )}}
@@ -124,7 +126,7 @@
             </div>
         </div>        
         <div class="clearfix"></div>
-        <div class="col-md-6 {{ (($model->apply_promo_for == VOUCHER_APPLY_PROMO_BOTH || $model->apply_promo_for == VOUCHER_APPLY_PROMO_SHOPS) && $model->promo_for_shops == PROMO_SHOPS_PARTICULAR) ? '' : 'hide' }}" id = "promo_for_particular_shop"> 
+        <!--<div class="col-md-6 {{ (($model->apply_promo_for == VOUCHER_APPLY_PROMO_BOTH || $model->apply_promo_for == VOUCHER_APPLY_PROMO_SHOPS) && $model->promo_for_shops == PROMO_SHOPS_PARTICULAR) ? '' : 'hide' }}" id = "promo_for_particular_shop"> 
             <div class="form-group {{ ($errors->has("shopbeneficiary_id")) ? 'has-error' : '' }}"> 
             {{Form::label('shopbeneficiary_id', __('admincrud.Beneficiar Shop Name'),['class' => 'required'])}}
             {{Form::select('shopbeneficiary_id[]',$branchList,$existsShopBenificiary,['multiple'=>'multiple','class' => 'selectpicker','title' => __('admincommon.Nothing selected')])}}
@@ -133,7 +135,8 @@
             @endif 
             </div> 
         </div>        
-        <div class="pull-right col-md-6 {{ (($model->apply_promo_for == VOUCHER_APPLY_PROMO_BOTH || $model->apply_promo_for == VOUCHER_APPLY_PROMO_USERS) && $model->promo_for_user == PROMO_USER_PARTICULAR) ? '' : 'hide' }}" id = "promo_for_particular_user"> 
+        <div class="pull-right col-md-6 {{ (($model->apply_promo_for == VOUCHER_APPLY_PROMO_BOTH || $model->apply_promo_for == VOUCHER_APPLY_PROMO_USERS) && $model->promo_for_user == PROMO_USER_PARTICULAR) ? '' : 'hide' }}" id = "promo_for_particular_user">--> 
+        <div class="col-md-6 {{ (($model->apply_promo_for == VOUCHER_APPLY_PROMO_BOTH || $model->apply_promo_for == VOUCHER_APPLY_PROMO_USERS) && $model->promo_for_user == PROMO_USER_PARTICULAR) ? '' : 'hide' }}" id = "promo_for_particular_user">
             <div class="form-group {{ ($errors->has("userbeneficiary_id")) ? 'has-error' : '' }}"> 
             {{Form::label('userbeneficiary_id', __('admincrud.Beneficiar User Name'),['class' => 'required'])}}
             {{Form::select('userbeneficiary_id[]',$userList,$existsUserBenificiary,['multiple'=>'multiple','class' => 'selectpicker','title' => __('admincommon.Nothing selected')])}}
@@ -147,7 +150,7 @@
   
     <div class="box-footer">  
         {{ Html::link(route('voucher.index'), __('admincommon.Cancel'),['class' => 'btn btn-default']) }}        
-        {{ Form::submit($model->exists ? __('admincommon.Update') : __('admincommon.Save'), ['class' => 'btn btn-info pull-right']) }}
+        {{ Form::submit($model->exists ? __('admincommon.Update') : __('admincommon.Save'), ['class' => 'btn btn-info pull-right coupon_submit']) }}
     </div>
   <!-- /.box-footer -->
 {{ Form::close() }}
@@ -223,6 +226,47 @@ $(document).ready(function(){
         else if (this.value == '2') {
             $('.coupon_value').text('Value ( Enter as Amount )');
         }
+    });
+
+    /** Discount value should be less than maximum redeem amount validation **/
+    $('#value').on('change',function() {        
+        var value = $(this).val();
+        var discount_type = $("input[name='discount_type']:checked").val();
+        var max_redeem_amount = $("#max_redeem_amount").val();
+        if (discount_type == '2') {
+            if (value > max_redeem_amount) {
+                alert('Discount value should be less than maximum redeem amount');
+                $('.error-discount-value').text('');
+                //$('.error-discount-value').text('Discount value should be less than maximum redeem amount');            
+            }
+            else{
+                $('.error-discount-value').text('');            
+            }
+        }
+        else
+            $('.error-discount-value').text('');        
+    });
+
+    /** Discount value should be less than maximum redeem amount validation **/
+    $('.coupon_submit').on('click',function() {
+        var value = $('#value').val();
+        var discount_type = $("input[name='discount_type']:checked").val();
+        var max_redeem_amount = $("#max_redeem_amount").val();
+        if (discount_type == '2') {
+            if (value > max_redeem_amount) {
+                $('.error-discount-value').text('');   
+                alert('Discount value should be less than maximum redeem amount');
+                return false;         
+            }
+            else{
+                $('.error-discount-value').text('');  
+                $('.coupon_submit').submit();          
+            }
+        }
+        else {
+            $('.error-discount-value').text('');
+            $('.coupon_submit').submit();
+        }            
     });
 }); 
 </script>

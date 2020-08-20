@@ -43,6 +43,7 @@ class VoucherResource extends JsonResource
             'offer_expiry_msg' => $this->when(true, function() {
                 return "Offer is valid until ".Common::renderDate($this->expiry_date);
             }),
+            'usage_count' => isset( $this->usage_count ) ? $this->usage_count : "",
         ];
     }
     

@@ -16,6 +16,8 @@ use App\Api\{
 use Validator;
 use DB;
 use App;
+use Auth;
+use App\Api\User;
 
 class VoucherController extends Controller
 {
@@ -37,7 +39,13 @@ class VoucherController extends Controller
     
     public function getVouchers()
     {
+        $userID = Auth::user()->user_id;
         $vouchers = Voucher::getBranchVouchers();
+        $vouchers->addSelect([
+            DB::raw(" (SELECT COUNT(VU.voucher_id) FROM voucher_usage AS VU where VU.beneficiary_type = ".VOUCHER_APPLY_PROMO_USERS." and VU.voucher_id = ".Voucher::tableName().".voucher_id "." and VU.beneficiary_id = ".$userID."  and VU.status = ".ITEM_ACTIVE.") as usage_count")
+        ])
+        ->havingRaw('usage_count < limit_of_use');        
+
         $modelVoucher = VoucherResource::collection($vouchers->get());
         $this->setMessage(__('apimsg.Voucher List'));
         return $this->asJson($modelVoucher);

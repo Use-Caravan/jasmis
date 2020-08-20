@@ -454,7 +454,7 @@ return [
     'Voucher status updated successfully' => 'تم تحديث حالة القسيمة بنجاح',
     'Voucher deleted successfully' => 'تم حذف القسيمة بنجاح',
     'Voucher updated successfully' => 'تم تحديث القسيمة بنجاح',
-    'Voucher added successfully' => 'تمت إضافة القسيمة بنجاح',
+    'Voucher added successfully' => 'يجب أن تكون قيمة الخصم أقل من الحد الأقصى لمبلغ الاسترداد',
  
     
     /**
