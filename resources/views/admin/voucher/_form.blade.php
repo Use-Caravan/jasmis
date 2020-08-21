@@ -24,7 +24,7 @@
                 @endif 
             </div>                   
         </div>
-        <div class="col-md-6"> 
+        <div class="col-md-6 max_redeem_amount_div"> 
             <div class="form-group {{ ($errors->has("max_redeem_amount")) ? 'has-error' : '' }}">                    
                 {{ Form::label("max_redeem_amount", __('admincrud.Maximum Redeem Amount'), ['class' => 'required']) }}
                 {{ Form::text("max_redeem_amount", $model['max_redeem_amount'], ['class' => 'form-control']) }} 
@@ -162,10 +162,18 @@
 $(document).ready(function(){
     var discount_type = $("input[name='discount_type']:checked").val();
     if (discount_type == '1') {
-        $('.coupon_value').text('Value ( Enter as Percentage )');
+        $('.coupon_value').text('Offer Percentage');
+        $('.max_redeem_amount_div').show();
+        $('#max_redeem_amount').addClass('required');
+        var max_redeem_amount = $('#max_redeem_amount').val();
     }
     else if (discount_type == '2') {
-        $('.coupon_value').text('Value ( Enter as Amount )');
+        $('.coupon_value').text('Offer Amount');
+        $('.max_redeem_amount_div').hide();
+        $('#max_redeem_amount').removeClass('required');
+        var max_redeem_amount = $('#max_redeem_amount').val();
+        if( max_redeem_amount == "" )
+            $('#max_redeem_amount').val("0");
     }
     
     $('#expiry_date_picker').datetimepicker({    
@@ -221,15 +229,23 @@ $(document).ready(function(){
 
     $('input[type=radio][name=discount_type]').change(function() {
         if (this.value == '1') {
-            $('.coupon_value').text('Value ( Enter as Percentage )');
+            $('.coupon_value').text('Offer Percentage');
+            $('.max_redeem_amount_div').show();
+            $('#max_redeem_amount').addClass('required');
+            //$('#max_redeem_amount').val("");
         }
         else if (this.value == '2') {
-            $('.coupon_value').text('Value ( Enter as Amount )');
+            $('.coupon_value').text('Offer Amount');
+            $('.max_redeem_amount_div').hide();
+            $('#max_redeem_amount').removeClass('required');
+            var max_redeem_amount = $('#max_redeem_amount').val();
+            if( max_redeem_amount == "" )
+                $('#max_redeem_amount').val("0");
         }
     });
 
     /** Discount value should be less than maximum redeem amount validation **/
-    $('#value').on('change',function() {        
+    /*$('#value').on('change',function() {        
         var value = $(this).val();
         var discount_type = $("input[name='discount_type']:checked").val();
         var max_redeem_amount = $("#max_redeem_amount").val();
@@ -245,10 +261,10 @@ $(document).ready(function(){
         }
         else
             $('.error-discount-value').text('');        
-    });
+    });*/
 
     /** Discount value should be less than maximum redeem amount validation **/
-    $('.coupon_submit').on('click',function() {
+    /*$('.coupon_submit').on('click',function() {
         var value = $('#value').val();
         var discount_type = $("input[name='discount_type']:checked").val();
         var max_redeem_amount = $("#max_redeem_amount").val();
@@ -267,7 +283,7 @@ $(document).ready(function(){
             $('.error-discount-value').text('');
             $('.coupon_submit').submit();
         }            
-    });
+    });*/
 }); 
 </script>
 

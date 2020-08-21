@@ -114,7 +114,7 @@ class VoucherController extends Controller
         DB::beginTransaction();
         try {
             /** Discount value should be less than maximum redeem amount validation **/
-            if( $request->discount_type == 2 )
+            /*if( $request->discount_type == 2 )
             {
                 $max_redeem_amount = $request->max_redeem_amount;
                 $discount_value = $request->value;
@@ -123,10 +123,16 @@ class VoucherController extends Controller
                 {
                     return redirect()->route('voucher.create')->with('error', __('admincrud.Discount value should be less than maximum redeem amount') );
                 }
-            }
+            }*/
             $model = new Voucher();
             $model->fill($request->all());
             $expiryDate = $request->expiry_date;
+
+            if( $request->discount_type == 2 )
+                $model->max_redeem_amount = 0;
+            else
+                $model->max_redeem_amount =($request->max_redeem_amount == null) ? 0 : $request->max_redeem_amount;
+
             $model->expiry_date = date('Y-m-d H:i:s', strtotime($expiryDate));
             $model->promo_code = ($request->promo_code === null) ? (Common::generateRandomString('voucher', 'promo_code', 8)) : $request->promo_code;
             $appType = implode(",",$request->app_type);
@@ -182,6 +188,7 @@ class VoucherController extends Controller
         $model = Voucher::findByKey($id);
         $model->expiry_date = date('m/d/Y h:i A', strtotime($model->expiry_date));        
         $explodeAppType = explode(',', $model->app_type);
+
         $branchList = Branch::getBranch();
         $userList = User::getUsers();
         $existsShopBenificiary = VoucherBeneficiary::existsShopBeneficiary($model->getKey());
@@ -203,8 +210,15 @@ class VoucherController extends Controller
     {
         DB::beginTransaction();
         try {
-            $model = Voucher::findByKey($id);        
+            $model = Voucher::findByKey($id);    
+
             $model->fill($request->all());
+
+            if( $request->discount_type == 2 )
+                $model->max_redeem_amount = 0;
+            else
+                $model->max_redeem_amount =($request->max_redeem_amount == null) ? 0 : $request->max_redeem_amount;
+    
             $expiryDate = $request->expiry_date;
             $model->expiry_date = date('Y-m-d H:i:s', strtotime($expiryDate));
             $appType = implode(",",$request->app_type);

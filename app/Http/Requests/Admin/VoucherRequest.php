@@ -26,7 +26,8 @@ class VoucherRequest extends FormRequest
         $particulars = $this->request->get('promo_for_shops');        
         $rules = [
                     'manual_voucher' => 'nullable',
-                    'max_redeem_amount' => 'required|numeric',
+                    //'max_redeem_amount' => 'required|numeric',
+                    'max_redeem_amount' => 'numeric',
                     'value' => 'required|numeric',
                     'min_order_value' => 'required|numeric',
                     'apply_promo_for' => 'required',

@@ -68,7 +68,7 @@ class WalletController extends Controller
 
             $temp_order_id = "";
             /** If payment process handled in mobile app **/
-            if( isset( request()->transaction_type ) && request()->transaction_type > 0 && request()->transaction_type == 1 )
+            if( isset( request()->transaction_type ) && request()->transaction_type > 0 )
             {
                 $transactionData = [
                     'payment_gateway_id' => $payment_gateway_id,//$paymentGateway->getKey(),

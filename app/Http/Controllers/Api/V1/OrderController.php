@@ -1620,7 +1620,7 @@ class OrderController extends Controller
                 else
                 {
                     $temp_order_id = "";
-                    $amount_to_pay = 0;
+                    $amount_to_pay = "0";
                     $online_payment = 0;
                 }
             }
@@ -2242,7 +2242,7 @@ class OrderController extends Controller
         } else if($voucher->discount_type == VOUCHER_DISCOUNT_TYPE_AMOUNT) {
             $discountAmount = $voucher->value;
         }
-        if($discountAmount > $voucher->max_redeem_amount) {
+        if( $voucher->discount_type == VOUCHER_DISCOUNT_TYPE_PERCENTAGE && ( $discountAmount > $voucher->max_redeem_amount) ) {
             $discountAmount = $voucher->max_redeem_amount;
         }
         
