@@ -92,7 +92,8 @@ class VoucherController extends Controller
     {   
         $model = new Voucher();        
         $branchList = Branch::getBranch();
-        $userList = User::getUsers();
+        //$userList = User::getUsers();
+        $userList = User::getUsersVoucher();
         $explodeAppType = [];
         $modeltime = '';
         $existsShopBenificiary = [];

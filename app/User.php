@@ -98,6 +98,13 @@ class User extends CAuthModel
         return array_column($userList,'email','user_id');
     }
 
+    public static function getUsersVoucher()
+    {
+        //$userList = self::where(['status' => ITEM_ACTIVE, 'email' => NOT NULL])->get()->toArray();
+        $userList = self::where(['status' => ITEM_ACTIVE])->where('email', '<>', '')->get()->toArray();
+        return array_column($userList,'email','user_id');
+    }
+
     public static function getAllUsers()
     {
         $allUsers = self::select(self::tableName().".*");

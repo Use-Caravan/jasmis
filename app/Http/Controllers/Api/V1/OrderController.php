@@ -263,8 +263,24 @@ class OrderController extends Controller
                 }
             }
 
-            $totalOrders = ((int)Order::count()) + 1;
+            //$totalOrders = ((int)Order::count()) + 1;
+            //$orderNumber = str_repeat('0', max(0, 7 - strlen($totalOrders))) . $totalOrders;
+            /** Create order number and check its already exists or not **/
+            $order_exists_count = 0;
+            $totalOrders = ((int)Order::count()) + 1;  
             $orderNumber = str_repeat('0', max(0, 7 - strlen($totalOrders))) . $totalOrders;
+            $order_exists_count = Order::where("order_number",$orderNumber)->count();
+            do
+            {
+                if( $order_exists_count > 0 )
+                {
+                    $totalOrders = $totalOrders + 1;
+                    $orderNumber = str_repeat('0', max(0, 7 - strlen($totalOrders))) . $totalOrders;
+                    $order_exists_count = Order::where("order_number",$orderNumber)->count();  
+                }
+            }while( $order_exists_count > 0 );
+            //echo $orderNumber;exit;
+            
             $orderDateTime = date('Y-m-d H:i:s');
             $adminProfit = ((($paymentDetails['total']['cprice'])/100)*($this->branchDetails->vendor_commission));
 
