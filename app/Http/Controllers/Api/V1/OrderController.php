@@ -1632,7 +1632,7 @@ class OrderController extends Controller
                 $user = User::find(request()->user()->user_id);
                 
                 if($user->wallet_amount < $paymentDetails['total']['cprice'])
-                    $amount_to_pay = $paymentDetails['total']['cprice'] - $user->wallet_amount;                    
+                    $amount_to_pay_to_wallet = $paymentDetails['total']['cprice'] - $user->wallet_amount;                    
                 else
                 {
                     $temp_order_id = "";
@@ -1648,7 +1648,8 @@ class OrderController extends Controller
                 $payment_gateway_id = $paymentGateway->getKey();
                 $temp_order_id = $payment_gateway_id;
 
-                $amount_to_pay = $paymentDetails['total']['cprice'];                
+                //$amount_to_pay = $paymentDetails['total']['cprice'];
+                $amount_to_pay = ( request()->payment_option == PAYMENT_OPTION_WALLET ) ? $amount_to_pay_to_wallet : $paymentDetails['total']['cprice'];                
             }                                
         }
 
