@@ -383,10 +383,17 @@ return [
       'Popup Image' => "Popup Image",
       'Exist Image' => 'Exist Image',
       'Redeem Amount Per Point' => 'Redeem Amount Per Point',
+      'Redeem Amount Per Point ( In Fils )' => 'Redeem Amount Per Point ( In Fils )',
       'Loyalty Level added successfully' => 'Loyalty Level added successfully',
       'Loyalty Level updated successfully' => 'Loyalty level updated successfully',
       'Loyalty Level deleted successfully' => 'Loyalty Level deleted successfully',
       'Loyalty Level status updated successfully' => 'Loyalty Level status updated successfully',
+      'Loyalty Point Per BD' => 'Loyalty Point Per BD',
+      'Minimum Amount to Redeem ( In BD )' => 'Minimum Amount to Redeem ( In BD )',
+      'Loyalty point per BD should not greater than higher loyalty level' => 'Loyalty point per BD should not greater than higher loyalty level',
+      'Loyalty point per BD should not lesser than lower loyalty level' => 'Loyalty point per BD should not lesser than lower loyalty level',
+      'Redeem amount per point should not greater than higher loyalty level' => 'Redeem amount per point should not greater than higher loyalty level',
+      'Redeem amount per point should not lesser than lower loyalty level' => 'Redeem amount per point should not lesser than lower loyalty level',
 
     /**
     * Offer Management

@@ -21,7 +21,9 @@
                     <th>@lang('admincrud.Loyalty Level Name')</th>                  
                     <th>@lang('admincrud.From Point')</th>
                     <th>@lang('admincrud.To Point')</th>
-                    <th>@lang('admincrud.Redeem Amount Per Point')</th>                  
+                    <th>@lang('admincrud.Loyalty Point Per BD')</th>
+                    <th>@lang('admincrud.Redeem Amount Per Point ( In Fils )')</th>                    
+                    <th>@lang('admincrud.Minimum Amount to Redeem ( In BD )')</th>                  
                     <th class="status">@lang('admincommon.Status')</th>
                     <th class="action">@lang('admincommon.Action')</th>
               </tr>
@@ -37,10 +39,16 @@
                         {{ Form::text("to_point", '', ['class' => 'form-control filterText', "placeholder" =>__('admincrud.To Point'), "data-name" => "3"]) }}
                     </th>
                     <th>
-                        {{ Form::text("redeem_amount_per_point", '', ['class' => 'form-control filterText', "placeholder" =>__('admincrud.Redeem Amount Per Point'), "data-name" => "3"]) }}
+                        {{ Form::text("loyalty_point_per_bd", '', ['class' => 'form-control filterText', "placeholder" =>__('admincrud.Loyalty Point Per BD'), "data-name" => "3"]) }}
+                    </th>
+                    <th>
+                        {{ Form::text("redeem_amount_per_point", '', ['class' => 'form-control filterText', "placeholder" =>__('admincrud.Redeem Amount Per Point ( In Fils )'), "data-name" => "4"]) }}
+                    </th>
+                    <th>
+                        {{ Form::text("minimum_amount_to_redeem", '', ['class' => 'form-control filterText', "placeholder" =>__('admincrud.Minimum Amount to Redeem ( In BD )'), "data-name" => "5"]) }}
                     </th>  
                     <th class="status">
-                        {{ Form::select('status', Common::status(), '' ,['class' => 'selectpicker filterSelect', 'placeholder' => __('admincommon.All'), "data-name" => "4"] )}}
+                        {{ Form::select('status', Common::status(), '' ,['class' => 'selectpicker filterSelect', 'placeholder' => __('admincommon.All'), "data-name" => "6"] )}}
                     </th>
                     <th class="action"></th>
                 </tr>
@@ -61,7 +69,9 @@ $(document).ready(function(){
             { 'data' : 'loyalty_level_name', 'name' : 'LL.loyalty_level_name'},
             { 'data' : 'from_point'},
             { 'data' : 'to_point'},
+            { 'data' : 'loyalty_point_per_bd'},
             { 'data' : 'redeem_amount_per_point'},
+            { 'data' : 'minimum_amount_to_redeem'},
             { 'data' : 'status', 'sClass' : 'status', 'orderable' : false},
             { 'data' : 'action', 'sClass' : 'action', 'orderable' : false}
         ],

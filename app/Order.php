@@ -519,11 +519,27 @@ class Order extends CModel
      * @return boolean 
      */
     public static function addLoyaltyPoints($orderModel)
-    {         
+    {   
+        /** Adding Loyalty point to user */
+        $userDetails = User::find($orderModel->user_id);     
         
-        $userDetails = User::find($orderModel->user_id);        
+        $user_loyalty_points = ( $userDetails->loyalty_points ) ? $userDetails->loyalty_points : 0;
+        $user_total_loyalty_points = ( $userDetails->total_loyalty_points ) ? $userDetails->total_loyalty_points : 0;
+        
+        /** Get loyalty level of user using user loyalty points **/
+        $loyaltyLevel = LoyaltyLevel::where('from_point', '<=', $user_loyalty_points)->where('to_point', '>=', $user_loyalty_points)->orderBy('loyalty_level_id','ASC')->first();    
+        $loyalty_point_per_bd = ( $loyaltyLevel->loyalty_point_per_bd ) ? (int)$loyaltyLevel->loyalty_point_per_bd : 0;
+        
+        /** Get the nearest whole number of item_total to calculate loyalty points to this order **/
+        $item_total = (int)$orderModel->item_total;
+        $loyalty_points_order = $item_total * $loyalty_point_per_bd;
+        
+        $userDetails->loyalty_points = (int)$user_loyalty_points + $loyalty_points_order;
+        $userDetails->total_loyalty_points = (int)$user_total_loyalty_points  + $loyalty_points_order;
+        return $userDetails->save();
+
         /** Adding Loyalty point to user */                        
-        $loyaltyPoint = LoyaltyPoint::where('from_amount', '<=', $orderModel->item_total)->where('to_amount', '>=', $orderModel->item_total)->first();
+        /*$loyaltyPoint = LoyaltyPoint::where('from_amount', '<=', $orderModel->item_total)->where('to_amount', '>=', $orderModel->item_total)->first();
         if($loyaltyPoint === null) {
             $loyaltyPoint = LoyaltyPoint::select('loyalty_point_id','to_amount','point')->where('status',ITEM_ACTIVE)->where('to_amount' ,'<', $orderModel->order_total)->orderBy('to_amount','DESC')->first();
         }
@@ -542,7 +558,7 @@ class Order extends CModel
         //$userLoyaltyCredit->save();
         $userDetails->loyalty_points = ($userDetails->loyalty_points === null) ? 0 + $loyaltyPoint->point : (int)$userDetails->loyalty_points + $loyaltyPoint->point;
         $userDetails->total_loyalty_points = $userDetails->total_loyalty_points  + $loyaltyPoint->point;
-        return $userDetails->save();
+        return $userDetails->save();*/
         /** Adding Loyalty point to user */
     }
 

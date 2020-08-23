@@ -204,6 +204,7 @@ Route::group(['prefix' => $appRoute, 'namespace' => 'Admin'], function() use ($a
 
         Route::resource('loyaltylevel','LoyaltyLevelController');	
         Route::post('loyaltylevel/status','LoyaltyLevelController@status')->name('loyaltylevel.status');
+        Route::post('getloyaltypoint-bylevel','LoyaltyLevelController@checkLoyaltyPointByLevel')->name('loyaltypoint-by-level');
         
         Route::resource('vendor','VendorController');		
         Route::post('vendor/status','VendorController@status')->name('vendor.status');

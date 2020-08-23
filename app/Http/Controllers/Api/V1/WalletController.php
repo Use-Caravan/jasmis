@@ -163,15 +163,30 @@ class WalletController extends Controller
                 return $this->commonError(__("apimsg.Your requesting loyalty point is too large"));
             }
 
-            $loyaltyLevel = LoyaltyLevel::where('from_point', '<=', $user->loyalty_points)->where('to_point', '>=', $user->loyalty_points)->orderBy('loyalty_level_id','ASC')->first();            
-
+            $loyaltyLevel = LoyaltyLevel::where('from_point', '<=', $user->loyalty_points)->where('to_point', '>=', $user->loyalty_points)->orderBy('loyalty_level_id','ASC')->first();     
+            
             if($loyaltyLevel === null) {
                 return $this->commonError(__("apimsg.You dont have Loyalty level"));
             }
 
+            /** Get amount for one point in fils **/
             $amountForOnePoint = ($loyaltyLevel->redeem_amount_per_point === null) ? 0 : $loyaltyLevel->redeem_amount_per_point;
             $requestPoint = request()->points;
-            $amount = $requestPoint * $amountForOnePoint;
+            $amount_in_fils = $requestPoint * $amountForOnePoint;
+
+            /** Convert amount for requested points in fils to BD **/
+            $amount_in_bd = $amount_in_fils / 1000; 
+            $amount = $amount_in_bd;
+            
+            /** Get minimum amount to redeem in BD**/
+            $minimum_amount_to_redeem = ($loyaltyLevel->minimum_amount_to_redeem === null) ? 0 : $loyaltyLevel->minimum_amount_to_redeem;
+            
+            /** Check requested redeem amount greater than or equal to minimum_amount_to_redeem or not **/
+            if( $amount_in_bd < $minimum_amount_to_redeem ) {
+                return $this->commonError(__("apimsg.Requested redeem amount below the minimum amount to redeem"));
+            }
+
+            /** If requested redeem amount greater than or equal to minimum_amount_to_redeem then update redeem  amount in user wallet **/
             $transaction = new Transaction();
             $transaction = $transaction->fill([
                 'user_id' => $userID,

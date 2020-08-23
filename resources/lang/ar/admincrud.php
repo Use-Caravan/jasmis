@@ -380,11 +380,17 @@ return [
       'Card Image' => "صورة البطاقة", 
       'Exist Image' => 'صورة موجودة',
       'Redeem Amount Per Point' => 'استبدال المبلغ لكل نقطة',
+      'Redeem Amount Per Point ( In Fils )' => 'استرداد المبلغ بالنقطة (بالفلس)',
       'Loyalty Level added successfully' => 'تمت إضافة مستوى الولاء بنجاح',
       'Loyalty Level updated successfully' => 'تم تحديث مستوى الولاء بنجاح',
       'Loyalty Level deleted successfully' => 'تم حذف مستوى الولاء بنجاح',
       'Loyalty Level status updated successfully' => 'تم تحديث حالة مستوى الولاء بنجاح',
-
+      'Loyalty Point Per BD' => 'نقطة الولاء لكل دينار بحريني',
+      'Minimum Amount to Redeem ( In BD )' => 'الحد الأدنى للمبلغ المراد استرداده (بالدينار البحريني)',
+      'Loyalty point per BD should not greater than higher loyalty level' => 'يجب ألا تزيد نقطة الولاء لكل دينار بحريني عن مستوى ولاء أعلى',
+      'Loyalty point per BD should not lesser than lower loyalty level' => 'يجب ألا تقل نقطة الولاء لكل دينار بحريني عن مستوى ولاء أقل',
+      'Redeem amount per point should not greater than higher loyalty level' => 'يجب ألا يزيد مبلغ الاسترداد لكل نقطة عن مستوى ولاء أعلى',
+      'Redeem amount per point should not lesser than lower loyalty level' => 'يجب ألا تقل قيمة الاسترداد لكل نقطة عن مستوى الولاء الأقل',
 
     /**
     * Offer Management

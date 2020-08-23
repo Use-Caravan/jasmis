@@ -89,6 +89,34 @@ class LoyaltyLevelController extends Controller
      */
     public function store(LoyaltyLevelRequest $request)
     {
+        /** Check loyalty point per BD is greater than higher loyalty level's OR lesser than higher loyalty level's  or not **/
+            $loyalty_level_high = LoyaltyLevel::where('to_point', '>', $request->to_point)->where('loyalty_point_per_bd', '<', $request->loyalty_point_per_bd)->count();
+
+            $loyalty_level_low = LoyaltyLevel::where('to_point', '<', $request->to_point)->where('loyalty_point_per_bd', '>', $request->loyalty_point_per_bd)->count();
+            
+            if( $loyalty_level_high > 0 )
+            {
+                return redirect()->route('loyaltylevel.create')->with('error', __("admincrud.Loyalty point per BD should not greater than higher loyalty level") );
+            }
+            else if( $loyalty_level_low > 0 )
+            {
+                return redirect()->route('loyaltylevel.create')->with('error', __("admincrud.Loyalty point per BD should not lesser than lower loyalty level") );
+            }
+
+            /** Check redeem amount per point is greater than higher loyalty level's OR lesser than higher loyalty level's  or not **/
+            $redeem_amount_per_point_high = LoyaltyLevel::where('to_point', '>', $request->to_point)->where('redeem_amount_per_point', '<', $request->redeem_amount_per_point)->count();
+
+            $redeem_amount_per_point_low = LoyaltyLevel::where('to_point', '<', $request->to_point)->where('redeem_amount_per_point', '>', $request->redeem_amount_per_point)->count();
+            
+            if( $redeem_amount_per_point_high > 0 )
+            {
+                return redirect()->route('loyaltylevel.create')->with('error', __("admincrud.Redeem amount per point should not greater than higher loyalty level") );
+            }
+            else if( $redeem_amount_per_point_low > 0 )
+            {
+                return redirect()->route('loyaltylevel.create')->with('error', __("admincrud.Redeem amount per point should not lesser than lower loyalty level") );
+            }
+
         DB::beginTransaction();
         try {
             $model = new LoyaltyLevel();
@@ -144,6 +172,61 @@ class LoyaltyLevelController extends Controller
         return view('admin.loyaltylevel.update', compact('model','modelLang'));
     }
 
+    public function checkLoyaltyPointByLevel(Request $request)
+    {
+        $loyalty_level_high_count = 0;
+        //echo $request->ajax();exit;
+        if($request->ajax()){
+            $type = $request->type;
+
+            if( $type == "loyalty_point_per_bd" )
+            {
+                $loyalty_level_high_count = LoyaltyLevel::where('to_point', '>', $request->to_point)->where('loyalty_point_per_bd', '<', $request->loyalty_point_per_bd)->count();
+
+                $loyalty_level_low_count = LoyaltyLevel::where('to_point', '<', $request->to_point)->where('loyalty_point_per_bd', '>', $request->loyalty_point_per_bd)->count();
+
+                $high_count = $loyalty_level_high_count;
+                $low_count = $loyalty_level_low_count;
+
+                $loyalty_level_high_count = 0;
+                $loyalty_level_low_count = 0;
+                $redeem_amount_per_point_high_count = 0;
+                $redeem_amount_per_point_low_count = 0;
+            }
+            else if( $type == "redeem_amount_per_point" )
+            {
+                $redeem_amount_per_point_high_count = LoyaltyLevel::where('to_point', '>', $request->to_point)->where('redeem_amount_per_point', '<', $request->redeem_amount_per_point)->count();
+
+                $redeem_amount_per_point_low_count = LoyaltyLevel::where('to_point', '<', $request->to_point)->where('redeem_amount_per_point', '>', $request->redeem_amount_per_point)->count();
+                
+                $high_count = $redeem_amount_per_point_high_count;
+                $low_count = $redeem_amount_per_point_low_count;
+
+                $loyalty_level_high_count = 0;
+                $loyalty_level_low_count = 0;
+                $redeem_amount_per_point_high_count = 0;
+                $redeem_amount_per_point_low_count = 0;
+            }
+            else if( $type == "both" )
+            {
+                $loyalty_level_high_count = LoyaltyLevel::where('to_point', '>', $request->to_point)->where('loyalty_point_per_bd', '<', $request->loyalty_point_per_bd)->count();
+                //echo $loyalty_level_high_count;exit;
+
+                $loyalty_level_low_count = LoyaltyLevel::where('to_point', '<', $request->to_point)->where('loyalty_point_per_bd', '>', $request->loyalty_point_per_bd)->count();
+                
+                $redeem_amount_per_point_high_count = LoyaltyLevel::where('to_point', '>', $request->to_point)->where('redeem_amount_per_point', '<', $request->redeem_amount_per_point)->count();
+
+                $redeem_amount_per_point_low_count = LoyaltyLevel::where('to_point', '<', $request->to_point)->where('redeem_amount_per_point', '>', $request->redeem_amount_per_point)->count();
+                
+                $high_count = 0;
+                $low_count = 0;
+            }
+        }
+        //print_r(['status' => AJAX_SUCCESS,'high_count' => $high_count,'low_count' => $low_count,'loyalty_level_high_count' => $loyalty_level_high_count,'loyalty_level_low_count' => $loyalty_level_low_count,'redeem_amount_per_point_high_count' => $redeem_amount_per_point_high_count,'redeem_amount_per_point_low_count' => $redeem_amount_per_point_low_count]);exit;
+
+        return response()->json(['status' => AJAX_SUCCESS,'high_count' => $high_count,'low_count' => $low_count,'loyalty_level_high_count' => $loyalty_level_high_count,'loyalty_level_low_count' => $loyalty_level_low_count,'redeem_amount_per_point_high_count' => $redeem_amount_per_point_high_count,'redeem_amount_per_point_low_count' => $redeem_amount_per_point_low_count]);
+    }
+
     /**
      * Update the specified resource in storage.
      *
@@ -156,6 +239,36 @@ class LoyaltyLevelController extends Controller
         DB::beginTransaction();
         try {
             $model = LoyaltyLevel::findByKey($id);        
+
+            /** Check loyalty point per BD is greater than higher loyalty level's OR lesser than higher loyalty level's  or not **/
+            $loyalty_level_high = LoyaltyLevel::where('to_point', '>', $request->to_point)->where('loyalty_point_per_bd', '<', $request->loyalty_point_per_bd)->count();
+
+            $loyalty_level_low = LoyaltyLevel::where('to_point', '<', $request->to_point)->where('loyalty_point_per_bd', '>', $request->loyalty_point_per_bd)->count();
+            
+            if( $loyalty_level_high > 0 )
+            {
+                return redirect()->route('loyaltylevel.edit',[ 'id' => $model->loyalty_level_key ])->with('error', __("admincrud.Loyalty point per BD should not greater than higher loyalty level") );
+            }
+            else if( $loyalty_level_low > 0 )
+            {
+                return redirect()->route('loyaltylevel.edit',[ 'id' => $model->loyalty_level_key ])->with('error', __("admincrud.Loyalty point per BD should not lesser than lower loyalty level") );
+            }
+
+            /** Check redeem amount per point is greater than higher loyalty level's OR lesser than higher loyalty level's  or not **/
+            $redeem_amount_per_point_high = LoyaltyLevel::where('to_point', '>', $request->to_point)->where('redeem_amount_per_point', '<', $request->redeem_amount_per_point)->count();
+
+            $redeem_amount_per_point_low = LoyaltyLevel::where('to_point', '<', $request->to_point)->where('redeem_amount_per_point', '>', $request->redeem_amount_per_point)->count();
+            
+            if( $redeem_amount_per_point_high > 0 )
+            {
+                return redirect()->route('loyaltylevel.edit',[ 'id' => $model->loyalty_level_key ])->with('error', __("admincrud.Redeem amount per point should not greater than higher loyalty level") );
+            }
+            else if( $redeem_amount_per_point_low > 0 )
+            {
+                return redirect()->route('loyaltylevel.edit',[ 'id' => $model->loyalty_level_key ])->with('error', __("admincrud.Redeem amount per point should not lesser than lower loyalty level") );
+            }
+
+            //$model = LoyaltyLevel::findByKey($id);        
 
             $existsImage       = $model->card_image;
             $existspopupImage  = $model->popup_image;

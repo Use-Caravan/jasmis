@@ -40,15 +40,35 @@
                 @endif                    
             </div>
         </div>
-        <div class="form-group {{ ($errors->has("redeem_amount_per_point")) ? 'has-error' : '' }}">                    
+        <div class="form-group loyalty_point_per_bd_div {{ ($errors->has("loyalty_point_per_bd")) ? 'has-error' : '' }}">                    
             <div class="col-md-12">                                          
-                {{ Form::label("redeem_amount_per_point", __('admincrud.Redeem Amount Per Point'),['class' => 'required']) }}
-                {{ Form::text("redeem_amount_per_point", $model->redeem_amount_per_point, ['class' => 'form-control']) }}
+                {{ Form::label("loyalty_point_per_bd", __('admincrud.Loyalty Point Per BD'),['class' => 'required']) }}
+                {{ Form::text("loyalty_point_per_bd", $model->loyalty_point_per_bd, ['class' => 'form-control only-numeric', 'maxlength' => '5']) }}
+                @if($errors->has("loyalty_point_per_bd"))
+                    <span class="help-block error-help-block">{{ $errors->first("loyalty_point_per_bd") }}</span>
+                @endif
+            </div>
+        </div>
+        <div class="form-group form-group-help redeem_amount_per_point_div {{ ($errors->has("redeem_amount_per_point")) ? 'has-error' : '' }}">                    
+            <div class="col-md-12">                                          
+                {{ Form::label("redeem_amount_per_point", __('admincrud.Redeem Amount Per Point ( In Fils )'),['class' => 'required']) }}
+                {{ Form::text("redeem_amount_per_point", $model->redeem_amount_per_point, ['class' => 'form-control only-numeric', 'maxlength' => '5']) }}
                 @if($errors->has("redeem_amount_per_point"))
                     <span class="help-block error-help-block">{{ $errors->first("redeem_amount_per_point") }}</span>
-                @endif                    
+                @endif         
             </div>
-        </div>  
+            <span class="help-block-text error-help-block redeem_amount_in_bd"></span>
+        </div> 
+        <br>
+        <div class="form-group {{ ($errors->has("minimum_amount_to_redeem")) ? 'has-error' : '' }}">                    
+            <div class="col-md-12">                                          
+                {{ Form::label("minimum_amount_to_redeem", __('admincrud.Minimum Amount to Redeem ( In BD )'),['class' => 'required']) }}
+                {{ Form::text("minimum_amount_to_redeem", $model->minimum_amount_to_redeem, ['class' => 'form-control only-numeric', 'maxlength' => '5']) }}
+                @if($errors->has("minimum_amount_to_redeem"))
+                    <span class="help-block error-help-block">{{ $errors->first("minimum_amount_to_redeem") }}</span>
+                @endif
+            </div>
+        </div> 
         <div class="form-group {{ ($errors->has("card_image")) ? 'has-error' : '' }}">                    
             <div class="col-md-12">                          
             {{ Form::label("card_image", __('admincrud.Card Image')." ( 550W x 356H )", ['class' => (!$model->exists) ? 'required' : '']) }}
@@ -103,9 +123,159 @@
   <!-- /.box-body -->
     <div class="box-footer">
         {{ Html::link(route('loyaltylevel.index'), __('admincommon.Cancel'),['class' => 'btn btn-default active']) }}        
-        {{ Form::submit($model->exists ? __('admincommon.Update') : __('admincommon.Save'), ['class' => 'btn btn-info pull-right']) }}
+        {{ Form::submit($model->exists ? __('admincommon.Update') : __('admincommon.Save'), ['class' => 'btn btn-info pull-right loyaltylevel_save']) }}
     </div>
   <!-- /.box-footer -->
 {{ Form::close() }}
 
 {!! JsValidator::formRequest('App\Http\Requests\Admin\LoyaltyLevelRequest', '#loyaltylevel-form')  !!}
+
+<script> 
+    $(document).ready(function(){
+        var redeem_amount_per_point = $('#redeem_amount_per_point').val();
+        var redeem_amount_in_bd = redeem_amount_per_point / 1000;
+        $(".redeem_amount_in_bd").text(redeem_amount_in_bd+" BD");
+
+        $('#redeem_amount_per_point').on('keyup', function () {
+            var redeem_amount_per_point = $(this).val();
+            var redeem_amount_in_bd = redeem_amount_per_point / 1000;
+            $(".redeem_amount_in_bd").text(redeem_amount_in_bd+" BD");
+        });
+
+        $(".only-numeric").bind("keypress", function (e) {
+            var keyCode = e.which ? e.which : e.keyCode
+               
+            if (!(keyCode >= 48 && keyCode <= 57))
+                return false;
+        });
+
+        /** Check loyalty point per BD is greater than higher loyalty level's or not **/
+        $('#loyalty_point_per_bd').change(function()
+        {   
+            checkLoyaltyPointByLevel("loyalty_point_per_bd");
+        });
+
+        /** Check loyalty point per BD is greater than higher loyalty level's or not **/
+        $('#redeem_amount_per_point').change(function()
+        {   
+            checkLoyaltyPointByLevel("redeem_amount_per_point");
+        });
+
+        $("form").submit(function(e) {
+            e.preventDefault();
+
+            var self = this,
+                loyalty_point_per_bd = $('#loyalty_point_per_bd').val(),
+                redeem_amount_per_point = $('#redeem_amount_per_point').val(),
+                to_point = $('#to_point').val(),
+                type = "both";
+
+            $.ajax({
+                type: "POST",
+                url: "{{ route('loyaltypoint-by-level') }}",
+                data: {loyalty_point_per_bd: loyalty_point_per_bd, redeem_amount_per_point: redeem_amount_per_point, to_point: to_point, type: type},
+                cache: false
+            }).done(function(result) {
+                if(result.status == AJAX_SUCCESS){
+                    if( result.loyalty_level_high_count == 0 && result.loyalty_level_low_count == 0 && result.redeem_amount_per_point_high_count == 0 && result.redeem_amount_per_point_low_count == 0 ) {
+                        $('.loyalty_point_per_bd_div').addClass('has-success');
+                        $("#loyalty_point_per_bd-error").text("");
+
+                        $('.redeem_amount_per_point_div').addClass('has-success');
+                        $("#redeem_amount_per_point-error").text("");
+
+                        //$("#loyaltylevel-form").submit();
+                        self.submit();
+                    }
+                    
+                    if( result.loyalty_level_high_count > 0 ) {
+                        $('.loyalty_point_per_bd_div').addClass('has-error');
+                        $("#loyalty_point_per_bd-error").text("Loyalty point per BD should not greater than higher loyalty level's");
+                    }
+                    
+                    if( result.loyalty_level_low_count > 0 ) {
+                        $('.loyalty_point_per_bd_div').addClass('has-error');
+                        $("#loyalty_point_per_bd-error").text("Loyalty point per BD should not lesser than lower loyalty level's");
+                    }
+                    
+                    if( result.redeem_amount_per_point_high_count > 0 ) {
+                        $('.redeem_amount_per_point_div').addClass('has-error');
+                        $("#redeem_amount_per_point-error").text("Redeem amount per point should not greater than higher loyalty level's");
+                    }
+                    
+                    if( result.redeem_amount_per_point_low_count > 0 ) {
+                        $('.redeem_amount_per_point_div').addClass('has-error');
+                        $("#redeem_amount_per_point-error").text("Redeem amount per point should not lesser than lower loyalty level's");
+                    }
+                }
+                else{
+                    Error('Something went wrong','Error');
+                }
+            }).fail(function() {
+                //alert('error');
+                Error('Something went wrong','Error');
+            });
+        });
+
+        /** Check loyalty point per BD is greater than higher loyalty level's or not **/
+        function checkLoyaltyPointByLevel( type )
+        {
+            //alert(type);
+            var to_point = $('#to_point').val();
+            if( type == 'loyalty_point_per_bd' ) {
+                var loyalty_point_per_bd = $('#loyalty_point_per_bd').val();  
+                var redeem_amount_per_point = "";              
+            }
+            else if( type == 'redeem_amount_per_point' ) {
+                var redeem_amount_per_point = $('#redeem_amount_per_point').val();  
+                var loyalty_point_per_bd = "";              
+            }
+
+            if( ( type == 'loyalty_point_per_bd' && loyalty_point_per_bd > 0 && to_point > 0 ) || ( type == 'redeem_amount_per_point' && redeem_amount_per_point > 0 && to_point > 0 ))
+            {
+                $.ajax({
+                    url: "{{ route('loyaltypoint-by-level') }}",
+                    type: 'post',
+                    data: {loyalty_point_per_bd: loyalty_point_per_bd, redeem_amount_per_point: redeem_amount_per_point, to_point: to_point, type: type},
+                    success: function(result){ 
+                        if(result.status == AJAX_SUCCESS){
+                            if( result.high_count == 0 && result.low_count == 0 ) {
+                                if( type == 'loyalty_point_per_bd' ) {
+                                    $('.loyalty_point_per_bd_div').addClass('has-success');
+                                    $("#loyalty_point_per_bd-error").text("");
+                                }
+                                else if( type == 'redeem_amount_per_point' ) {
+                                    $('.redeem_amount_per_point_div').addClass('has-success');
+                                    $("#redeem_amount_per_point-error").text("");
+                                }
+                            }
+                            if( result.high_count > 0 ) {
+                                if( type == 'loyalty_point_per_bd' ) {
+                                    $('.loyalty_point_per_bd_div').addClass('has-error');
+                                    $("#loyalty_point_per_bd-error").text("Loyalty point per BD should not greater than higher loyalty level's");
+                                }
+                                else if( type == 'redeem_amount_per_point' ) {
+                                    $('.redeem_amount_per_point_div').addClass('has-error');
+                                    $("#redeem_amount_per_point-error").text("Redeem amount per point should not greater than higher loyalty level's");
+                                }
+                            }
+                            
+                            if( result.low_count > 0 ) {
+                                if( type == 'loyalty_point_per_bd' ) {
+                                    $('.loyalty_point_per_bd_div').addClass('has-error');
+                                    $("#loyalty_point_per_bd-error").text("Loyalty point per BD should not lesser than lower loyalty level's");
+                                }
+                                else if( type == 'redeem_amount_per_point' ) {
+                                    $('.redeem_amount_per_point_div').addClass('has-error');
+                                    $("#redeem_amount_per_point-error").text("Redeem amount per point should not lesser than lower loyalty level's");
+                                }
+                            }
+                        }else{
+                            Error('Something went wrong','Error');
+                        }
+                    }
+                });
+            }
+        }
+    });
+</script>

@@ -141,4 +141,5 @@ return [
     'Coupon Offer' => 'Coupon Offer',
     'Total' => 'Total',
     'Delivery Fee' =>  'Delivery Fee',
+    'Requested redeem amount below the minimum amount to redeem' => 'Requested redeem amount below the minimum amount to redeem',
 ];

@@ -142,5 +142,5 @@ return [
     'Coupon Offer' => 'عرض الكوبون',
     'Total' => 'مجموع',
     'Delivery Fee' =>  'رسوم التوصيل',
-
+    'Requested redeem amount below the minimum amount to redeem' => 'طلب استرداد المبلغ أقل من الحد الأدنى للمبلغ المراد استرداده',
 ];
