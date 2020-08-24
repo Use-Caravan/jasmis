@@ -28,6 +28,12 @@ class HtmlRender
         $type = TYPE_QUICKBUYSTATUS_COLUMN;
         return view('admin.layouts.partials._tableaction',compact('model','route','type'));
     }
+    public static function newitemColumn($model,$route)
+    {   
+        $type = TYPE_NEWITEMSTATUS_COLUMN;
+        //echo view('admin.layouts.partials._tableaction',compact('model','route','type'));exit;
+        return view('admin.layouts.partials._tableaction',compact('model','route','type'));
+    }
 
     /**
      * Method to generate approved status column checkbox

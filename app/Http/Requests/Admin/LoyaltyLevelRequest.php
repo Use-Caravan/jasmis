@@ -31,7 +31,7 @@ class LoyaltyLevelRequest extends FormRequest
             'to_point' => 'required|numeric',
             'loyalty_point_per_bd' => 'required|integer|max:4294967295',
             'redeem_amount_per_point' => 'required|integer|max:4294967295',
-            'minimum_amount_to_redeem' => 'required||integer|max:4294967295',            
+            'minimum_amount_to_redeem' => 'required|integer|max:4294967295',            
         ];
 
         switch ($this->method()) {

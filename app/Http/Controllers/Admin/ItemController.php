@@ -46,6 +46,7 @@ class ItemController extends Controller
     public function index(Request $request)
     {         
         $model = new Item();
+
         if($request->ajax()) {
             $model = Item::getAll();            
             return DataTables::eloquent($model)
@@ -59,6 +60,13 @@ class ItemController extends Controller
                         ->editColumn('quickbuy_status', function ($model) {
                                 return HtmlRender::quickbuyColumn($model,'item.quickbuystatus');
                         })
+                        ->editColumn('newitem_status', function ($model) {
+                                $newitemstatus = HtmlRender::newitemColumn($model,'item.newitemstatus');
+                                //$newitemstatus = trim($newitemstatus,'"');
+                                //return html_entity_decode($newitemstatus);
+                                return HtmlRender::newitemColumn($model,'item.newitemstatus');
+                        })
+                        
                         ->addColumn('action', function ($model) {                                
                                 $view = HtmlRender::actionColumn(
                                     $model,
@@ -338,6 +346,20 @@ class ItemController extends Controller
             $response = ['status' => AJAX_FAIL, 'msg' => __('admincommon.Something went wrong') ];
             $model = Item::findByKey($request->itemkey);            
             $model->quickbuy_status = $request->status;
+            if($model->save()){
+                $response = ['status' => AJAX_SUCCESS,'msg'=> __('admincrud.Item quick buy status updated successfully') ];
+            }             
+            Common::log("Status Update","Item quick buy status has been changed",$model);
+            return response()->json($response);
+        }
+    }
+
+    public function newitemstatus(Request $request)
+    {   
+        if($request->ajax()){
+            $response = ['status' => AJAX_FAIL, 'msg' => __('admincommon.Something went wrong') ];
+            $model = Item::findByKey($request->itemkey);            
+            $model->newitem_status = $request->status;
             if($model->save()){
                 $response = ['status' => AJAX_SUCCESS,'msg'=> __('admincrud.Item quick buy status updated successfully') ];
             }             

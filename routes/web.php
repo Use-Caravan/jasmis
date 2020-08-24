@@ -238,6 +238,7 @@ Route::group(['prefix' => $appRoute, 'namespace' => 'Admin'], function() use ($a
         Route::resource('item','ItemController');
         Route::post('item/status','ItemController@status')->name('item.status');
         Route::post('item/quickbuy','ItemController@quickbuystatus')->name('item.quickbuystatus');
+        Route::post('item/newitem','ItemController@newitemstatus')->name('item.newitemstatus');
         Route::post('item/approvedstatus','ItemController@approvedStatus')->name('item.approvedstatus');
         Route::post('get-item-by-branch','ItemController@getItembyBranch')->name('get-item-by-branch');        
         Route::post('get-item-by-branch-offer','ItemController@getItembyBranchOffer')->name('get-item-by-branch-offer');

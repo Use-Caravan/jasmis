@@ -60,8 +60,10 @@ class OrderResource extends JsonResource
                     ];
                 }),
             'order_type' => ($this->order_type === null) ? "" : $this->order_type,    
-            'status' => ($this->order_status === null) ? "" :(new Order)->approvedStatus($this->order_status),
-            'order_status_value' => ($this->order_status === null) ? "" : $this->order_status,
+            //'status' => ($this->order_status === null) ? "" :(new Order)->approvedStatus($this->order_status),
+            'status' => ($this->order_status === null) ? "" : ( $this->order_status == ORDER_APPROVED_STATUS_DRIVER_ACCEPTED || $this->order_status == ORDER_DRIVER_REJECTED ) ? (new Order)->approvedStatus(ORDER_APPROVED_STATUS_PENDING) : (new Order)->approvedStatus($this->order_status),
+            //'order_status_value' => ($this->order_status === null) ? "" : $this->order_status,
+            'order_status_value' => ($this->order_status === null) ? "" : ( $this->order_status == ORDER_APPROVED_STATUS_DRIVER_ACCEPTED || $this->order_status == ORDER_DRIVER_REJECTED ) ? ORDER_APPROVED_STATUS_PENDING : $this->order_status,
             'status_color' => ($this->order_status === null) ? ORDER_DEFAULT_COLOR : (new Order)->approvedStatus($this->order_status,'color'),            
             'branch_latitude' => ($this->branch_latitude === null) ? '' : $this->branch_latitude,
             'branch_longitude' => ($this->branch_longitude === null) ? '' : $this->branch_longitude,

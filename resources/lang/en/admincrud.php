@@ -297,7 +297,7 @@ return [
     'Item updated successfully' => 'Item updated successfully',
     'Item added successfully' => 'Item added successfully',
     'Item quick buy status updated successfully' => 'Item quick buy status updated successfully',
-    
+    'Item new item status updated successfully' => 'Item new item status updated successfully',
     
     /**
      * Ingredient Management

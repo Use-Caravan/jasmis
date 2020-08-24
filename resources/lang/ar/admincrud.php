@@ -297,6 +297,7 @@ return [
     'Item updated successfully' => 'تم تحديث العنصر بنجاح',
     'Item added successfully' => 'تمت إضافة العنصر بنجاح',
     'Item quick buy status updated successfully' => 'تم تحديث حالة الشراء السريع للعنصر بنجاح',
+    'Item new item status updated successfully' => 'تم تحديث حالة العنصر الجديد للعنصر بنجاح',
 
      /**
      * Ingredient Management

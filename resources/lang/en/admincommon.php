@@ -57,7 +57,7 @@ return [
     'Delivery boys' => 'Delivery boys',
     'Popular' => 'Popular',
     'Quick Buy' => 'Quick Buy',
-
+    'New Item' => 'New Item',
     
     /**
     * Status

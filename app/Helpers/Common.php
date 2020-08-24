@@ -239,7 +239,7 @@ class Common
         return ($popular != null) ? $list[$popular] : $list;
     }
 
-     /**Get quickbuy Status  */
+    /**Get quickbuy Status  */
     public function quickbuy($quickbuy = null)  
     {
         $list = [
@@ -247,6 +247,16 @@ class Common
             0 => __('admincommon.Inactive'),
         ];
         return ($quickbuy != null) ? $list[$quickbuy] : $list;
+    }
+
+    /**Get new item Status  */
+    public function newitem($newitem = null)  
+    {
+        $list = [
+            1 => __('admincommon.Active'),
+            0 => __('admincommon.Inactive'),
+        ];
+        return ($newitem != null) ? $list[$newitem] : $list;
     }
 
     /**

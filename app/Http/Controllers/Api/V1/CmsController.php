@@ -34,10 +34,12 @@ class CmsController extends Controller
     public function index(Request $request)
     {
         $cms = Cms::getList()->where(['status' => ITEM_ACTIVE])->where(['section' => NULL])->orderBy('sort_no','asc')->get()->toArray();
-        array_push($cms,['title' => 'FAQ','slug' => 'faq', 'position' => 3]);
+        array_push($cms,['title' => 'FAQ','slug' => 'faq', 'position' => 3, 'description' => '', 'cms_content' => '']);
         $data = [];
+        //print_r($cms);exit;
         foreach($cms as $key => $value) {
-            $data[] =  [ 'cms_title' => $value['title'], 'cms_link' => route('frontend.cms', $value['slug']), 'position' => ($value['position'] === null) ? 3 : $value['position']  ];
+            //$data[] =  [ 'cms_title' => $value['title'], 'cms_link' => route('frontend.cms', $value['slug']), 'position' => ($value['position'] === null) ? 3 : $value['position']  ];
+            $data[] =  [ 'cms_title' => $value['title'], 'cms_link' => route('frontend.cms', $value['slug']), 'cms_description' => $value['description'], 'cms_content' => $value['cms_content'], 'position' => ($value['position'] === null) ? 3 : $value['position']  ];
         }
         //$cms = CmsResource::collection($cms);
         $this->setMessage( __('apimsg.Cms are fetched.') );
@@ -132,8 +134,6 @@ class CmsController extends Controller
                      'no_of_items' => '', 
                      'section_items' => $quickbuy_items,
                      'section_items_3' => $quickbuy_items
-                       
-
                    ];
 
         $section4 =  [ 

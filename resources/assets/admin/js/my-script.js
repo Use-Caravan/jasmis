@@ -57,6 +57,24 @@ $(document).ready(function()
         }); 
     });
 
+    $('body').on('change','.SwitchNewitem',function (e, data) {
+        var itemkey = $(this).attr('itemkey'); 
+        var action = $(this).attr('action'); 
+        var status = ($(this).prop('checked') == true) ?  ITEM_ACTIVE  : ITEM_INACTIVE ;
+        $.ajax({
+            url: action,
+            type: 'post',
+            data : { itemkey : itemkey,status : status },
+            success: function(result) {
+                if(result.status == AJAX_SUCCESS ){
+                    successNotify(result.msg);
+                }else{
+                    errorNotify(result.msg);
+                }
+            }
+        }); 
+    });
+
     $('body').on('change','select.approvedStatuss',function (e, data) {
         var itemkey = $(this).attr('id');
         var action = $(this).attr('action');        

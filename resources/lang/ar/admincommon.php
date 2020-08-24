@@ -55,7 +55,8 @@ return [
     'Filter' => 'منقي',
     'Delivery boys' => 'الأولاد التسليم',
     'Popular' => 'جمع',
-
+    'Quick Buy' => 'شراء سريع',
+    'New Item' => 'عنصر جديد',
 
      /**
     * Status

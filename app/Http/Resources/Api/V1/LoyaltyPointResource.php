@@ -91,6 +91,7 @@ class LoyaltyPointResource extends JsonResource
                 }                
                 return  FileHelper::loadImage( ($result === null) ? '' :  $result->popup_image );
             }), 
+            'redeem_amount_per_point' => $this->redeem_amount_per_point,
         ];
     }
     

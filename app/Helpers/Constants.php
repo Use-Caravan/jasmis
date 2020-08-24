@@ -79,6 +79,7 @@
     const TYPE_QUICKBUYSTATUS_COLUMN = 4;
     const TYPE_ACTION_COLUMN = 2;
     const APPROVED_STATUS_COLUMN = 3;
+    const TYPE_NEWITEMSTATUS_COLUMN = 5;
 
     /**
      * Storage paths for all files

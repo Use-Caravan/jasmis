@@ -31,7 +31,8 @@
                   <th class="status">@lang('admincommon.Sort No')</th>
                   <th class="status">@lang('admincrud.Approved Status')</th>
                   <th class="status">@lang('admincommon.Status')</th>                  
-                  <th class="status">@lang('admincommon.Quick Buy')</th>                  
+                  <th class="status">@lang('admincommon.Quick Buy')</th>
+                  <!--<th class="status">@lang('admincommon.New Item')</th>-->                  
                   <th class="action">@lang('admincommon.Action')</th>
               </tr> 
                 <tr>
@@ -68,6 +69,9 @@
                     <th class="quickbuy">
                         {{ Form::select('quickbuy_status', Common::quickbuy(), '' ,['class' => 'selectpicker filterSelect', 'placeholder' => __('admincommon.All'), "data-name" => "10"] )}}
                     </th>
+                    <!--<th class="newitem">
+                        {{ Form::select('newitem_status', Common::newitem(), '' ,['class' => 'selectpicker filterSelect', 'placeholder' => __('admincommon.All'), "data-name" => "11"] )}}
+                    </th>-->
                     <th class="action"></th>
                 </tr>
               </thead>
@@ -103,6 +107,7 @@ $(document).ready(function(){
             { 'data' : 'approved_status'},
             { 'data' : 'status', 'sClass' : 'status', 'orderable' : false},
             { 'data' : 'quickbuy_status', 'sClass' : 'quickbuy_status', 'orderable' : false},
+            //{ 'data' : 'newitem_status', 'sClass' : 'newitem_status', 'orderable' : false },
             { 'data' : 'action', 'sClass' : 'action', 'orderable' : false}
         ],      
     });        
