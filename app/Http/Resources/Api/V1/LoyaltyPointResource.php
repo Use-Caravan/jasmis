@@ -26,7 +26,19 @@ class LoyaltyPointResource extends JsonResource
      */
     public function toArray($request)
     {        
-        
+        $loyalty_level = LoyaltyLevel::where('from_point','<=',(int)$this->total_loyalty_points)->where('to_point','>=',(int)$this->total_loyalty_points);
+        $loyalty_level = $loyalty_level->first();
+        $loyalty_point_per_bd = ($loyalty_level === null) ? '' : $loyalty_level->loyalty_point_per_bd;
+
+        $redeem_amount_per_point = ($loyalty_level === null) ? '' : $loyalty_level->redeem_amount_per_point;
+        $loyalty_point_per_bd = ($loyalty_level === null) ? '' : $loyalty_level->loyalty_point_per_bd;
+        $minimum_amount_to_redeem = ($loyalty_level === null) ? '' : $loyalty_level->minimum_amount_to_redeem;
+        $points_to_redeem_1BD = '';
+        if( $redeem_amount_per_point > 0 )
+        {
+           $points_to_redeem_1BD = ( $redeem_amount_per_point < 1000 ) ? ( 1000 / $redeem_amount_per_point ) : '';
+        }
+
         return [
             'user_key' => $this->user_key, 
             'first_name' => $this->first_name,
@@ -91,7 +103,11 @@ class LoyaltyPointResource extends JsonResource
                 }                
                 return  FileHelper::loadImage( ($result === null) ? '' :  $result->popup_image );
             }), 
-            'redeem_amount_per_point' => $this->redeem_amount_per_point,
+            'redeem_amount_per_point' => $redeem_amount_per_point.' Fils',
+            'loyalty_point_per_bd' => $loyalty_point_per_bd,
+            'minimum_amount_to_redeem' => $minimum_amount_to_redeem.' BD',
+            'points_for_every_1BD' => $loyalty_point_per_bd,
+            'points_to_redeem_1BD' => $points_to_redeem_1BD
         ];
     }
     
