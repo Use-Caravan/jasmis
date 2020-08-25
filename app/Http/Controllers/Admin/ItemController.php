@@ -47,6 +47,9 @@ class ItemController extends Controller
     {         
         $model = new Item();
 
+        //echo htmlspecialchars_decode(HtmlRender::newitemColumn($model,'item.newitemstatus'));exit;
+        //echo HtmlRender::newitemColumn($model,'item.newitemstatus');exit;
+
         if($request->ajax()) {
             $model = Item::getAll();            
             return DataTables::eloquent($model)
@@ -61,9 +64,6 @@ class ItemController extends Controller
                                 return HtmlRender::quickbuyColumn($model,'item.quickbuystatus');
                         })
                         ->editColumn('newitem_status', function ($model) {
-                                $newitemstatus = HtmlRender::newitemColumn($model,'item.newitemstatus');
-                                //$newitemstatus = trim($newitemstatus,'"');
-                                //return html_entity_decode($newitemstatus);
                                 return HtmlRender::newitemColumn($model,'item.newitemstatus');
                         })
                         
@@ -92,7 +92,7 @@ class ItemController extends Controller
                                     ); 
                                 return "$edit$delete";
                             })
-                        ->rawColumns(['status','approved_status','quickbuy_status','action'])
+                        ->rawColumns(['status','approved_status','quickbuy_status','newitem_status','action'])
                         ->toJson();
         }
         $vendorList = Vendor::getVendors();
@@ -361,9 +361,9 @@ class ItemController extends Controller
             $model = Item::findByKey($request->itemkey);            
             $model->newitem_status = $request->status;
             if($model->save()){
-                $response = ['status' => AJAX_SUCCESS,'msg'=> __('admincrud.Item quick buy status updated successfully') ];
+                $response = ['status' => AJAX_SUCCESS,'msg'=> __('admincrud.Item new item status updated successfully') ];
             }             
-            Common::log("Status Update","Item quick buy status has been changed",$model);
+            Common::log("Status Update","Item new item status has been changed",$model);
             return response()->json($response);
         }
     }
