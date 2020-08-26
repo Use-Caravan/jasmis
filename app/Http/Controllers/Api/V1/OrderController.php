@@ -803,7 +803,7 @@ class OrderController extends Controller
                         $order->save();
                         (new CartController())->clearCart();
 
-                        if($order->payment_status = ORDER_PAYMENT_STATUS_SUCCESS) {
+                        if($order->payment_status == ORDER_PAYMENT_STATUS_SUCCESS) {
                             $voucherUsageStatus = VoucherUsage::where(['order_id' => $order->order_id])->first();
                             if($voucherUsageStatus !== null) {
                                 $voucherUsageStatus->status = ITEM_ACTIVE;
