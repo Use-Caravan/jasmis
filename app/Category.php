@@ -87,8 +87,17 @@ class Category extends CModel
         CategoryLang::selectTranslation($query);
         return $query;
 	}
-    
-	/**
+
+    /** Get category details by name **/
+    public static function findByName($name)
+    {
+        $self = new self();
+        $query = self::select($self->getTable().'.*');
+        CategoryLang::selectTranslationByName($query, $name);
+        return $query;
+    }
+
+    /**
 	 *
 	 * @var query
 	 */

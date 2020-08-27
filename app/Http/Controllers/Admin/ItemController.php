@@ -14,6 +14,7 @@ use App\{
     Branch,
     BranchCategory,
     BranchCuisine,
+    Category,
     CategoryLang,
     CuisineLang,
     Ingredient,
@@ -31,7 +32,6 @@ use Hash;
 use HtmlRender;
 use Html;
 
-
 /**
  * @Title("Item Management")
  */
@@ -44,11 +44,8 @@ class ItemController extends Controller
      * @Title("List")
      */
     public function index(Request $request)
-    {         
+    {     
         $model = new Item();
-
-        //echo htmlspecialchars_decode(HtmlRender::newitemColumn($model,'item.newitemstatus'));exit;
-        //echo HtmlRender::newitemColumn($model,'item.newitemstatus');exit;
 
         if($request->ajax()) {
             $model = Item::getAll();            
@@ -360,6 +357,20 @@ class ItemController extends Controller
             $response = ['status' => AJAX_FAIL, 'msg' => __('admincommon.Something went wrong') ];
             $model = Item::findByKey($request->itemkey);            
             $model->newitem_status = $request->status;
+
+            /** Assign category of this item to "New Items" to shown in get-near-branches() API under "New Items" category **/
+            if( $request->status == ITEM_ACTIVE )
+            {
+                $new_item_cat_det = Category::findByName("New Items")->first();
+                $category_id = $new_item_cat_det->category_id;
+                //echo $category_id;exit;
+            
+                $model->category_id = $category_id;
+            }
+            else {
+                $model->category_id = 55;
+            }
+
             if($model->save()){
                 $response = ['status' => AJAX_SUCCESS,'msg'=> __('admincrud.Item new item status updated successfully') ];
             }             

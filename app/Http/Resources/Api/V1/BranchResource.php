@@ -116,7 +116,7 @@ class BranchResource extends JsonResource
             }),
             'branch_offer' => 'Buy 1 Get 1 offer',
             'items' => ($this->branch_key === request()->branch_key) ? CategoryResource::collection(Category::getCategories()->get()) : [],
-            'new_items' => ($this->branch_key === request()->branch_key) ? ItemResource::collection(Item::getItems(null,$request->branch_key,null)->where('newitem_status',ITEM_ACTIVE)->get()) : [],
+            //'new_items' => ($this->branch_key === request()->branch_key) ? ItemResource::collection(Item::getItems(null,$request->branch_key,null)->where('newitem_status',ITEM_ACTIVE)->get()) : [],
             /*$this->mergeWhen( ($request->branch_key), [
                 'new_items' => ItemResource::collection(Item::getItems(null,$request->branch_key,null)->where('newitem_status',ITEM_ACTIVE)->get()),
             ]),*/
