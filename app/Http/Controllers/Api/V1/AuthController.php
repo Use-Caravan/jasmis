@@ -172,15 +172,6 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {               
-        /*$phone_number = "97334077640";
-        $message = "Checking sms usecaravan..";
-        $sendOTP = SendOTP::instance()->setReciver($phone_number)->send($message);exit;*/
-
-        /*$phone_number = "34077640";
-        $message = "Checking SMS.........";
-        $sendOTP = SendOTP::instance()->setReciver($phone_number)->send($message);
-        print_r($sendOTP);exit;*/
-
         $user = new User();        
         $validator = Validator::make($request->all(),
             [
@@ -273,34 +264,39 @@ class AuthController extends Controller
         $otpPin = Common::generateOTP();
         $user = $this->user;
         if($user === null) {
-            $user = User::findByKey(request('user_key'));
-        }
-        
-        $otp = OTPTemp::where(['user_id' => $user->user_id,'otp_purpose' => $this->purpose])->where('status','!=',OTP_VERIFIED)->first();
-        if($otp === null) {            
-            $otp = new OTPTemp();
-            $otp = $otp->fill([
-                'user_id' => $user->user_id,
-                'otp' => $otpPin,
-                'otp_purpose' => $this->purpose,
-                'status' => OTP_UNVERIFIED,
-            ]);
-        } else {
-            $otp->otp = $otpPin;
+            if( request('user_key') !== null )
+                $user = User::findByKey(request('user_key'));
+            else if( request('phone_number') !== null )
+                $user = User::where(['phone_number' => request('phone_number'), 'user_type' => USER_TYPE_CUSTOMER])->first();
         }
 
-        $message = "Your One Time Password is $otpPin";
-       
-        $sendOTP = SendOTP::instance()->setReciver($user->phone_number)->send($message);
-        /* if(!$sendOTP) {
-            return $this->commonError( __('apimsg.OTP not sent') );
-        } else  { */
-            $otp->save();        
-            $otpTemp = new OTPResource($otp);
-            $this->setMessage( __('apimsg.OTP has been sent') );
-            $this->setData($otpTemp);
-            return $this->asJson();
-       /* } */
+        if($user !== null) {
+            $otp = OTPTemp::where(['user_id' => $user->user_id,'otp_purpose' => $this->purpose])->where('status','!=',OTP_VERIFIED)->first();
+            if($otp === null) {            
+                $otp = new OTPTemp();
+                $otp = $otp->fill([
+                    'user_id' => $user->user_id,
+                    'otp' => $otpPin,
+                    'otp_purpose' => $this->purpose,
+                    'status' => OTP_UNVERIFIED,
+                ]);
+            } else {
+                $otp->otp = $otpPin;
+            }
+
+            $message = "Your One Time Password is $otpPin";
+           
+            $sendOTP = SendOTP::instance()->setReciver($user->phone_number)->send($message);
+            /* if(!$sendOTP) {
+                return $this->commonError( __('apimsg.OTP not sent') );
+            } else  { */
+                $otp->save();        
+                $otpTemp = new OTPResource($otp);
+                $this->setMessage( __('apimsg.OTP has been sent') );
+                $this->setData($otpTemp);
+                return $this->asJson();
+           /* } */
+        }
     }    
 
     /**
