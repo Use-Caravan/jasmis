@@ -11,6 +11,7 @@ use App\Http\{
     Resources\Api\V1\CalculateResource
 };
 use App\Mail\OrderConfirmation;
+use App\Mail\DeliveryboyForgotPasswordEmail;
 use App\Helpers\{
     OneSignal,
     Curl,
@@ -2790,9 +2791,40 @@ class OrderController extends Controller
 
         $orderModel->save();
         $this->setMessage(__("apimsg.Order status updated successfully"));
-        return $this->asJson();
-         
+        return $this->asJson();         
     }    
+
+    public function sendPasswordResetMailDeliveryBoy()
+    {   
+        $deliveryboy_key = request()->deliveryboy_key;
+        $deliveryboy_email = request()->email;
+        $reset_password = request()->reset_password;
+
+        $url = config('webconfig.deliveryboy_url')."/api/v1/driver/$deliveryboy_key?company_id=".config('webconfig.company_id');
+        $response = new Curl();
+        $response->setUrl($url);        
+        $data = $response->send();
+        $response = json_decode($data,true);
+        //print_r($response);exit;
+
+        $deliveryboy_name = ( $response['data']['name'] ) ? $response['data']['name'] : "";
+
+        $responseData = [
+                'deliveryboy_name' => $deliveryboy_name,
+                'reset_password' => $reset_password,
+                'deliveryboy_email' => $deliveryboy_email
+            ];
+            
+        if($deliveryboy_email !==  null && $deliveryboy_email !== '')  {
+            try {
+                Mail::to($deliveryboy_email)->send(new DeliveryboyForgotPasswordEmail($responseData));           
+             } catch (\Exception $ex) {      
+                //echo $ex->getMessage();exit;      
+                return response()->json(['status' => HTTP_UNPROCESSABLE, 'message' => __("apimsg.Mail configuration is incorrect")],HTTP_UNPROCESSABLE);
+            }
+        }
+        return response()->json(['status' => HTTP_SUCCESS,'message' => __('apimsg.Mail has been sent.')],HTTP_SUCCESS);
+    }
 
 }
 

@@ -52,6 +52,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
     /** Node team status update */
     Route::get('save-order-develiveryboy/{order_key}','OrderController@saveOrderOnDeliveryBoy')->middleware('localization');
     Route::get('order/deliveryboy','OrderController@orderStatusUpdate')->middleware('localization');
+    Route::get('password-reset-mail-develiveryboy/{deliveryboy_key}/{email}/{reset_password}','OrderController@sendPasswordResetMailDeliveryBoy')->middleware('localization');
     /** Node team status update */
        
     /**
