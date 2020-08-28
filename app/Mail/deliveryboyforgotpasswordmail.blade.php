@@ -18,7 +18,7 @@
        <tbody>
 		   <tr>
 		     <td align="center" style="padding-bottom:10px">
-			   <a href="#"><img src="icons/logo.png" width="140"></a> 
+			   <a href="{{ route('frontend.index') }}"><img src="{{ FileHelper::loadImage(config('webconfig.app_logo')) }}" width="140"></a> 
 			 </td>
 		   </tr>
 		   <td>
