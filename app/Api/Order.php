@@ -153,6 +153,8 @@ class Order extends CommonOrder
       
         $orders = $orders->where([
             Order::tableName().'.status' => ITEM_ACTIVE,
+            Vendor::tableName().'.status' => ITEM_ACTIVE,
+            Branch::tableName().'.status' => ITEM_ACTIVE,
         ])->orderBy('order_id','desc');
         
         if(request()->order_key !== null) {
