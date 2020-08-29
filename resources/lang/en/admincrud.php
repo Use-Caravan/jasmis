@@ -285,6 +285,7 @@ return [
     'Item Description' => 'Item Description',
     'Allergic Ingredient' => 'Allergic Ingredient',
     'Item Name' => 'Item Name',
+    'Item Details' => 'Item Details',
     'Item Image' => 'Item Image',
     'Item Price' => 'Item Price',
     'Item Category' => 'Item Category',

@@ -61,7 +61,7 @@
                 </tr> 
                 <tr>
                     <th>@lang('admincrud.Wallet Amount Used')</th>
-                    <td>{{ $model->wallet_amount_used }}</td>
+                    <td>{{ ( $model->wallet_amount_used === null ) ? '-' : $model->wallet_amount_used }}</td>
                 </tr>
                <tr>
                     <th>@lang('admincrud.Delivery Fee')</th>
@@ -103,7 +103,16 @@
                 </tr> --}}
                 <tr>
                     <th>@lang('admincrud.Payment Response')</th>
-                    <td>{{ ($model->payment_response === null) ? '-' : $model->payment_response }}</td>
+                    <!--<td>{{ ($model->payment_response === null) ? '-' : $model->payment_response }}</td>-->
+                    <?php 
+                        $options = [
+                            ORDER_PAYMENT_STATUS_PENDING   => __('admincrud.Pending'),
+                            ORDER_PAYMENT_STATUS_SUCCESS      => __('admincrud.Success'),
+                            ORDER_PAYMENT_STATUS_FAILURE     => __('admincrud.Failure')
+                        ];
+                        $paymentStatus = ($model->payment_status !== null && isset($options[$model->payment_status])) ? $options[$model->payment_status] : '-';
+                    ?>
+                    <td>{{ $paymentStatus }}</td>
                 </tr>
                 <tr>
                     <th>@lang('admincrud.Order Approved Date Time')</th>
@@ -115,28 +124,28 @@
                 </tr>
                 <tr>
                     <th>@lang('admincrud.Order Payment Id')</th>
-                    <td>{{ ($model->order_payment_id === null) ? '-' : $model->order_payment_id }}</td>
+                    <td>{{ ($model->payment_gateway_id === null) ? '-' : $model->payment_gateway_id }}</td>
                 </tr>
                 <tr>
-                    <th>@lang('admincrud.Item Name')</th>
+                    <th>@lang('admincrud.Item Details')</th>
                     <td>
                         @foreach($model->items as $key => $itemName)
                             {{ ($itemName->item_name === null) ? '-' : $itemName->item_name }}</br>
                             @foreach($itemName->ingredients as $key => $ingredientName )
-                                <ul><li>{{ ($ingredientName->ingredient_name === null) ? '-' : $ingredientName->ingredient_name }}</li></ul>
+                                <ul><li>{{ ($ingredientName->ingredient_name === null) ? '-' : $ingredientName->ingredient_name.' - '.Common::currency($ingredientName->ingredient_price) }}</li></ul>
                             @endforeach
                             
                         @endforeach
                     </td>
                 </tr>
-                <tr>
+                <!--<tr>
                     <th>@lang('admincrud.Ingredient Group Name')</th>
                     <td>{{ ($model->ingredient_group_names === null) ? '-' : $model->ingredient_group_names }}</td>
                 </tr> 
                 <tr>
                     <th>@lang('admincrud.Ingredient Name')</th>
                     <td>{{ ($model->ingredient_names === null) ? '-' : $model->ingredient_names }}</td>
-                </tr>
+                </tr>-->
                 <tr>
                     <th>@lang('admincommon.Status')</th>
                     @if($model->status == ITEM_ACTIVE)

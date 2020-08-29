@@ -251,11 +251,13 @@ class Order extends CModel
 
                 //$order = Order::findByKey($orderKey)                
                  $order = self::getList()
-                    ->addSelect(User::tableName().'.first_name',User::tableName().'.last_name',User::tableName().'.username',Voucher::tableName().'.promo_code')
+                    ->addSelect(User::tableName().'.first_name',User::tableName().'.last_name',User::tableName().'.username',Voucher::tableName().'.promo_code',Transaction::tableName().'.payment_gateway_id')
                     ->leftjoin(Vendor::tableName(),self::tableName().'.vendor_id',Vendor::tableName().'.vendor_id')
                     ->leftjoin(Branch::tableName(),self::tableName().'.branch_id',Branch::tableName().'.branch_id')
                     ->leftjoin(User::tableName(),self::tableName().'.user_id',User::tableName().'.user_id')
-                    ->leftjoin(Voucher::tableName(),self::tableName().'.voucher_id',Voucher::tableName().'.voucher_id');
+                    ->leftjoin(Voucher::tableName(),self::tableName().'.voucher_id',Voucher::tableName().'.voucher_id')
+                    ->leftjoin(Transaction::tableName(),self::tableName().'.transaction_id',Transaction::tableName().'.transaction_id')
+                    ->leftjoin(PaymentGateway::tableName(),Transaction::tableName().'.transaction_id',Transaction::tableName().'.transaction_id');
                     VendorLang::selectTranslation($order);
                     BranchLang::selectTranslation($order);
                     $order->where([Order::tableName().'.order_key' => $orderKey]);
@@ -264,8 +266,10 @@ class Order extends CModel
                 OrderItemLang::selectTranslation($items,'OIL');
                 $order->items = $items->get();
                     foreach($order->items as $key => $orderIngredient) {
-                        $ingredients = OrderIngredient::where(OrderIngredient::tableName().'.order_item_id',$orderIngredient->order_item_id);
+                        $ingredients = OrderIngredient::select(OrderIngredient::tableName().'.*')->where(OrderIngredient::tableName().'.order_item_id',$orderIngredient->order_item_id);
+                        //print_r($ingredients->get());exit;
                         OrderIngredientLang::selectTranslation($ingredients);
+                        //print_r($ingredients->get());exit;
                         $orderIngredient->ingredients =$ingredients->get();
                         foreach($orderIngredient->ingredients as $key => $ingredientGroup) {
                             $ingredientGroup = OrderItemIngredientGroup::where(OrderItemIngredientGroup::tableName().'.order_item_id',$ingredientGroup->order_item_id);
