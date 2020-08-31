@@ -158,12 +158,15 @@ class WalletController extends Controller
         DB::beginTransaction();
         try {
             $userID = Auth::user()->user_id;
+            //echo $userID;exit;
             $user = User::find($userID);
+            //print_r($user);exit;
             if($user->loyalty_points < request()->points) {
                 return $this->commonError(__("apimsg.Your requesting loyalty point is too large"));
             }
 
-            $loyaltyLevel = LoyaltyLevel::where('from_point', '<=', $user->loyalty_points)->where('to_point', '>=', $user->loyalty_points)->orderBy('loyalty_level_id','ASC')->first();     
+            $loyaltyLevel = LoyaltyLevel::where('from_point', '<=', $user->total_loyalty_points)->where('to_point', '>=', $user->total_loyalty_points)->orderBy('loyalty_level_id','ASC')->first();     
+            //print_r($loyaltyLevel);exit;
             
             if($loyaltyLevel === null) {
                 return $this->commonError(__("apimsg.You dont have Loyalty level"));
@@ -175,7 +178,8 @@ class WalletController extends Controller
             $amount_in_fils = $requestPoint * $amountForOnePoint;
 
             /** Convert amount for requested points in fils to BD **/
-            $amount_in_bd = $amount_in_fils / 1000; 
+            $amount_in_bd = $amount_in_fils / 1000;
+
             $amount = $amount_in_bd;
             
             /** Get minimum amount to redeem in BD**/

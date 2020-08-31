@@ -531,7 +531,7 @@ class Order extends CModel
         $user_total_loyalty_points = ( $userDetails->total_loyalty_points ) ? $userDetails->total_loyalty_points : 0;
         
         /** Get loyalty level of user using user loyalty points **/
-        $loyaltyLevel = LoyaltyLevel::where('from_point', '<=', $user_loyalty_points)->where('to_point', '>=', $user_loyalty_points)->orderBy('loyalty_level_id','ASC')->first();    
+        $loyaltyLevel = LoyaltyLevel::where('from_point', '<=', $user_total_loyalty_points)->where('to_point', '>=', $user_total_loyalty_points)->orderBy('loyalty_level_id','ASC')->first();    
         $loyalty_point_per_bd = ( $loyaltyLevel->loyalty_point_per_bd ) ? (int)$loyaltyLevel->loyalty_point_per_bd : 0;
         
         /** Get the nearest whole number of item_total to calculate loyalty points to this order **/

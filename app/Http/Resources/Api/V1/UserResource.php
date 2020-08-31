@@ -43,7 +43,7 @@ class UserResource extends JsonResource
             'wallet_amount' => Common::currency($this->wallet_amount),
             'loyalty_points' => ($this->loyalty_points !== null) ? (int)$this->loyalty_points : 0,
             'loyalty_level_name' => $this->when(true,function() {
-                $loyalty_level = LoyaltyLevel::where('from_point','<=',(int)$this->loyalty_points)->where('to_point','>=',(int)$this->loyalty_points);
+                $loyalty_level = LoyaltyLevel::where('from_point','<=',(int)$this->total_loyalty_points)->where('to_point','>=',(int)$this->total_loyalty_points);
                 LoyaltyLevelLang::selectTranslation($loyalty_level);
                 $loyalty_level = $loyalty_level->first();
                 return ($loyalty_level === null) ? '' : $loyalty_level->loyalty_level_name;
