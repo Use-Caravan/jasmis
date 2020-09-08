@@ -18,6 +18,7 @@ use App\Helpers\{
     SadadPaymentGateway,
     CredimaxPaymentGateway
 };
+use App\Helpers\SendOTP;
 use App\Api\{
     Cart,
     CartItem,
@@ -201,7 +202,7 @@ class OrderController extends Controller
      * Place order with credimax payment gateway
      */
     public function placeOrderCredimax()
-    {      
+    {     
         $rules = [
             'branch_key'    => 'required|exists:branch,branch_key',
             'user_address_key'    => 'nullable|required_if:order_type,1|exists:user_address,user_address_key',
@@ -499,6 +500,9 @@ class OrderController extends Controller
 
             if(request()->user()->user_type == USER_TYPE_CUSTOMER) {
                 $this->sendConfirmationMail($order->order_key);
+
+                /** Send order confirmation SMS to customer **/
+                $send_sms = $this->sendConfirmationSMS($order->order_key);
             }
 
             /* if(request()->user()->user_type === USER_TYPE_CORPORATES) {
@@ -1583,6 +1587,35 @@ class OrderController extends Controller
             }
         }
         return response()->json(['status' => HTTP_SUCCESS,'message' => __('apimsg.Mail has been sent.')],HTTP_SUCCESS);
+    }
+
+    /** Send order confirmation SMS to customer **/
+    public function sendConfirmationSMS($orderKey)
+    {   
+        request()->request->add([
+            'order_key' => $orderKey,            
+        ]);
+        
+        $orderDetails = Order::getList()
+                       ->addSelect([User::tableName().'.phone_number',
+                                    User::tableName().'.first_name',
+                                    User::tableName().'.last_name'
+                       ])
+                       ->leftjoin(User::tableName(),Order::tableName().'.user_id',User::tableName().'.user_id')
+                       ->where([Order::tableName().'.order_key' => $orderKey])->first();
+        
+        $phone_number = $orderDetails->phone_number;
+
+        if( !empty( $phone_number ) ) {
+            $order_number = $orderDetails->order_number;
+            $customer_name = ( $orderDetails->first_name ) ? ucfirst( $orderDetails->first_name ) : "";
+            $customer_name = ( $orderDetails->last_name ) ? ( $customer_name.' '.ucfirst( $orderDetails->last_name ) ) : $customer_name;
+            
+            $message = "Thank you for your order, ".$customer_name."! Your Caravan will set out soon with your food. Order id - CRN".$order_number;   
+            $sendOTP = SendOTP::instance()->setReciver($phone_number)->send($message);
+            
+            return $sendOTP;
+        }
     }
 
     public function calculateData()
