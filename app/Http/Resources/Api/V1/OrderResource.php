@@ -80,7 +80,7 @@ class OrderResource extends JsonResource
                 'payment_details' => $this->when(true, function(){
                     $paymentDetails = [
                         [ 
-                            'name' => __('apimsg.Sub total'), 
+                            'name' => __('apimsg.Sub Total'), 
                             'price' => Common::currency($this->item_total),
                             'color_code' => PAYMENT_SUB_TOTOAL_COLOR,
                             'is_bold' => IS_BOLD,
@@ -88,7 +88,7 @@ class OrderResource extends JsonResource
                             'is_line' => IS_LINE,
                         ],
                         [
-                            'name' => __('apimsg.Delivery Fee'), 
+                            'name' => __('apimsg.Delivery Charge'), 
                             'price' => Common::currency($this->delivery_fee),
                             'color_code' => PAYMENT_DELIVERY_FEE_COLOR,
                             'is_bold' => IS_BOLD,

@@ -161,14 +161,14 @@ class Order extends CommonOrder
             $orders = $orders->where(Order::tableName().".order_key",request()->order_key);
         }
         
-        if(request()->order_key !== null && $order !== null && (int)$order->order_booked_by === USER_TYPE_CUSTOMER) {
+        /*if(request()->order_key !== null && $order !== null && (int)$order->order_booked_by === USER_TYPE_CUSTOMER) {
             $orders = $orders->where(function($orders) {
                 $orders->where([
                     Order::tableName().'.payment_status' => ORDER_PAYMENT_STATUS_SUCCESS,
                     [Order::tableName().'.payment_type', '<>', PAYMENT_OPTION_COD]
                 ])->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_COD);
             });        
-        }
+        }*/
         
         /*$orders = $orders->where(function($orders) {
             $orders->where('payment_type', '<>', PAYMENT_OPTION_ONLINE)
@@ -179,12 +179,12 @@ class Order extends CommonOrder
         });*/
         
         /** Show payment success orders only for payment type online, wallet **/
-        $orders = $orders->where(function($orders) {
+        /*$orders = $orders->where(function($orders) {
         $orders->where([
                 Order::tableName().'.payment_status' => ORDER_PAYMENT_STATUS_SUCCESS,
                 [Order::tableName().'.payment_type', '<>', PAYMENT_OPTION_COD]
             ])->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_COD);
-        });
+        });*/
 
         $orders = $orders->groupBy('order_id');
         return $orders;

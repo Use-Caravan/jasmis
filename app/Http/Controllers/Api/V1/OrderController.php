@@ -101,7 +101,7 @@ class OrderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {           
+    {    
         $orders = Order::getCustomerOrders()
             ->where([Order::tableName().'.user_id' => request()->user()->user_id])->get();
         $orders = OrderResource::collection($orders);        
@@ -117,7 +117,6 @@ class OrderController extends Controller
      */
     public function show($id)
     {   
-             
         $orders = Order::getCustomerOrders()->first();
         if($orders === null){
             return $this->commonError( __('apimsg.Invalid order') );
@@ -1581,8 +1580,8 @@ class OrderController extends Controller
         }
         if($orderDetails->email !==  null && $orderDetails->email !== '')  {
             try {
-                Mail::to($orderDetails->email)->send(new OrderConfirmation($responseData));           
-             } catch (\Exception $ex) {            
+                Mail::to($orderDetails->email)->send(new OrderConfirmation($responseData));
+             } catch (\Exception $ex) { 
                 return response()->json(['status' => HTTP_UNPROCESSABLE, 'message' => __("apimsg.Mail configuration is incorrect")],HTTP_UNPROCESSABLE);
             }
         }

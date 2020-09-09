@@ -5,7 +5,7 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,600,700" rel="stylesheet" type="text/css"/>
   </head>
-<body style="background:#ffffff">
+<body style="background:#e6e7ea">
 
 <table cellpadding="0" cellspacing="0" width="100%" border="0" align="center" style="padding:25px 15px; font-family: 'Roboto'; font-size:14px; color:#333; line-height:20px;">
 <tbody>
@@ -15,60 +15,37 @@
        <tbody>
 		   <tr>
 		     <td align="center" style="padding-bottom:10px">
-			   <!--<a href="{{route('frontend.index')}}"><img src="{{ FileHelper::loadImage(config('webconfig.app_logo')) }}" width="140"></a>--> 
-			   <a href="{{route('frontend.index')}}"><img src="{{ url("resources/assets/general/order_confirmation_logo.png") }}" width="140"></a>
+			   <a href="{{route('frontend.index')}}"><img src="{{ FileHelper::loadImage(config('webconfig.app_logo')) }}" width="140"></a> 
 			 </td   >
 		   </tr>
 		   <td>
-		   	<hr color="#e22319">
-		     <table cellpadding="0" cellspacing="0" width="100%" border="0" align="center" style="box-shadow: 0px 0px 25px rgba(0, 0, 0, 0.15); "><!--border-top-left-radius:8px; border-top-right-radius:8px-->
+		     <table cellpadding="0" cellspacing="0" width="100%" border="0" align="center" style="box-shadow: 0px 0px 25px rgba(0, 0, 0, 0.15); border-top-left-radius:8px; border-top-right-radius:8px">
 		       <tbody>
-			     <!--<tr>
-			       <td valign="middle" style="background-color:#e22319; color:#fff; padding:15px 20px; border-top-left-radius:8px; border-top-right-radius:8px">
+			     <tr>
+			       <td valign="middle" style="background-color:#fc2217; color:#fff; padding:15px 20px; border-top-left-radius:8px; border-top-right-radius:8px">
 				     <h1 style="margin:0px; line-height:normal; font-weight:300; font-size:22px">
 					   Thank you for your order!
 					 </h1>
 			       </td>
-			     </tr>-->
+			     </tr>
 				 <tr>
 				   <td> 
-				     <table cellpadding="0" cellspacing="0" width="100%" border="0" align="center" style="background-color:#ffffff; border-left: 1px solid #c1c2c7; border-right: 1px solid #c1c2c7; border-top: 1px solid #c1c2c7; border-bottom: : 1px solid #c1c2c7;">
+				     <table cellpadding="0" cellspacing="0" width="100%" border="0" align="center" style="background-color:#ffffff; border-left: 1px solid #c1c2c7; border-right: 1px solid #c1c2c7;">
 				     <tbody>
 					   <tr>
 					     <td style="padding:20px 20px;">
-					     	<p style="margin:0px 0px 10px 0px;">Thank you for your order, <b>{{ucfirst($order_details['orderdetails']->first_name)." ".ucfirst($order_details['orderdetails']->last_name)}}</b>!</p>
-					     	<p style="margin:0px 0px 5px 0px;">Your Caravan will set out soon with your food.</p>
-					     	<p style="margin:0px 0px 5px 0px;">Here are your order details: </p>
-
-							<!--<p style="margin:0px 0px 10px 0px;">Dear <b>{{$order_details['orderdetails']->first_name.$order_details['orderdetails']->last_name}}</b>, </p>
+							<p style="margin:0px 0px 10px 0px;">Dear <b>{{$order_details['orderdetails']->first_name.$order_details['orderdetails']->last_name}}</b>, </p>
 							<p style="margin:0px 0px 5px 0px;">Thank you for placing order at <b>{{$order_details['orderitems']->data->branch_name}}</b>.</p>
-							Exciting to have you here. Your order has been successfully placed and please allow us sometime to confirm your order.-->
+							Exciting to have you here. Your order has been successfully placed and please allow us sometime to confirm your order.
 					     </td>
 					   </tr>
-
-					    <tr>
-					   		<td style="padding:0px 50px 5px 150px;">Order ID: <span style="padding:0px 0px 10px 65px;">{{ $order_details['orderitems']->data->order_number }}</span></td>
-					   	</tr>
-					   	<tr>
-					   		<td style="padding:5px 50px 5px 150px;">Time of Order: <span style="padding:0px 0px 10px 30px;">{{ $order_details['orderitems']->data->order_datetime }}</span></td>
-					   	</tr>
-					   	<tr>
-					   		<td style="padding:5px 50px 5px 150px;">Payment Method: <span style="padding:0px 0px 10px 10px;">    {{$modelOrder->paymentTypes($order_details['orderdetails']->payment_type)}}</span></td>
-					   	</tr>
-					   	<tr>
-					   		<td style="padding:5px 50px 10px 150px;">Delivery Address: <span style="padding:0px 0px 10px 10px;"> 
-								{{$order_details['orderdetails']->address_line_one}}, 
-								{{$order_details['orderdetails']->address_line_two}}.</span>
-							</td>
-					   	</tr>
-
-					   <!--<tr valign="top">
+					   <tr valign="top">
 						 <table cellpadding="0" cellspacing="0" width="100%" border="0" style="background-color:#f2f2f2; border: 1px solid #c1c2c7; border-top: 0px; border-bottom: 0px; padding:20px 20px">
 						  <tr>
 						    <td>
 						      <table cellpadding="0" cellspacing="0" width="100%" border="0" style="background-color:#fff; margin-bottom:20px; border: 1px solid #d3d4d8;">
 							  <tr>
-							   <th colspan="3" style="padding:15px 15px 0px 15px; text-align:left; color:#e22319; font-size:14px; font-weight:600; text-transform:uppercase">
+							   <th colspan="3" style="padding:15px 15px 0px 15px; text-align:left; color:#fc2217; font-size:14px; font-weight:600; text-transform:uppercase">
 							   Order Information:
 							   </th>							   
 							  </tr>
@@ -100,29 +77,29 @@
 							</tr>
 							</table>
 							</td>							
-						  </tr>-->
+						  </tr>
 						  <tr>
 						    <td>
 						      <table cellpadding="0" cellspacing="0" width="100%" border="0" style="margin-bottom:20px; border-top: 1px solid #d3d4d8;">
-							  <!--<tr>
+							  <tr>
 							   <td>
 							    <table cellpadding="0" cellspacing="0" width="100%" border="0">
 							     <thead>
-							       <th colspan="3" style="padding:10px 15px 10px 15px; text-align:left; color:#e22319; font-size:14px; font-weight:600; text-transform:uppercase; background-color:#fff; border-left: 1px solid #d3d4d8; border-right: 1px solid #d3d4d8;">
+							       <th colspan="3" style="padding:10px 15px 10px 15px; text-align:left; color:#fc2217; font-size:14px; font-weight:600; text-transform:uppercase; background-color:#fff; border-left: 1px solid #d3d4d8; border-right: 1px solid #d3d4d8;">
 								   Order Detail:
 								   </th>							   
 							     </thead>
 							    </table>
 							   <td> 
-							  </tr>-->
+							  </tr>
 							  <tr>
 							    <td>
 								<table cellpadding="0" cellspacing="0" width="100%" border="0" >
-								<tr style="color:#fff;">
-								  <thead style="background:#e22319;">
-					               <th style="padding:10px 15px; text-align:left; font-weight:500;color:#fff;">Item Name</th>
-					               <th style="padding:10px 0px; text-align:center; font-weight:500;color:#fff;">Qty</th>
-					               <th style="padding:10px 15px; text-align:right; font-weight:500;color:#fff;">Price</th>
+								<tr style="">
+								  <thead style="background:#e1e2e4; text-transform:uppercase;">
+					               <th style="padding:10px 15px; text-align:left; font-weight:500">Product</th>
+					               <th style="padding:10px 0px; text-align:center; font-weight:500">Qty</th>
+					               <th style="padding:10px 15px; text-align:right; font-weight:500">Price</th>
 								  <thead>
 								</tr>
                                  
@@ -137,16 +114,16 @@
 								</tr>
                                 @endforeach
                                 @foreach($order_details['orderitems']->data->payment_details as $key => $value)
-								<tr style="text-align:right; font-weight:500; font-size:13px">
+								<tr style="text-align:right; font-weight:500; text-transform:uppercase; font-size:13px">
 								  <td style="border-right:1px solid #d3d4d8;"></td>
-								  <td width="100" style="padding:8px 15px; border-bottom:1px solid #d3d4d8;">{{$value->name}}:</td>
-								  <td width="100" style="padding:8px 15px; border-bottom:1px solid #d3d4d8; border-right:1px solid #d3d4d8;">{{$value->price}}</td>					
+								  <td width="80" style="padding:8px 15px; border-bottom:1px solid #d3d4d8; background:#e6e7ea">{{$value->name}}:</td>
+								  <td width="80" style="padding:8px 15px; border-bottom:1px solid #d3d4d8; border-right:1px solid #d3d4d8; background:#e6e7ea">{{$value->price}}</td>					
 								</tr> 
                                 @endforeach
-								<tr style="text-align:right; font-weight:500; color:#fff; font-size:13px">
-								  <td style="border-right:1px solid #e22319;"></td>
-								  <td width="80" style="padding:12px 15px; background:#e22319">Grand Total</td>
-								  <td width="80" style="padding:12px 15px; background:#e22319; font-size:20px">{{$order_details['orderitems']->data->total_amount->price}}</td>					
+								<tr style="text-align:right; font-weight:500; color:#fff; text-transform:uppercase; font-size:13px">
+								  <td style="border-right:1px solid #fc2217;"></td>
+								  <td width="80" style="padding:12px 15px; background:#fc2217">Total</td>
+								  <td width="80" style="padding:12px 15px; background:#fc2217; font-size:20px">{{$order_details['orderitems']->data->total_amount->price}}</td>					
 								</tr>
 								</table>
 								</td>
@@ -154,42 +131,14 @@
 							</table>
 							</td>							
 						  </tr>
-
-						<tr>
-						   	<td> 
-						     	<table cellpadding="0" cellspacing="0" width="100%" border="0" align="center">
-						     		<!--style="background-color:#ffffff; border-left: 1px solid #c1c2c7; border-right: 1px solid #c1c2c7;"-->
-						     		<tbody>
-									   	<tr>
-									     	<td style="padding:20px 20px;">
-										     	<p style="margin:0px 0px 10px 0px;text-align: center;">If you have any enquiries, feel free to contact us any time</p>
-										     	<p style="margin:0px 0px 5px 0px;text-align: center;">Email at support@usecaravan.com.</p>
-										     	<p style="margin:25px 0px 5px 0px;text-align: center;">Until next time, </p>
-										     	<p style="margin:0px 0px 5px 0px;text-align: center;">Your Caravan Team</p>
-									     	</td>
-									   	</tr>
-									</tbody>
-								</table>
-							</td>
-						</tr>
-
-						<tr style="text-align:center; font-weight:500; color:#fff; font-size:13px">
-						  	<td style="padding:12px 15px; background:#e22319;">"Put us in your pocket and get your Caravan on the move."</td>					
-						</tr>
-
-						<tr style="text-align:center; font-size:13px">
-						  	<td style="padding:12px 15px;">@<?php echo date("Y");?> Caravan All Rights Reserved.</td>					
-						</tr>
-								  
-
-						  <!--<tr>
+						  <tr>
 						    <td>
 						      <table cellpadding="0" cellspacing="0" width="100%" border="0">
 							  <tr>
 								<td style="background-color:#fff; border: 1px solid #d3d4d8; width:300px">
 								  <table cellpadding="0" cellspacing="0" width="100%" border="0">
 								    <tr>
-									   <th style="padding:15px 15px 0px 15px; text-align:left; color:#e22319; font-size:14px; font-weight:600; text-transform:uppercase">
+									   <th style="padding:15px 15px 0px 15px; text-align:left; color:#fc2217; font-size:14px; font-weight:600; text-transform:uppercase">
 									   Customer Information:
 									   </th>							   
 									</tr>
@@ -205,7 +154,7 @@
 								<td style="background-color:#fff; border: 1px solid #d3d4d8; width:300px">
 								  <table cellpadding="0" cellspacing="0" width="100%" border="0">
 								    <tr>
-									   <th style="padding:15px 15px 0px 15px; text-align:left; color:#e22319; font-size:14px; font-weight:600; text-transform:uppercase">
+									   <th style="padding:15px 15px 0px 15px; text-align:left; color:#fc2217; font-size:14px; font-weight:600; text-transform:uppercase">
 									   Shipping Address:
 									   </th>							   
 									</tr>
@@ -222,14 +171,14 @@
 							</td>							
 						  </tr>
 						 </table>						 
-					   </tr>-->
+					   </tr>
 					 </tbody>
 				     </table>
 				   </td>
 				 </tr>
-			    <!--<tr>
+			    <tr>
 				    <td style="padding:15px 20px; background:#fff; text-align:center; border: 1px solid #c1c2c7; border-top: 0px; border-bottom: 0px;">
-                        <p style="margin:0px 0px 5px 0px; font-weight:500; color:#e22319">
+                        <p style="margin:0px 0px 5px 0px; font-weight:500; color:#fc2217">
                             <span style="text-align:right; display:inline-block">"People who love to eat are always the best people"<br>
                             <span style="color: #333; font-weight: normal;">- Julia Child</span></span>
                         </p>
@@ -239,7 +188,7 @@
                     @if($order_details['need_voucher_url'] !== null || $order_details['need_voucher_url'] !== '')
                     <tr>
                         <td style="padding:15px 20px; background:#fff; text-align:center; border: 1px solid #c1c2c7; border-top: 0px; border-bottom: 0px;">
-                            <a href="{{ url($order_details['need_voucher_url']) }}" style="margin:0px 0px 5px 0px; font-weight:500; color:#0000FF"> {{-- e22319 --}}
+                            <a href="{{ url($order_details['need_voucher_url']) }}" style="margin:0px 0px 5px 0px; font-weight:500; color:#0000FF"> {{-- fc2217 --}}
                                 <span style="text-align:right; display:inline-block text-decoration: underline"> Please collect your vouchers here </span>
                             </a>
                         </td>
@@ -247,7 +196,7 @@
                     @endif
                 @endif
 				 <tr>
-			       <td valign="middle" style="background-color:#e22319; color:#fff; padding:15px 20px; border-bottom-left-radius:8px; border-bottom-right-radius:8px">
+			       <td valign="middle" style="background-color:#fc2217; color:#fff; padding:15px 20px; border-bottom-left-radius:8px; border-bottom-right-radius:8px">
 				     <table cellpadding="0" cellspacing="0" width="100%" border="0">
 						<td><span style="font-weight:300; font-size:13px">Best Regards,</span><br>{{$order_details['orderitems']->data->branch_name}} Team.</td>
 						<td style="text-align:right; padding-left:15px;">
@@ -272,7 +221,7 @@
 				</td>
 			 </table>
 		   </td>
-		 </tr>-->
+		 </tr>
        </tbody>
      </table>
    </td>
