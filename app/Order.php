@@ -113,7 +113,7 @@ class Order extends CModel
                 ->leftjoin(Branch::tableName(),self::tableName().'.branch_id',Branch::tableName().'.branch_id')
                 ->leftjoin(Vendor::tableName(),self::tableName().'.vendor_id',Vendor::tableName().'.vendor_id')
                 ->leftjoin(UserAddress::tableName(),self::tableName().'.user_address_id',UserAddress::tableName().'.user_address_id');
-                if($corporateOrder === null) {
+                /*if($corporateOrder === null) {
                     $orders = $orders->where(function($orders) {
                         $orders->where([
                             Order::tableName().'.payment_status' => ORDER_PAYMENT_STATUS_SUCCESS,
@@ -126,15 +126,15 @@ class Order extends CModel
                           ->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_WALLET_AND_ONLINE);
                           
                     }); 
-                }
+                }*/
                  
                  /** Show payment success orders only for payment type online, wallet **/
-                $orders = $orders->where(function($orders) {
+                /*$orders = $orders->where(function($orders) {
                 $orders->where([
                         Order::tableName().'.payment_status' => ORDER_PAYMENT_STATUS_SUCCESS,
                         [Order::tableName().'.payment_type', '<>', PAYMENT_OPTION_COD]
                     ])->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_COD);
-                });
+                });*/
 
                 BranchLang::selectTranslation($orders);
                 VendorLang::selectTranslation($orders);

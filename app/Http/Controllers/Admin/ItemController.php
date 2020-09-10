@@ -359,7 +359,7 @@ class ItemController extends Controller
             $model->newitem_status = $request->status;
 
             /** Assign category of this item to "New Items" to shown in get-near-branches() API under "New Items" category **/
-            if( $request->status == ITEM_ACTIVE )
+            /*if( $request->status == ITEM_ACTIVE )
             {
                 $new_item_cat_det = Category::findByName("New Items")->first();
                 $category_id = $new_item_cat_det->category_id;
@@ -369,7 +369,7 @@ class ItemController extends Controller
             }
             else {
                 $model->category_id = 55;
-            }
+            }*/
 
             if($model->save()){
                 $response = ['status' => AJAX_SUCCESS,'msg'=> __('admincrud.Item new item status updated successfully') ];

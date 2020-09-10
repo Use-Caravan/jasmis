@@ -223,6 +223,16 @@ class OrderController extends Controller
         }   
         //print_r($rules);exit;
 
+
+
+        /** Get available drivers from node server to auto assign drivers to order **/                
+        $url = config('webconfig.deliveryboy_url')."/api/v1/driver/company?company_id=".config('webconfig.company_id');
+        $data = Curl::instance()->setUrl($url)->send();
+        $response = json_decode($data,true);
+        $driverslist = $response['data'];
+        
+
+
         $credimaxPaymentStatus = 0;
         $transaction_id = 0;
         if( ( (request()->payment_option == PAYMENT_OPTION_ONLINE) || (request()->payment_option == PAYMENT_OPTION_CREDIT) || (request()->payment_option == PAYMENT_OPTION_WALLET ) ) && isset( request()->temp_order_id ) && request()->temp_order_id > 0 )        
@@ -915,7 +925,7 @@ class OrderController extends Controller
             } */
             
             /** Create order in delivery boy and call node server auto assign driver API **/ 
-            $responseDataDeliveryBoy = $this->createOrderDeliveryBoy( $orderKey );
+            $responseDataDeliveryBoy = $this->createOrderDeliveryBoy( $orderKey, $driverslist );
             
             $this->setMessage(__('apimsg.Order placed successfully') );
             return $this->asJson($responseData);
@@ -926,20 +936,22 @@ class OrderController extends Controller
     }
     
     /** Create order in delivery boy and call node server auto assign driver API **/ 
-    public function createOrderDeliveryBoy( $order_key )
+    public function createOrderDeliveryBoy( $order_key, $driverslist )
     {
-        //echo "hiuyuii";exit;
         /** Call node server auto assign driver API **/                
-        $url = config('webconfig.deliveryboy_url')."/api/v1/driver/company?company_id=".config('webconfig.company_id');
+        /*$url = config('webconfig.deliveryboy_url')."/api/v1/driver/company?company_id=".config('webconfig.company_id');
+        echo $url;
         $data = Curl::instance()->setUrl($url)->send();
+        print_r($data);
         $response = json_decode($data,true);
-        $driverslist = $response['data'];
-
+        $driverslist = $response['data'];*/
         //print_r($driverslist);
+
         $response = $this->saveOrderOnDeliveryBoy($order_key);
-        //print_r($response);exit;
         $deliveryboyResponse = Common::compressData($response);
 
+        //echo "deliveryboyResponse Status = ".$deliveryboyResponse->status;
+        
         if($deliveryboyResponse->status == HTTP_SUCCESS) {
             $assign_driver_count = 0;
             foreach($driverslist as $key => $value) {
@@ -951,7 +963,7 @@ class OrderController extends Controller
 
                 if( isset( $response_assign['status'] ) && $response_assign['status'] === HTTP_SUCCESS)
                     $assign_driver_count++;          
-            }//echo "assign_driver_count = ".$assign_driver_count;
+            }//echo "assign_driver_count = ".$assign_driver_count;exit;
 
             if( $assign_driver_count > 0 )
                 return 1;
@@ -1560,16 +1572,59 @@ class OrderController extends Controller
                                     UserAddress::tableName().'.address_line_one',
                                     UserAddress::tableName().'.address_line_two',
                                     UserAddress::tableName().'.landmark',
-                                    UserAddress::tableName().'.company'
+                                    UserAddress::tableName().'.company',
+                                    //UserAddress::tableName().'.flat_no',
+                                    UserAddress::tableName().'.apartment',
+                                    UserAddress::tableName().'.building',
+                                    UserAddress::tableName().'.street',
+                                    UserAddress::tableName().'.floor',
+                                    UserAddress::tableName().'.block',
+                                    UserAddress::tableName().'.area'
                        ])
                        ->leftjoin(User::tableName(),Order::tableName().'.user_id',User::tableName().'.user_id')
                        ->leftjoin(UserAddress::tableName(),Order::tableName().'.user_address_id',UserAddress::tableName().'.user_address_id')
                        ->where([Order::tableName().'.order_key' => $orderKey])->first();
+
+        $address = ''; 
+        if($orderDetails->address_line_one !== null) {
+            $address.= $orderDetails->address_line_one.", ";
+        }
+        if($orderDetails->address_line_two !== null) {
+            $address.= $orderDetails->address_line_two.", ";
+        }
+        if($orderDetails->landmark !== null) {
+            $address.= $orderDetails->landmark.", ";
+        }
+        if($orderDetails->company !== null) {
+            $address.= $orderDetails->company.", ";
+        }
+        /*if($orderDetails->flat_no !== null) {
+            $address.= "Flat No : ".$orderDetails->flat_no.", ";
+        }*/
+        if($orderDetails->apartment !== null) {
+            $address.= "Apartment : ".$orderDetails->apartment.", ";
+        }
+        if($orderDetails->building !== null) {
+            $address.= "Building : ".$orderDetails->building.", ";
+        }
+        if($orderDetails->street !== null) {
+            $address.= "Street Name: ".$orderDetails->street.", ";
+        }
+        if($orderDetails->floor !== null) {
+            $address.= "Floor : ".$orderDetails->floor.", ";
+        }
+        if($orderDetails->block !== null) {
+            $address.= "Block : ".$orderDetails->block.", ";
+        }
+        if($orderDetails->area !== null) {
+            $address.= "Area : ".$orderDetails->area;
+        }
         
         $responseData = [
                 'orderitems' => $orderItemDetails,
                 'orderdetails' => $orderDetails,
-                'need_voucher_url' => ''
+                'need_voucher_url' => '',
+                'address' => $address
             ];
             
         /* if(request()->corporate_voucher === true) {

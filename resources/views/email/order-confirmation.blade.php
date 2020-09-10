@@ -5,6 +5,25 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,600,700" rel="stylesheet" type="text/css"/>
   </head>
+
+  	<style>
+		@media only screen and (min-device-width: 200px) and (max-device-width: 324px) {
+			.ord_det{
+				font-size: 8px;
+			}
+		}
+		@media only screen and (min-device-width: 325px) and (max-device-width: 400px) {
+			.ord_det{
+				font-size: 10px;
+			}
+		}
+		@media only screen and (min-device-width: 400px) and (max-device-width: 1024px) {
+			.ord_det{
+				font-size: 12px;
+			}
+		}		
+	</style>
+
 <body style="background:#ffffff">
 
 <table cellpadding="0" cellspacing="0" width="100%" border="0" align="center" style="padding:25px 15px; font-family: 'Roboto'; font-size:14px; color:#333; line-height:20px;">
@@ -46,21 +65,42 @@
 					     </td>
 					   </tr>
 
-					    <tr>
-					   		<td style="padding:0px 50px 5px 150px;">Order ID: <span style="padding:0px 0px 10px 65px;">{{ $order_details['orderitems']->data->order_number }}</span></td>
+					   	<table class="ord_det">
+						   	<tr> 
+					            <td width="20%" style="padding:0% 0% 0% 10%;">Order ID:</td> 
+					            <td width="20%">{{ $order_details['orderitems']->data->order_number }}</td> 
+					        </tr> 
+					  
+					        <tr> 
+					            <td width="20%" style="padding:0% 0% 0% 10%;">Time of Order:</td> 
+					            <td width="20%">{{ $order_details['orderitems']->data->order_datetime }}</td> 
+					        </tr>
+
+					        <tr> 
+					            <td width="20%" style="padding:0% 0% 0% 10%;">Payment Method:</td> 
+					            <td width="20%">{{$modelOrder->paymentTypes($order_details['orderdetails']->payment_type)}}</td>
+					        </tr> 
+					  
+					        <tr> 
+					            <td width="20%" style="padding:0% 0% 0% 10%;">Delivery Address:</td> 
+					            <td width="20%">{{$order_details['address']}}</td> 
+					        </tr>
+					    </table>
+
+					    <!--<tr>
+					   		<td style="padding:0% 5% 0% 10%;">Order ID: <span style="padding:0px 0px 5% 65px;">{{ $order_details['orderitems']->data->order_number }}</span></td>
 					   	</tr>
 					   	<tr>
-					   		<td style="padding:5px 50px 5px 150px;">Time of Order: <span style="padding:0px 0px 10px 30px;">{{ $order_details['orderitems']->data->order_datetime }}</span></td>
+					   		<td style="padding:3% 5% 0% 10%;">Time of Order: <span style="padding:0px 0px 5% 30px;">{{ $order_details['orderitems']->data->order_datetime }}</span></td>
 					   	</tr>
 					   	<tr>
-					   		<td style="padding:5px 50px 5px 150px;">Payment Method: <span style="padding:0px 0px 10px 10px;">    {{$modelOrder->paymentTypes($order_details['orderdetails']->payment_type)}}</span></td>
+					   		<td style="padding:3% 5% 0% 10%;">Payment Method: <span style="padding:0px 0px 5% 10px;">    {{$modelOrder->paymentTypes($order_details['orderdetails']->payment_type)}}</span></td>
 					   	</tr>
 					   	<tr>
-					   		<td style="padding:5px 50px 10px 150px;">Delivery Address: <span style="padding:0px 0px 10px 10px;"> 
-								{{$order_details['orderdetails']->address_line_one}}, 
-								{{$order_details['orderdetails']->address_line_two}}.</span>
+					   		<td style="padding:3% 5% 5% 10%;">Delivery Address: <span style="padding:0px 0px 5% 10px;"> 
+								{{$order_details['address']}}</span>
 							</td>
-					   	</tr>
+					   	</tr>-->
 
 					   <!--<tr valign="top">
 						 <table cellpadding="0" cellspacing="0" width="100%" border="0" style="background-color:#f2f2f2; border: 1px solid #c1c2c7; border-top: 0px; border-bottom: 0px; padding:20px 20px">
@@ -120,7 +160,7 @@
 								<table cellpadding="0" cellspacing="0" width="100%" border="0" >
 								<tr style="color:#fff;">
 								  <thead style="background:#e22319;">
-					               <th style="padding:10px 15px; text-align:left; font-weight:500;color:#fff;">Item Name</th>
+					               <th style="padding:10px 15px; text-align:left; font-weight:500;color:#fff;width: 36%;">Item Name</th>
 					               <th style="padding:10px 0px; text-align:center; font-weight:500;color:#fff;">Qty</th>
 					               <th style="padding:10px 15px; text-align:right; font-weight:500;color:#fff;">Price</th>
 								  <thead>
