@@ -88,7 +88,14 @@ class Item extends CommonItem
                 }            
             }
             if($categoryId !== null) {
-                $query->where([Item::tableName().'.category_id' => $categoryId]);
+                $category_det = CategoryLang::where("category_id", $categoryId)->get();
+                $category_name = ( $category_det[0]->category_name ) ? $category_det[0]->category_name : "";
+                if( $category_name == "New Items" ) {
+                    $query->where([Item::tableName().'.newitem_status' => ITEM_ACTIVE])
+                          ->orWhere([Item::tableName().'.category_id' => $categoryId]);
+                }
+                else
+                    $query->where([Item::tableName().'.category_id' => $categoryId]);
             }
             /* for Web filter */
 
