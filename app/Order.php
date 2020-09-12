@@ -681,14 +681,14 @@ class Order extends CModel
             case ORDER_COUNT_TYPE_PENDING :        
                 $orderStatus = [
                     ORDER_APPROVED_STATUS_PENDING,
-                    /* ORDER_APPROVED_STATUS_APPROVED,
+                    ORDER_APPROVED_STATUS_APPROVED,
                     ORDER_APPROVED_STATUS_PREPARING,
                     ORDER_ONTHEWAY,
                     ORDER_APPROVED_STATUS_DRIVER_PICKED_UP,
                     ORDER_APPROVED_STATUS_ASSIGNED_TO_DRIVER,
                     ORDER_APPROVED_STATUS_DRIVER_ACCEPTED,
                     ORDER_APPROVED_STATUS_READY_FOR_PICKUP,
-                    ORDER_DRIVER_REQUESTED, */
+                    ORDER_DRIVER_REQUESTED, 
                 ];
                 $order = $order->whereIn('order_status',$orderStatus);
                 break; 
@@ -712,11 +712,11 @@ class Order extends CModel
         } */
             
         if($isCount === true) {
-            return $order->where([
+            /*return $order->where([
                         Order::tableName().'.payment_status' => ORDER_PAYMENT_STATUS_SUCCESS,
                         [Order::tableName().'.payment_type', '<>', PAYMENT_OPTION_COD]
-                    ])->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_COD)->count();
-                    // return $order->count();
+                    ])->orWhere(Order::tableName().'.payment_type', PAYMENT_OPTION_COD)->count();*/
+            return $order->count();
         }
             
         return $order->where(['payment_status' => ORDER_PAYMENT_SUCCESS])->sum('order_total');
