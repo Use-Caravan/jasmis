@@ -503,7 +503,7 @@ class OrderController extends Controller
                              'item_name' => $orderItemLang->item_name
                 ]; */
             }
-              
+
             $user = User::find($this->userDetails->user_id);
             $deviceToken = $user->device_token;                    
 
@@ -962,7 +962,14 @@ class OrderController extends Controller
                 //print_r($response_assign);
 
                 if( isset( $response_assign['status'] ) && $response_assign['status'] === HTTP_SUCCESS)
+                {
                     $assign_driver_count++;          
+                    $deviceTokenRider = ( isset($value['device_token']) ) ? $value['device_token'] : '';
+                    if( !empty( $deviceTokenRider ) ) {
+                        $oneSignalRider  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_DRIVER_APP)->push(['en' => 'New order'], ['en' => 'You have a new incoming order.'], [$deviceTokenRider], []);
+                        //print_r($oneSignalRider);exit;
+                    }                    
+                }
             }//echo "assign_driver_count = ".$assign_driver_count;exit;
 
             if( $assign_driver_count > 0 )
@@ -1673,7 +1680,7 @@ class OrderController extends Controller
     }
 
     public function calculateData()
-    {       
+    {  
         $rules = [
             'branch_key'    => 'required|exists:branch,branch_key',
             'user_address_key'    => 'nullable|exists:user_address,user_address_key',
@@ -1691,6 +1698,7 @@ class OrderController extends Controller
         }
         $this->cartDetails = Cart::where(['user_id' => request()->user()->user_id])->orderBy('cart_id','DESC')->first();
         $responseData = $this->checkoutQuotation();
+        //print_r($this->cartDetails);exit;
         if($responseData['status'] === false && $responseData['type'] === EXPECTATION_FAILED) {
             return $this->commonError($responseData['error']);
         }
@@ -1698,9 +1706,13 @@ class OrderController extends Controller
             return $this->prepareResponse();
         }
 
+        $this->cartDetails = Cart::where(['user_id' => request()->user()->user_id, 'branch_id' => $this->branchDetails->branch_id])->orderBy('cart_id','DESC')->first();
+        
         $responseDataPayment = $this->checkoutQuotation(true);
         $paymentDetails = $responseDataPayment['data'];
+        //print_r($paymentDetails);exit;
         
+        //print_r($this->cartDetails);exit;
         if(request()->corporate_voucher !== true) {
             if($paymentDetails['sub_total']['cprice'] < $this->branchDetails->vendor_min_order_value) {                
                 return $this->commonError( __("apimsg.Order value should be greater than",['amount' => Common::currency($this->branchDetails->vendor_min_order_value)]) );
@@ -1802,7 +1814,8 @@ class OrderController extends Controller
         /** Delivery time slot conditions */
 
         /** Item Details */
-        $cartDetails = $this->cartDetails;        
+        $cartDetails = $this->cartDetails;     
+        //print_r($cartDetails);exit;   
 
         if($cartDetails === null) {
             $returnData['error'] = __("apimsg.There is no items in your cart");            

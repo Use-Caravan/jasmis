@@ -87,12 +87,15 @@ return [
     /** 
      * One Signal Configuration 
      */  
-    'one_signal_app_id' => '8c088e27-9a9e-4c71-957a-d114b5c9bc9f',
-    'one_signal_auth_id' => 'NTBiMDg1NzEtNjA0ZS00NTk0LTllYTYtMGRlNjRkZjE3OGEy',
-    'vendor_one_signal_app_id' => '3c4bb844-f83f-4d84-a16c-94822192199d',
-    'vendor_one_signal_auth_id' => 'Zjc1MTU2MGYtNTA2My00Mjg0LTkwZGItMDZiMjRiOGI1Yzk3',
-    'deliveryboy_one_signal_app_id' => 'ba1b7194-fea2-42c5-8e8c-234aa0dc3602',
-    'deliveryboy_one_signal_auth_id' => 'OWU0NGU5NzctYjAzYy00YTg5LWExOTgtYjIxMDViY2ZlOTFk',
+    'one_signal_app_id' => '9e54be7d-f073-40d8-b653-1ee8c3ff558e',
+    'one_signal_auth_id' => 'OTBkZGMxMTUtOTZhMC00OGQxLTk2YjEtYTZkNzJkMmYzOTIy',
+    'one_signal_android_channel_id' => '6ac90291-30a5-4507-a033-58adf01c5e5c',
+    'vendor_one_signal_app_id' => '88a7e692-18ea-4b24-969c-1406682623f7',//'3c4bb844-f83f-4d84-a16c-94822192199d',//'1:831643271249:android:8ee25feffbf18f71',
+    'vendor_one_signal_auth_id' => 'ZTYzNGZiZGItMmIzZi00NzU3LThiZjYtNGUxMmQ4OWMwMWQ2',//'Zjc1MTU2MGYtNTA2My00Mjg0LTkwZGItMDZiMjRiOGI1Yzk3',
+    'vendor_android_channel_id' => '6c00dcb5-b71f-45c2-b29f-6fcc6c06bed0',
+    'deliveryboy_one_signal_app_id' => '708c1c35-4a9b-40f0-a756-d9f9e28ba3d8',//'ba1b7194-fea2-42c5-8e8c-234aa0dc3602',
+    'deliveryboy_one_signal_auth_id' => 'NWNiNmQ3MDctMDJmMi00MDA4LTkxM2UtYjEyOWZlMmViZmIx',//'OWU0NGU5NzctYjAzYy00YTg5LWExOTgtYjIxMDViY2ZlOTFk',
+    'deliveryboy_android_channel_id' => 'adf530b6-202c-40a0-a223-de0238d240a7',
     'vendor_one_signal_web_app_id' => 'bb42b8c9-7dd8-45e4-9302-de954ddc1c5a',
     //'vendor_one_signal_app_id' => '3f6085a1-ec49-4a16-8a87-b36ea19e769a',
 

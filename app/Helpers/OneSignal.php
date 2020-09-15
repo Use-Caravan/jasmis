@@ -64,18 +64,22 @@ class OneSignal
             case ONE_SIGNAL_USER_APP:
                 $this->appId = config('webconfig.one_signal_app_id');
                 $this->restApiKey = config('webconfig.one_signal_auth_id');
+                $this->android_channel_id = config('webconfig.one_signal_android_channel_id');
                 
                 break;
             case ONE_SIGNAL_VENDOR_APP:
                 $this->appId = config('webconfig.vendor_one_signal_app_id');
                 $this->restApiKey = config('webconfig.vendor_one_signal_auth_id');
+                $this->android_channel_id = config('webconfig.vendor_android_channel_id');
                 break;
             case ONE_SIGNAL_DRIVER_APP:
                 $this->appId = config('webconfig.deliveryboy_one_signal_app_id');
                 $this->restApiKey = config('webconfig.deliveryboy_one_signal_auth_id');
+                $this->android_channel_id = config('webconfig.deliveryboy_android_channel_id');
                 break;
             case ONE_SIGNAL_VENDOR_WEB_APP:    
                 $this->appId = config('webconfig.vendor_one_signal_web_app_id');
+                $this->android_channel_id = config('webconfig.vendor_android_channel_id');
                 break;
         }        
         return $this;
@@ -108,7 +112,7 @@ class OneSignal
             'contents' => $message,
             'headings' => $title,
 
-            'android_channel_id' => '3f6085a1-ec49-4a16-8a87-b36ea19e769a',
+            'android_channel_id' => $this->android_channel_id,//'6c00dcb5-b71f-45c2-b29f-6fcc6c06bed0',//'3f6085a1-ec49-4a16-8a87-b36ea19e769a',
             'android_sound' => 'customnotification.wav',
          
         ];
@@ -139,6 +143,7 @@ class OneSignal
         curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         $response = curl_exec($ch);
+        //print_r($response);exit;
         curl_close($ch);
         return $response;
         # NotificationLog::log(Json::decode($fields), $response);
