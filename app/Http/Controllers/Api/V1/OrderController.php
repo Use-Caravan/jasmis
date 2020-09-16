@@ -268,11 +268,11 @@ class OrderController extends Controller
         DB::beginTransaction();
         try{ 
 
-            if(request()->corporate_voucher !== true) {
+            /*if(request()->corporate_voucher !== true) {
                 if($paymentDetails['sub_total']['cprice'] < $this->branchDetails->vendor_min_order_value) {                
                     return $this->commonError( __("apimsg.Order value should be greater than",['amount' => Common::currency($this->branchDetails->vendor_min_order_value)]) );
                 }
-            }
+            }*/
 
             //$totalOrders = ((int)Order::count()) + 1;
             //$orderNumber = str_repeat('0', max(0, 7 - strlen($totalOrders))) . $totalOrders;
@@ -1016,11 +1016,11 @@ class OrderController extends Controller
         DB::beginTransaction();
         try{ 
 
-            if(request()->corporate_voucher !== true) {
+            /*if(request()->corporate_voucher !== true) {
                 if($paymentDetails['sub_total']['cprice'] < $this->branchDetails->vendor_min_order_value) {                
                     return $this->commonError( __("apimsg.Order value should be greater than",['amount' => Common::currency($this->branchDetails->vendor_min_order_value)]) );
                 }
-            }
+            }*/
 
             $totalOrders = ((int)Order::count()) + 1;
             $orderNumber = str_repeat('0', max(0, 7 - strlen($totalOrders))) . $totalOrders;
@@ -1696,9 +1696,13 @@ class OrderController extends Controller
         if($validator->fails()) {
             return $this->validateError($validator->errors());            
         }
-        $this->cartDetails = Cart::where(['user_id' => request()->user()->user_id])->orderBy('cart_id','DESC')->first();
-        $responseData = $this->checkoutQuotation();
+
+        //$this->cart_details = Cart::where(['user_id' => request()->user()->user_id, 'deleted_at' => NULL])->first();
+
+        $this->cartDetails = Cart::where(['user_id' => request()->user()->user_id, 'deleted_at' => NULL])->orderBy('cart_id','DESC')->first();
         //print_r($this->cartDetails);exit;
+        $responseData = $this->checkoutQuotation();
+        
         if($responseData['status'] === false && $responseData['type'] === EXPECTATION_FAILED) {
             return $this->commonError($responseData['error']);
         }
@@ -1706,18 +1710,18 @@ class OrderController extends Controller
             return $this->prepareResponse();
         }
 
-        $this->cartDetails = Cart::where(['user_id' => request()->user()->user_id, 'branch_id' => $this->branchDetails->branch_id])->orderBy('cart_id','DESC')->first();
+        $this->cartDetails = Cart::where(['user_id' => request()->user()->user_id, 'deleted_at' => NULL, 'branch_id' => $this->branchDetails->branch_id])->orderBy('cart_id','DESC')->first();
         
         $responseDataPayment = $this->checkoutQuotation(true);
         $paymentDetails = $responseDataPayment['data'];
         //print_r($paymentDetails);exit;
         
         //print_r($this->cartDetails);exit;
-        if(request()->corporate_voucher !== true) {
+        /*if(request()->corporate_voucher !== true) {
             if($paymentDetails['sub_total']['cprice'] < $this->branchDetails->vendor_min_order_value) {                
                 return $this->commonError( __("apimsg.Order value should be greater than",['amount' => Common::currency($this->branchDetails->vendor_min_order_value)]) );
             }
-        }
+        }*/
 
         $temp_order_id = "";
         $amount_to_pay = "0";

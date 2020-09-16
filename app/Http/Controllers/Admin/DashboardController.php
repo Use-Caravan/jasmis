@@ -49,7 +49,7 @@ class DashboardController extends Controller
             
             'today' => [
                 'order_count' => Order::getOrdersCount(ORDER_COUNT_TYPE_ALL,ORDER_COUNT_DAY_TYPE_TODAY),
-                'order_total' => Order::getOrdersCount(ORDER_COUNT_TYPE_DELIVERED,ORDER_COUNT_DAY_TYPE_ALL,false),
+                'order_total' => Order::getOrdersCount(ORDER_COUNT_TYPE_DELIVERED,ORDER_COUNT_DAY_TYPE_TODAY,false),
                 'pending_order_count' => Order::getOrdersCount(ORDER_COUNT_TYPE_PENDING,ORDER_COUNT_DAY_TYPE_TODAY),
                 'delivered_order_count' => Order::getOrdersCount(ORDER_COUNT_TYPE_DELIVERED,ORDER_COUNT_DAY_TYPE_TODAY),
                 'rejected_order_count' => Order::getOrdersCount(ORDER_COUNT_TYPE_REJECTED,ORDER_COUNT_DAY_TYPE_TODAY),
