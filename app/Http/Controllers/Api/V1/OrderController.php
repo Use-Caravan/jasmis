@@ -572,7 +572,7 @@ class OrderController extends Controller
 
                         $vendor = Vendor::find($this->branchDetails->vendor_id); 
                         $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
-                        $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
+                        //$oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
                         
                         if($vendor->web_app_id !== null) {
                             $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
@@ -605,7 +605,7 @@ class OrderController extends Controller
 
                         $vendor = Vendor::find($this->branchDetails->vendor_id); 
                         $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
-                        $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
+                        //$oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
                         
                         if($vendor->web_app_id !== null) {
                             $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
@@ -683,7 +683,7 @@ class OrderController extends Controller
                     
                     $vendor = Vendor::find($this->branchDetails->vendor_id); 
                     $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
-                    $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
+                    //$oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
                     
                     if($vendor->web_app_id !== null) {
                         $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
@@ -741,7 +741,7 @@ class OrderController extends Controller
 
                             $vendor = Vendor::find($this->branchDetails->vendor_id); 
                             $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
-                            $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
+                            //$oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
                             
                             if($vendor->web_app_id !== null) {
                                 $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
@@ -826,7 +826,7 @@ class OrderController extends Controller
                         }
 
                         $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
-                        $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
+                        //$oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
                         if($vendor->web_app_id !== null) {
                             $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
                         } 
@@ -1343,7 +1343,7 @@ class OrderController extends Controller
                     
                     $vendor = Vendor::find($this->branchDetails->vendor_id); 
                     $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
-                    $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
+                    //$oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
                     
                     if($vendor->web_app_id !== null) {
                         $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
@@ -1457,7 +1457,7 @@ class OrderController extends Controller
                         }
 
                         $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
-                        $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
+                        //$oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
                         if($vendor->web_app_id !== null) {
                             $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
                         } 
@@ -2187,11 +2187,12 @@ class OrderController extends Controller
             ->leftJoin(DeliveryArea::tableName(),BranchDeliveryArea::tableName().".delivery_area_id",DeliveryArea::tableName().".delivery_area_id")
             ->where([BranchDeliveryArea::tableName().'.branch_id' => $branch->branch_id])
             ->first();
-            
+
         if($userAddress === null) {
             return ['status'=> false, 'error' => __('apimsg.User address not found')];
         }
         $this->userAddress = $userAddress;
+        //echo $branchZoneType->zone_type;exit;
         if($branchZoneType->zone_type == DELIVERY_AREA_ZONE_CIRCLE) {
             
             $branchDeliveryArea = Branch::select([
@@ -2233,8 +2234,10 @@ class OrderController extends Controller
             ->get();
             
         }
-            
-        if($branchDeliveryArea === null) {
+
+        //echo count($branchDeliveryArea);exit;
+
+        if($branchDeliveryArea === null || count($branchDeliveryArea) == 0) {
             return ['status'=> false, 'error' => __('apimsg.The selected address in not within the delivery area of the branch')];
         }
         $this->branchDeliveryArea = $branchDeliveryArea;
@@ -2842,7 +2845,8 @@ class OrderController extends Controller
         if($orderModel === null) {
             return $this->commonError(__("apimsg.Order status is not found"));
         }
-        /* $vendorDetails = Vendor::find($orderModel->vendor_id); */
+        $vendorDetails = Vendor::find($orderModel->vendor_id);
+        //print_r($vendorDetails);exit;
         $userDetails = User::find($orderModel->user_id);
         $orderModel->deliveryboy_key = request()->deliveryboy_key;
         switch (request()->order_status) {
@@ -2874,6 +2878,9 @@ class OrderController extends Controller
             break;
             case NODE_ORDER_DRIVER_ACCEPTED:
                 $orderModel->order_status = ORDER_APPROVED_STATUS_DRIVER_ACCEPTED;
+
+                $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have a new incoming order.'], [$vendorDetails->device_token], []);
+                //print_r($oneSignalVendor);exit;
             break;
             case NODE_ORDER_DRIVER_REJECTED:
                 $orderModel->order_status = ORDER_DRIVER_REJECTED;
