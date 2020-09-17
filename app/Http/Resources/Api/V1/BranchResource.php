@@ -34,6 +34,27 @@ class BranchResource extends JsonResource
     public function toArray($request)
     {       
         //return parent::toArray($request);
+
+        /** Add new items in branch items array **/
+        $newitem_count = Item::where('newitem_status', ITEM_ACTIVE)->where('status', ITEM_ACTIVE)->count();
+        
+        $categories = Category::getCategories()->get();
+        $new_items_category = array(
+            "category_id" => "New Item",
+            "category_key" => "New Items",
+            "is_main_category" => 1,
+            "main_category_id" => "",
+            "category_image" => "",
+            "sort_no" => "",
+            "status" => 1,
+            "created_at" => "",
+            "updated_at" => "",
+            "deleted_at" => "",
+            "category_name" => "New Items",
+            "category_count" => $newitem_count
+            );
+
+        $categories->push((object)$new_items_category);
         
         $vendor = new Vendor();
 
@@ -115,7 +136,10 @@ class BranchResource extends JsonResource
                 }
             }),
             'branch_offer' => 'Buy 1 Get 1 offer',
-            'items' => ($this->branch_key === request()->branch_key) ? CategoryResource::collection(Category::getCategories()->get()) : [],
+            //'items' => ($this->branch_key === request()->branch_key) ? CategoryResource::collection(Category::getCategories()->get()) : [],
+            'items' => ($this->branch_key === request()->branch_key) ? CategoryResource::collection($categories) : [],
+
+            
             //'new_items' => ($this->branch_key === request()->branch_key) ? ItemResource::collection(Item::getItems(null,$request->branch_key,null)->where('newitem_status',ITEM_ACTIVE)->get()) : [],
             /*$this->mergeWhen( ($request->branch_key), [
                 'new_items' => ItemResource::collection(Item::getItems(null,$request->branch_key,null)->where('newitem_status',ITEM_ACTIVE)->get()),

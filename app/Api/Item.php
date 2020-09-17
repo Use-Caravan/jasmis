@@ -28,7 +28,7 @@ class Item extends CommonItem
      * @param integer $categoryId for list of particular category items     
      * @return json collection
      */
-    public static function getItems($itemId = null, $branchId = null,$categoryId = null)
+    public static function getItems($itemId = null, $branchId = null,$categoryId = null,$new_items = null)
     {   
         $item = new Item();
         $branch = new Branch();        
@@ -71,7 +71,7 @@ class Item extends CommonItem
             //Cuisine::tableName().'.status' => ITEM_ACTIVE,
             Item::tableName().'.approved_status' => BRANCH_APPROVED_STATUS_APPROVED
         ])
-        ->where(function($query) use($branchId, $itemId, $categoryId) {
+        ->where(function($query) use($branchId, $itemId, $categoryId, $new_items) {
             if ($branchId !== null) {
                 if(is_integer($branchId)) {
                     $query->where([Branch::tableName().'.branch_id' => $branchId]);
@@ -89,13 +89,20 @@ class Item extends CommonItem
             }
             if($categoryId !== null) {
                 $category_det = CategoryLang::where("category_id", $categoryId)->get();
-                $category_name = ( $category_det[0]->category_name ) ? $category_det[0]->category_name : "";
+                $category_name = ( isset( $category_det[0] ) && $category_det[0]->category_name ) ? $category_det[0]->category_name : "";
                 if( $category_name == "New Items" ) {
-                    $query->where([Item::tableName().'.newitem_status' => ITEM_ACTIVE])
-                          ->orWhere([Item::tableName().'.category_id' => $categoryId]);
+                    /*$query->where([Item::tableName().'.newitem_status' => ITEM_ACTIVE])
+                          ->orWhere([Item::tableName().'.category_id' => $categoryId]);*/
+                    $query->where([Item::tableName().'.category_id' => $categoryId]);
+                }
+                else if( $categoryId == "New Item" ) {
+                    $query->where([Item::tableName().'.newitem_status' => ITEM_ACTIVE]);
                 }
                 else
                     $query->where([Item::tableName().'.category_id' => $categoryId]);
+            }
+            if($new_items !== null) {
+                $query->where([Item::tableName().'.newitem_status' => ITEM_ACTIVE]);
             }
             /* for Web filter */
 

@@ -578,7 +578,8 @@ class OrderController extends Controller
                             $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
                         } 
                     
-                        if(!$oneSignalCustomer || !$oneSignalVendor) {
+                        //if(!$oneSignalCustomer || !$oneSignalVendor) {
+                        if(!$oneSignalCustomer) {
                             $this->commonError(__("apimsg.Notification not send") );
                         }
                     }
@@ -611,7 +612,8 @@ class OrderController extends Controller
                             $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
                         } 
                     
-                        if(!$oneSignalCustomer || !$oneSignalVendor) {
+                        //if(!$oneSignalCustomer || !$oneSignalVendor) {
+                        if(!$oneSignalCustomer) {
                             $this->commonError(__("apimsg.Notification not send") );
                         }
                     }
@@ -689,7 +691,8 @@ class OrderController extends Controller
                         $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
                     } 
                 
-                    if(!$oneSignalCustomer || !$oneSignalVendor) {
+                    //if(!$oneSignalCustomer || !$oneSignalVendor) {
+                    if(!$oneSignalCustomer) {
                         $this->commonError(__("apimsg.Notification not send") );
                     }
 
@@ -747,7 +750,8 @@ class OrderController extends Controller
                                 $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
                             } 
                         
-                            if(!$oneSignalCustomer || !$oneSignalVendor) {
+                            //if(!$oneSignalCustomer || !$oneSignalVendor) {
+                            if(!$oneSignalCustomer) {
                                 $this->commonError(__("apimsg.Notification not send") );
                             }
                         }
@@ -830,7 +834,8 @@ class OrderController extends Controller
                         if($vendor->web_app_id !== null) {
                             $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
                         } 
-                        if(!$oneSignalCustomer || !$oneSignalVendor) {
+                        //if(!$oneSignalCustomer || !$oneSignalVendor) {
+                        if(!$oneSignalCustomer) {
                             $this->commonError(__("apimsg.Notification not send") );
                         }
                     }
@@ -1349,7 +1354,8 @@ class OrderController extends Controller
                         $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
                     } 
                 
-                    if(!$oneSignalCustomer || !$oneSignalVendor) {
+                    //if(!$oneSignalCustomer || !$oneSignalVendor) {
+                        if(!$oneSignalCustomer) {
                         $this->commonError(__("apimsg.Notification not send") );
                     }
 
@@ -1461,7 +1467,8 @@ class OrderController extends Controller
                         if($vendor->web_app_id !== null) {
                             $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
                         } 
-                        if(!$oneSignalCustomer || !$oneSignalVendor) {
+                        //if(!$oneSignalCustomer || !$oneSignalVendor) {
+                        if(!$oneSignalCustomer) {
                             $this->commonError(__("apimsg.Notification not send") );
                         }
                     }
