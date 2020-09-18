@@ -45,7 +45,7 @@ class BranchResource extends JsonResource
             "is_main_category" => 1,
             "main_category_id" => "",
             "category_image" => "",
-            "sort_no" => "",
+            "sort_no" => 0,
             "status" => 1,
             "created_at" => "",
             "updated_at" => "",
