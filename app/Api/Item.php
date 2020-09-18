@@ -91,11 +91,11 @@ class Item extends CommonItem
                 $category_det = CategoryLang::where("category_id", $categoryId)->get();
                 $category_name = ( isset( $category_det[0] ) && $category_det[0]->category_name ) ? $category_det[0]->category_name : "";
                 if( $category_name == "New Items" ) {
-                    /*$query->where([Item::tableName().'.newitem_status' => ITEM_ACTIVE])
-                          ->orWhere([Item::tableName().'.category_id' => $categoryId]);*/
+                    //$query->where([Item::tableName().'.newitem_status' => ITEM_ACTIVE])
+                          //->orWhere([Item::tableName().'.category_id' => $categoryId]);
                     $query->where([Item::tableName().'.category_id' => $categoryId]);
                 }
-                else if( $categoryId == "New Item" ) {
+                else if( $categoryId == 0 ) {
                     $query->where([Item::tableName().'.newitem_status' => ITEM_ACTIVE]);
                 }
                 else

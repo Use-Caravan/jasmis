@@ -37,10 +37,10 @@ class BranchResource extends JsonResource
 
         /** Add new items in branch items array **/
         $newitem_count = Item::where('newitem_status', ITEM_ACTIVE)->where('status', ITEM_ACTIVE)->count();
-        
+
         $categories = Category::getCategories()->get();
         $new_items_category = array(
-            "category_id" => "New Item",
+            "category_id" => 0,
             "category_key" => "New Items",
             "is_main_category" => 1,
             "main_category_id" => "",
