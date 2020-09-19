@@ -148,6 +148,7 @@ class AuthController extends Controller
         $user->last_name = $request->last_name;
         $user->email = $request->email;
         $user->status = ITEM_ACTIVE;
+        $user->device_token = $request->device_token;
 
         $len = '16';
         $existsCardNumber = User::get();
