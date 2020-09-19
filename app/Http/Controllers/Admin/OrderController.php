@@ -18,6 +18,7 @@ use Maatwebsite\Excel\Exporter;
 use Maatwebsite\Excel\Excel;
 use DataTables;
 use App\Helpers\Curl;
+use App\Helpers\OneSignal;
 use DB;
 use FileHelper;
 use Hash;
@@ -391,6 +392,23 @@ class OrderController extends Controller
             $order = Order::findByKey($order_key);            
             $order->order_status = ORDER_APPROVED_STATUS_ASSIGNED_TO_DRIVER;            
             $order->save();
+
+            $url_push = config('webconfig.deliveryboy_url')."/api/v1/driver/$deliveryboy_key?company_id=".config('webconfig.company_id');
+            $response_push = new Curl();
+            $response_push->setUrl($url_push);        
+            $data_push = $response_push->send();
+            $response_push = json_decode($data_push,true);
+            //print_r($response_push);exit;
+
+            if( isset( $response_push['data'] ) ) {
+                $deviceTokenRider = ( isset( $response_push['data']['device_token'] ) ) ? $response_push['data']['device_token'] : "";
+
+                if( !empty( $deviceTokenRider ) ) {
+                    $oneSignalRider  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_DRIVER_APP)->push(['en' => 'New order'], ['en' => 'You have a new incoming order.'], [$deviceTokenRider], []);
+                    //print_r($oneSignalRider);exit;
+                }
+            }
+
             return response()->json(['status' => HTTP_SUCCESS,'message' => 'Order assigned to driver']);
         } else {
             return response()->json(['status' => HTTP_UNPROCESSABLE,'message' => $response['message']]);

@@ -182,8 +182,26 @@ class OrderController extends Controller
         }
         if(request()->order_status == ORDER_APPROVED_STATUS_READY_FOR_PICKUP) {
             if($order->order_type == ORDER_TYPE_DELIVERY) {
-                $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'Order Status'], ['en' => "Your order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup."], [$vendorDetails->device_token], []);
+                //$oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup."], [$vendorDetails->device_token], []);
+
+                $deliveryboy_key = $order->deliveryboy_key;
+                $url_push = config('webconfig.deliveryboy_url')."/api/v1/driver/$deliveryboy_key?company_id=".config('webconfig.company_id');
+                $response_push = new Curl();
+                $response_push->setUrl($url_push);        
+                $data_push = $response_push->send();
+                $response_push = json_decode($data_push,true);
+                //print_r($response_push);exit;
+
+                if( isset( $response_push['data'] ) ) {
+                    $deviceTokenRider = ( isset( $response_push['data']['device_token'] ) ) ? $response_push['data']['device_token'] : "";
+
+                    if( !empty( $deviceTokenRider ) ) {
+                        $oneSignalRider  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_DRIVER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup."], [$deviceTokenRider], []);
+                        //print_r($oneSignalRider);exit;
+                    }
+                }
             }
+
             $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup."], [$userDetails->device_token], []);
         }
 
