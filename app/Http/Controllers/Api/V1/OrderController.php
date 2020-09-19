@@ -2900,7 +2900,8 @@ class OrderController extends Controller
                 //print_r($oneSignalVendor);exit;
             break;
             case NODE_ORDER_DRIVER_REJECTED:
-                $orderModel->order_status = ORDER_DRIVER_REJECTED;
+                //$orderModel->order_status = ORDER_DRIVER_REJECTED;
+                $orderModel->order_status = ORDER_APPROVED_STATUS_PENDING;
             break;
             case NODE_ORDER_DRIVER_DELIVERED:
                 $orderModel->order_status = ORDER_APPROVED_STATUS_DELIVERED;
