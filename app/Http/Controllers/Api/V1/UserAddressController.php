@@ -98,7 +98,13 @@ class UserAddressController extends Controller
             DB::rollback();
             throw $e;
         }
+
+        /** Send user lat, long as null to avoid cart cleared automatically after add address out of delivery area in Item::getItems() function **/
+        request()->latitude = null; 
+        request()->longitude = null;
+
         $data = new UserAddressResource($model);
+        //print_r($data);exit;
         return $this->asJson($data);
     }
 
@@ -167,6 +173,11 @@ class UserAddressController extends Controller
             throw $e;
         }
         $data = new UserAddressResource($model);
+
+        /** Send user lat, long as null to avoid cart cleared automatically after add address out of delivery area in Item::getItems() function **/
+        request()->latitude = null; 
+        request()->longitude = null;
+        
         return $this->asJson($data);
     }
 
