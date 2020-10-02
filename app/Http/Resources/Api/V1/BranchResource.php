@@ -39,22 +39,27 @@ class BranchResource extends JsonResource
         $newitem_count = Item::where('newitem_status', ITEM_ACTIVE)->where('status', ITEM_ACTIVE)->count();
 
         $categories = Category::getCategories()->get();
-        $new_items_category = array(
-            "category_id" => 0,
-            "category_key" => "New Items",
-            "is_main_category" => 1,
-            "main_category_id" => "",
-            "category_image" => "",
-            "sort_no" => 0,
-            "status" => 1,
-            "created_at" => "",
-            "updated_at" => "",
-            "deleted_at" => "",
-            "category_name" => "New Items",
-            "category_count" => $newitem_count
-            );
 
-        $categories->push((object)$new_items_category);
+        if( $newitem_count > 0 ) {
+            $new_items_category = array(
+                "category_id" => 0,
+                "category_key" => "New Items",
+                "is_main_category" => 1,
+                "main_category_id" => "",
+                "category_image" => "",
+                "sort_no" => 0,
+                "status" => 1,
+                "created_at" => "",
+                "updated_at" => "",
+                "deleted_at" => "",
+                "category_name" => "New Items",
+                "category_count" => $newitem_count
+                );
+
+            //$categories->push((object)$new_items_category);
+            /** Add new items as first element in category items array **/
+            $categories->prepend((object)$new_items_category);
+        }
         
         $vendor = new Vendor();
 
