@@ -22,6 +22,10 @@ class OrderResource extends JsonResource
      */
     public function toArray($request)
     {  
+        $vendor_logo = Vendorlang::where('vendor_id',$this->vendor_id)->where('language_code','en')->pluck('vendor_logo');
+        $vendor_logo = isset( $vendor_logo[0] ) ? $vendor_logo[0] : "";
+        //echo $vendor_logo;exit;
+
         //return parent::toArray($request);
         $ratings = BranchReview::where('vendor_id',$this->vendor_id)->where('branch_id',$this->branch_id)->where('user_id',$this->user_id)
                         ->where('status',ITEM_ACTIVE)
@@ -39,7 +43,8 @@ class OrderResource extends JsonResource
             'corder_total' => $this->order_total,
             'csub_total' => $this->item_total,
             'order_datetime' => Common::renderDate($this->order_datetime),
-            'vendor_logo' => FileHelper::loadImage(Vendorlang::where('vendor_id',$this->vendor_id)->pluck('vendor_logo')),
+            //'vendor_logo' => FileHelper::loadImage(Vendorlang::where('vendor_id',$this->vendor_id)->where('language_code','en')->pluck('vendor_logo')),
+            'vendor_logo' => FileHelper::loadImage($vendor_logo),
             'branch_name' => $this->branch_name,
             'arabic_branch_name' => BranchLang::where('branch_id',$this->branch_id)->where('language_code','ar')->value('branch_name'),
             'branch_key' => $this->branch_key, 
