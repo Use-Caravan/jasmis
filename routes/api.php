@@ -54,6 +54,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
     Route::get('order/deliveryboy','OrderController@orderStatusUpdate')->middleware('localization');
     //Route::get('password-reset-mail-develiveryboy/{deliveryboy_key}/{email}/{reset_password}','OrderController@sendPasswordResetMailDeliveryBoy')->middleware('localization');
     Route::get('password-reset-mail-develiveryboy','OrderController@sendPasswordResetMailDeliveryBoy')->middleware('localization');
+
+    Route::post('update-driver-location','OrderController@updateDriverLocation')->name('update-driver-location')->middleware('localization');
     /** Node team status update */
        
     /**

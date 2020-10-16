@@ -57,7 +57,8 @@ use App\Api\{
     OrderIngredientLang,
     UserLoyaltyCredit,
     BranchDeliveryArea,
-    DeliveryArea
+    DeliveryArea,
+    DeliveryboyLocation
 };
 
 
@@ -961,29 +962,36 @@ class OrderController extends Controller
             $assign_driver_count = 0;
             foreach($driverslist as $key => $value) {
                 $deliveryboy_key = $value['_id'];
-                $url = config('webconfig.deliveryboy_url')."/api/v1/order/$order_key/assign_driver/$deliveryboy_key?company_id=".config('webconfig.company_id');
-                $data = Curl::instance()->action(METHOD_PUT)->setUrl($url)->send();        
-                $response_assign = json_decode($data,true);
-                //print_r($response_assign);
 
-                if( isset( $response_assign['status'] ) && $response_assign['status'] === HTTP_SUCCESS)
-                {
-                    $assign_driver_count++;          
-                    $deviceTokenRider = ( isset($value['device_token']) ) ? $value['device_token'] : '';
+                /** Check the driver's current location is within the branch delivery area are not **/
+                $delivery_area_count = $this->checkDeliveryBoyInDeliveryArea( $deliveryboy_key );
+                //echo $delivery_area_count;exit;
 
-                    $url_push = config('webconfig.deliveryboy_url')."/api/v1/driver/$deliveryboy_key?company_id=".config('webconfig.company_id');
-                    $response_push = new Curl();
-                    $response_push->setUrl($url_push);        
-                    $data_push = $response_push->send();
-                    $response_push = json_decode($data_push,true);
-                    //print_r($response_push);exit;
+                if( $delivery_area_count > 0 ) {
+                    $url = config('webconfig.deliveryboy_url')."/api/v1/order/$order_key/assign_driver/$deliveryboy_key?company_id=".config('webconfig.company_id');
+                    $data = Curl::instance()->action(METHOD_PUT)->setUrl($url)->send();        
+                    $response_assign = json_decode($data,true);
+                    //print_r($response_assign);
 
-                    $deviceTokenRider = ( $response_push['data']['device_token'] ) ? $response_push['data']['device_token'] : "";
+                    if( isset( $response_assign['status'] ) && $response_assign['status'] === HTTP_SUCCESS)
+                    {
+                        $assign_driver_count++;          
+                        $deviceTokenRider = ( isset($value['device_token']) ) ? $value['device_token'] : '';
 
-                    if( !empty( $deviceTokenRider ) ) {
-                        $oneSignalRider  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_DRIVER_APP)->push(['en' => 'New order'], ['en' => 'You have a new incoming order.'], [$deviceTokenRider], []);
-                        //print_r($oneSignalRider);exit;
-                    }                    
+                        $url_push = config('webconfig.deliveryboy_url')."/api/v1/driver/$deliveryboy_key?company_id=".config('webconfig.company_id');
+                        $response_push = new Curl();
+                        $response_push->setUrl($url_push);        
+                        $data_push = $response_push->send();
+                        $response_push = json_decode($data_push,true);
+                        //print_r($response_push);exit;
+
+                        $deviceTokenRider = ( $response_push['data']['device_token'] ) ? $response_push['data']['device_token'] : "";
+
+                        if( !empty( $deviceTokenRider ) ) {
+                            $oneSignalRider  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_DRIVER_APP)->push(['en' => 'New order'], ['en' => 'You have a new incoming order.'], [$deviceTokenRider], []);
+                            //print_r($oneSignalRider);exit;
+                        }                    
+                    }
                 }
             }//echo "assign_driver_count = ".$assign_driver_count;exit;
 
@@ -994,6 +1002,81 @@ class OrderController extends Controller
         } else {
             return 0;
         }
+    }
+
+    public function checkDeliveryBoyInDeliveryArea( $deliveryboy_key )
+    {
+        if( !empty( $deliveryboy_key ) ) {
+            $deliveryboy_location = DeliveryboyLocation::findByKey( $deliveryboy_key );
+
+            if($deliveryboy_location === null) {
+                //return ['status'=> false, 'error' => __('apimsg.User address not found')];
+                return 0;
+            }
+            else {
+                $branch = Branch::findByKey(request()->branch_key);
+                $branchZoneType = BranchDeliveryArea::select([
+                        BranchDeliveryArea::tableName().".branch_id",
+                        DeliveryArea::tableName().'.zone_type'                
+                    ])
+                    ->leftJoin(DeliveryArea::tableName(),BranchDeliveryArea::tableName().".delivery_area_id",DeliveryArea::tableName().".delivery_area_id")
+                    ->where([BranchDeliveryArea::tableName().'.branch_id' => $branch->branch_id])
+                    ->first();
+
+                if($branchZoneType->zone_type == DELIVERY_AREA_ZONE_CIRCLE) {
+                    
+                    $branchDeliveryArea = Branch::select([
+                            'branch.branch_id',
+                            'branch.branch_key',
+                            'DA.*',
+                            DB::raw("( 6371000 * acos( cos( radians($deliveryboy_location->latitude) ) * cos( radians( DA.circle_latitude ) ) 
+                            * cos( radians( DA.circle_longitude ) - radians($deliveryboy_location->longitude) ) + sin( radians($deliveryboy_location->latitude) )
+                            * sin( radians( DA.circle_latitude ) ) ) ) as distance")
+                        ])
+                        ->leftJoin('branch_delivery_area as BDA','branch.branch_id','=','BDA.branch_id')
+                        ->leftJoin('delivery_area as DA','BDA.delivery_area_id','=','DA.delivery_area_id')
+                        ->where([
+                            'branch.branch_key' => request()->branch_key,
+                            'DA.status' => ITEM_ACTIVE,
+                            "DA.zone_type" => DELIVERY_AREA_ZONE_CIRCLE,
+                        ])
+                        ->havingRaw("distance <  DA.zone_radius")
+                        ->orderBy('distance','ASC')
+                        ->first();
+                        
+                }
+                if($branchZoneType->zone_type == DELIVERY_AREA_ZONE_POLYGON) {
+                    
+                    // $zoneLatLng = '[GEOMETRY - 129 B]';
+                    $branchDeliveryArea = BranchDeliveryArea::select([
+                        BranchDeliveryArea::tableName().".branch_id",
+                        DeliveryArea::tableName().".*"                
+                    ])
+                    ->leftJoin(DeliveryArea::tableName(),BranchDeliveryArea::tableName().".delivery_area_id",DeliveryArea::tableName().".delivery_area_id")
+                    ->where([
+                        DeliveryArea::tableName().".zone_type" => DELIVERY_AREA_ZONE_POLYGON,
+                        DeliveryArea::tableName().".status" => ITEM_ACTIVE
+                    ])
+                    ->whereNull(DeliveryArea::tableName().".deleted_at")
+                    ->whereRaw("ST_CONTAINS(".DeliveryArea::tableName().".zone_latlng, Point(".$deliveryboy_location->latitude.", ".$deliveryboy_location->longitude."))")
+                    // ->whereRaw("ST_CONTAINS(".DeliveryArea::tableName().".zone_latlng, Point(1.122, 21.2121))")
+                    ->groupBy(BranchDeliveryArea::tableName().".branch_id")
+                    ->get();
+                    
+                }
+
+                //echo count($branchDeliveryArea);exit;
+
+                if($branchDeliveryArea === null || count($branchDeliveryArea) == 0) {
+                    //return ['status'=> false, 'error' => __('apimsg.The selected address in not within the delivery area of the branch')];
+                    return 0;
+                }
+                else
+                    return count($branchDeliveryArea);
+            }
+        }
+        else
+            return 0;
     }
 
     /**
@@ -2955,5 +3038,48 @@ class OrderController extends Controller
         return response()->json(['status' => HTTP_SUCCESS,'message' => __('apimsg.Mail has been sent.')],HTTP_SUCCESS);
     }
 
+    /** Update driver location to track driver's current location **/
+    public function updateDriverLocation()
+    {   
+        $deliveryboy_key = request()->deliveryboy_key;
+        $deliveryboy_latitude = request()->latitude;
+        $deliveryboy_longitude = request()->longitude;
+
+        $rules = [
+            'deliveryboy_key'    => 'required',
+            'latitude'    => 'required',
+            'longitude'    => 'required'              
+        ];           
+
+        $validator = Validator::make(request()->all(),$rules);   
+        if($validator->fails()) {
+            return $this->validateError($validator->errors());            
+        }
+
+        try {
+            $deliveryboy_location_model = DeliveryboyLocation::findByKey($deliveryboy_key);
+            
+            if( $deliveryboy_location_model === null ) {
+                $deliveryboy_location_model = new DeliveryboyLocation();
+                
+                $deliveryboy_location_model->deliveryboy_key = $deliveryboy_key;
+                $deliveryboy_location_model->latitude = $deliveryboy_latitude;
+                $deliveryboy_location_model->longitude = $deliveryboy_longitude;
+                $deliveryboy_location_model->status = ITEM_ACTIVE;
+
+                $deliveryboy_location_model->save();
+                $deliveryboyID = $deliveryboy_location_model->getKey();
+            }
+            else {
+                $deliveryboy_location_model->latitude = $deliveryboy_latitude;
+                $deliveryboy_location_model->longitude = $deliveryboy_longitude;
+                $deliveryboy_location_model->save();   
+            }
+
+            return response()->json(['status' => HTTP_SUCCESS,'message' => __('apimsg.Driver location updated successfully.')],HTTP_SUCCESS);
+        } catch(Exception $e) {
+            throw $e->getMessage();
+        }
+    }
 }
 
