@@ -246,9 +246,12 @@ class Controller extends BaseController
                     Branch::tableName().'.status' => ITEM_ACTIVE,
                     Vendor::tableName().'.status' => ITEM_ACTIVE,
                     Branch::tableName().'.branch_id' => $cart_details->branch_id,
-                ])->first();
+                ])
+                ->whereNull(Branch::tableName().".deleted_at")
+                ->whereNull(Vendor::tableName().".deleted_at")
+                ->first();
 
-            $branch_key = $branchDetails->branch_key;
+            $branch_key = isset( $branchDetails->branch_key ) ? $branchDetails->branch_key : null;
             
             $cartItem = CartItem::where('cart_id',$cart_details->cart_id)->get();
         
@@ -273,14 +276,18 @@ class Controller extends BaseController
             
 
             $items = (new OrderController())->itemCheckoutItemData($itemArray);
-            
+
 
             if($items['status'] === false) {
                 $totalCheckouAmount = 0;
             }
             
             $totalCheckouAmount = 0;
-            $cart = (new OrderController())->dataFormat(['items' => $items['data']]); 
+            $cart = isset( $items['data'] ) ? (new OrderController())->dataFormat(['items' => $items['data']]) : array(); 
+
+
+            $cart['items'] = isset( $cart['items'] ) ? $cart['items'] : array();
+
             if( count($cart['items']) <= 0) {
                $totalCheckouAmount = 0; 
             } else {

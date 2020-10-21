@@ -56,6 +56,13 @@ class UserController extends Controller
                 return $this->validateError($validator->errors());
             }
             $user = $user->find($userId);
+            //print_r($user);exit;
+
+            if( ( request()->phone_number !== $user->phone_number ) && $user->otp_verified == OTP_VERIFIED )  {
+                $user->otp_verified = NULL;
+                $user->otp_verified_at = NULL;
+            }
+
             //print_r(request()->except('current_password','new_password','confirm_password'));exit;
             if( !empty(request()->dob) ) {
                 $user = $user->fill(request()->except('current_password','new_password','confirm_password'));
@@ -74,9 +81,11 @@ class UserController extends Controller
             $userKey = request()->user()->user_key;
             $userId = request()->user()->user_id; 
             $userDetails = User::findByKey($userKey);
+            //print_r($userDetails);exit;
             if(request()->email !== $userDetails->email) {
                 return $this->validateError(__('apimsg.Invalid user'));
             }
+
             $validator = Validator::make(request()->all(),[
                 'phone_number' => "required|numeric|digits_between:8,15",
                 'email' => "required|email",
@@ -102,7 +111,12 @@ class UserController extends Controller
             
             if(request()->hasFile('profile_image')) {
                 $user->profile_image = FileHelper::uploadFile(request()->profile_image,USER_PROFILE_IMAGE);                
-            }           
+            } 
+
+            if( ( request()->phone_number !== $userDetails->phone_number ) && $userDetails->otp_verified == OTP_VERIFIED )  {
+                $user->otp_verified = NULL;
+                $user->otp_verified_at = NULL;
+            }          
 
             $user->save();
             $this->setMessage(__("apimsg.User details are updated"));
