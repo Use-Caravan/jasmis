@@ -201,6 +201,13 @@ class BranchController extends Controller
 
         // return $this->asJson($branches);
         //$query = ['branches' => $branches];
+
+        /** Send user lat, long as null to avoid cart cleared automatically after call get-nearest-branch() API in Item::getItems() function **/
+        if( isset( request()->latitude ) )
+            request()->latitude = null; 
+        if( isset( request()->longitude ) )
+            request()->longitude = null;
+
         $this->setMessage( __('apimsg.Branches are fetched') );
         return $this->asJson($branches);
     }
