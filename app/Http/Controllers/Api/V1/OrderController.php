@@ -1826,6 +1826,9 @@ class OrderController extends Controller
         $temp_order_id = "";
         $amount_to_pay = "0";
         $online_payment = 0;
+
+        $user = User::find(request()->user()->user_id); 
+
         /** Create temporary order id and send in response to process payment in mobile app **/
         if( request()->payment_option && ( ( request()->payment_option == PAYMENT_OPTION_ONLINE ) || ( request()->payment_option == PAYMENT_OPTION_CREDIT ) || ( request()->payment_option == PAYMENT_OPTION_WALLET ) ) )
         {
@@ -1833,7 +1836,7 @@ class OrderController extends Controller
                 
             if( request()->payment_option == PAYMENT_OPTION_WALLET )
             {
-                $user = User::find(request()->user()->user_id);
+                //$user = User::find(request()->user()->user_id);
                 
                 if($user->wallet_amount < $paymentDetails['total']['cprice'])
                     $amount_to_pay_to_wallet = $paymentDetails['total']['cprice'] - $user->wallet_amount;                    
@@ -1862,6 +1865,7 @@ class OrderController extends Controller
                     
         $responseData['data']['temp_order_id'] = (string)$temp_order_id;
         $responseData['data']['amount_to_pay'] = $amount_to_pay;
+        $responseData['data']['otp_verified'] = isset( $user->otp_verified ) ? $user->otp_verified : 0;
 
         $this->setMessage(__("apimsg.Cart details are processed") );
         
