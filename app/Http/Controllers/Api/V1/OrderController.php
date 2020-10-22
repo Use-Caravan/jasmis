@@ -2323,9 +2323,11 @@ class OrderController extends Controller
                 DeliveryArea::tableName().".*"                
             ])
             ->leftJoin(DeliveryArea::tableName(),BranchDeliveryArea::tableName().".delivery_area_id",DeliveryArea::tableName().".delivery_area_id")
+            ->leftJoin(Branch::tableName(),BranchDeliveryArea::tableName().".branch_id",Branch::tableName().".branch_id")
             ->where([
                 DeliveryArea::tableName().".zone_type" => DELIVERY_AREA_ZONE_POLYGON,
-                DeliveryArea::tableName().".status" => ITEM_ACTIVE
+                DeliveryArea::tableName().".status" => ITEM_ACTIVE,
+                Branch::tableName().".branch_key" => request()->branch_key,
             ])
             ->whereNull(DeliveryArea::tableName().".deleted_at")
             ->whereRaw("ST_CONTAINS(".DeliveryArea::tableName().".zone_latlng, Point(".$userAddress->latitude.", ".$userAddress->longitude."))")
@@ -2334,7 +2336,7 @@ class OrderController extends Controller
             ->get();
             
         }
-
+        //print_r($branchDeliveryArea);exit;
         //echo count($branchDeliveryArea);exit;
 
         if($branchDeliveryArea === null || count($branchDeliveryArea) == 0) {

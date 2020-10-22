@@ -251,7 +251,7 @@ class Controller extends BaseController
                 ->whereNull(Vendor::tableName().".deleted_at")
                 ->first();
 
-            $branch_key = isset( $branchDetails->branch_key ) ? $branchDetails->branch_key : null;
+            $branch_key = ( isset( $branchDetails->branch_key ) && ( $cart_qty > 0 ) ) ? $branchDetails->branch_key : null;
             
             $cartItem = CartItem::where('cart_id',$cart_details->cart_id)->get();
         
