@@ -70,9 +70,11 @@ class CancelOrder extends Command
                         $payment_type = $model->payment_type;
                         if( ( $user_id > 0 ) && !empty( $order_key ) && ( $item_total > 0 ) )
                         {
+                            $user = User::find($user_id);
+
                             /** Refund to customer while cancel order if payment type is online / cpocket / online & cpocket **/
                             if($payment_type == PAYMENT_OPTION_ONLINE || $payment_type == PAYMENT_OPTION_WALLET || $payment_type == PAYMENT_OPTION_WALLET_AND_ONLINE){
-                                $user = User::find($user_id);
+                                //$user = User::find($user_id);
                                 if( $user )
                                 {
                                     $user->wallet_amount = ( (double)$user->wallet_amount + $item_total);
@@ -105,7 +107,7 @@ class CancelOrder extends Command
                                             $this->info('Error in cancel order');
                                         } 
                                         else        
-                                            $this->info($response['status'].'Order cancelled successfully');
+                                            $this->info($response['status'].'Order cancelled successfully - '.$model->order_number);
                                     }
                                 }
                                 else
