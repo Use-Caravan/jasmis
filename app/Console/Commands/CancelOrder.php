@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Order;
 use App\User;
 use App\Helpers\Curl;
+use App\Helpers\OneSignal;
 
 class CancelOrder extends Command
 {
@@ -79,6 +80,13 @@ class CancelOrder extends Command
                                 }
                             }
 
+                            /** Send push notification to customer if order second cut off time limit exceed **/ 
+                            $order_datetime = $model->order_datetime;
+                            $order_date = date( "dmY", strtotime( $order_datetime ) );
+                            $order_time = date( "Hi", strtotime( $order_datetime ) );
+                            $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "We regret to inform you that your order #".config('webconfig.app_inv_prefix').$model->order_number." placed on ".$order_date." at ".$order_time." has been cancelled. If you have paid for the order, it'll be added to your cPocket wallet and you can use it for future orders."], [$user->device_token], []);
+                            /** Send push notification to customer if order second cut off time limit exceed **/
+
                             /** Change order status to rejected **/
                             $model = Order::findByKey($order_key);
                             if( $model ){
@@ -101,7 +109,7 @@ class CancelOrder extends Command
                                     }
                                 }
                                 else
-                                    $this->info('Error in cancel order');
+                                    $this->info('Error in cancel order - '.$model->order_number);
                             }
                         }
                     }

@@ -339,11 +339,21 @@ class OrderController extends Controller
             }
             // refund to customer 
             if($request->order_status == ORDER_APPROVED_STATUS_REJECTED) {
+                $user = User::find($model->user_id);
                 if($model->payment_type == PAYMENT_OPTION_ONLINE || $model->payment_type == PAYMENT_OPTION_WALLET || $model->payment_type == PAYMENT_OPTION_WALLET_AND_ONLINE){
-                    $user = User::find($model->user_id);
+                    //$user = User::find($model->user_id);
                     $user->wallet_amount = ( (double)$user->wallet_amount + $model->item_total);
                     $user->save();
                 }
+
+                /** Send push notification to customer if order cancelled in admin / vendor panel web **/ 
+                $order_datetime = $model->order_datetime;
+                $order_date = date( "dmY", strtotime( $order_datetime ) );
+                $order_time = date( "Hi", strtotime( $order_datetime ) );
+                $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "We regret to inform you that your order #".config('webconfig.app_inv_prefix').$model->order_number." placed on ".$order_date." at ".$order_time." has been cancelled. If you have paid for the order, it'll be added to your cPocket wallet and you can use it for future orders."], [$user->device_token], []);
+                /** Send push notification to customer if order cancelled in admin / vendor panel web **/
+
+                //We regret to inform you that your order #CRN0000483 placed on 26102020 at 1548 has been cancelled. If you have paid for //the order, it'll be added to your cPocket wallet and you can use it for future orders. 
             }
             $model = Order::findByKey($order_key);
             $model->order_status = $request->order_status;

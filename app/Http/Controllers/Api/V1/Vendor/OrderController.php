@@ -169,12 +169,21 @@ class OrderController extends Controller
         if(request()->order_status == ORDER_APPROVED_STATUS_REJECTED) {
             
             // refund to customer 
+            $user = User::find($order->user_id);
             if($order->payment_type == PAYMENT_OPTION_ONLINE || $order->payment_type == PAYMENT_OPTION_WALLET || $order->payment_type == PAYMENT_OPTION_WALLET_AND_ONLINE){
-                $user = User::find($order->user_id);
+                //$user = User::find($order->user_id);
                 $user->wallet_amount = ( (double)$user->wallet_amount + $order->item_total);
                 $user->save();
             }
             
+            /** Send push notification to customer if order cancelled in vendor app **/ 
+            $order_datetime = $order->order_datetime;
+            $order_date = date( "dmY", strtotime( $order_datetime ) );
+            $order_time = date( "Hi", strtotime( $order_datetime ) );
+            $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "We regret to inform you that your order #".config('webconfig.app_inv_prefix').$order->order_number." placed on ".$order_date." at ".$order_time." has been cancelled. If you have paid for the order, it'll be added to your cPocket wallet and you can use it for future orders."], [$user->device_token], []);
+            //print_r($oneSignalCustomer);exit;
+            /** Send push notification to customer if order cancelled in vendor app **/
+
             $order->order_rejected_datetime = date('Y-m-d H:i:s');
             $order->order_approved_datetime = null;
             $order->order_reject_reason = request()->order_reject_reason;
