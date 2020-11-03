@@ -148,10 +148,18 @@ return [
     "payment_gateway_failiur_url" => "https://caravan.brigita.co/api/v1/payment-gateway/failiur", 
     
     
-    "credimaxpay_benefit_checkout_url" => "https://api.credimaxpay.com/api/benefit_checkout",
-    "credimaxpay_credit_card_checkout_url" => "https://api.credimaxpay.com/api/v2/checkout",
+    //"credimaxpay_benefit_checkout_url" => "https://api.credimaxpay.com/api/benefit_checkout",
+    //"credimaxpay_credit_card_checkout_url" => "https://api.credimaxpay.com/api/v2/checkout",
+
+    //Credimax updated URLs https://docs.google.com/document/d/1uz68G4LHUxjL_P1cy06kefJgz3JoPBtBIgPCJ_V4ez4/edit
+    "credimaxpay_benefit_checkout_url" => "https://api.paygcc.com/api/v2/benefit_checkout",
+    "credimaxpay_credit_card_checkout_url" => "https://api.paygcc.com/api/v2/checkout",
+
     "credimaxpay_company_code" => "iRSn0PAEcsKwHpKCICx8vjLEsBAk0SltAXWx4b83eXdZVZ9OXSb0OOB1SOO9NWh8",
-    "credimaxpay_payment_details_url" => "https://api.credimaxpay.com/api/orderPaymentDetails",
+
+    //"credimaxpay_payment_details_url" => "https://api.credimaxpay.com/api/orderPaymentDetails",
+    "credimaxpay_payment_details_url" => "https://api.paygcc.com/api/orderPaymentDetails",
+    
     "credimax_payment_gateway_success_url" => "/api/v1/payment-gateway/credimax-success",
     "credimax_payment_gateway_failure_url" => "/api/v1/payment-gateway/credimax-failure",
     "credimax_payment_gateway_wallet_success_url" => "/api/v1/payment-gateway/credimax-wallet-success",
