@@ -19,6 +19,7 @@ use Maatwebsite\Excel\Excel;
 use DataTables;
 use App\Helpers\Curl;
 use App\Helpers\OneSignal;
+use App\Helpers\FireBase;
 use DB;
 use FileHelper;
 use Hash;
@@ -414,8 +415,12 @@ class OrderController extends Controller
                 $deviceTokenRider = ( isset( $response_push['data']['device_token'] ) ) ? $response_push['data']['device_token'] : "";
 
                 if( !empty( $deviceTokenRider ) ) {
-                    $oneSignalRider  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_DRIVER_APP)->push(['en' => 'New order'], ['en' => 'You have a new incoming order.'], [$deviceTokenRider], []);
+                    //$oneSignalRider  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_DRIVER_APP)->push(['en' => 'New order'], ['en' => 'You have a new incoming order.'], [$deviceTokenRider], []);
                     //print_r($oneSignalRider);exit;
+
+                    /** Send order push notification to rider from FireBase **/
+                    $fireBaseRider  = FireBase::getInstance()->setAppType(FIRE_BASE_DRIVER_APP)->push('Orders', 'New order', 'You have a new incoming order.', $deviceTokenRider, []);
+                    //print_r($fireBaseRider);exit;
                 }
             }
 

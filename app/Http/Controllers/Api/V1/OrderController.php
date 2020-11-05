@@ -16,7 +16,8 @@ use App\Helpers\{
     OneSignal,
     Curl,
     SadadPaymentGateway,
-    CredimaxPaymentGateway
+    CredimaxPaymentGateway,
+    FireBase
 };
 use App\Helpers\SendOTP;
 use App\Api\{
@@ -578,7 +579,7 @@ class OrderController extends Controller
                         if($vendor->web_app_id !== null) {
                             $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
                         } 
-                    
+
                         //if(!$oneSignalCustomer || !$oneSignalVendor) {
                         if(!$oneSignalCustomer) {
                             $this->commonError(__("apimsg.Notification not send") );
@@ -988,8 +989,12 @@ class OrderController extends Controller
                         $deviceTokenRider = ( $response_push['data']['device_token'] ) ? $response_push['data']['device_token'] : "";
 
                         if( !empty( $deviceTokenRider ) ) {
-                            $oneSignalRider  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_DRIVER_APP)->push(['en' => 'New order'], ['en' => 'You have a new incoming order.'], [$deviceTokenRider], []);
+                            //$oneSignalRider  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_DRIVER_APP)->push(['en' => 'New order'], ['en' => 'You have a new incoming order.'], [$deviceTokenRider], []);
                             //print_r($oneSignalRider);exit;
+
+                            /** Send order push notification to rider from FireBase **/
+                            $fireBaseRider  = FireBase::getInstance()->setAppType(FIRE_BASE_DRIVER_APP)->push('Orders', 'New order', 'You have a new incoming order.', $deviceTokenRider, []);
+                            //print_r($fireBaseRider);exit;
                         }                    
                     }
                 }
@@ -1053,9 +1058,11 @@ class OrderController extends Controller
                         DeliveryArea::tableName().".*"                
                     ])
                     ->leftJoin(DeliveryArea::tableName(),BranchDeliveryArea::tableName().".delivery_area_id",DeliveryArea::tableName().".delivery_area_id")
+                    ->leftJoin(Branch::tableName(),BranchDeliveryArea::tableName().".branch_id",Branch::tableName().".branch_id")
                     ->where([
                         DeliveryArea::tableName().".zone_type" => DELIVERY_AREA_ZONE_POLYGON,
-                        DeliveryArea::tableName().".status" => ITEM_ACTIVE
+                        DeliveryArea::tableName().".status" => ITEM_ACTIVE,
+                        Branch::tableName().".branch_key" => request()->branch_key
                     ])
                     ->whereNull(DeliveryArea::tableName().".deleted_at")
                     ->whereRaw("ST_CONTAINS(".DeliveryArea::tableName().".zone_latlng, Point(".$deliveryboy_location->latitude.", ".$deliveryboy_location->longitude."))")
@@ -1063,7 +1070,7 @@ class OrderController extends Controller
                     ->groupBy(BranchDeliveryArea::tableName().".branch_id")
                     ->get();
                     
-                }
+                }                
 
                 //echo count($branchDeliveryArea);exit;
 
@@ -2985,8 +2992,12 @@ class OrderController extends Controller
             case NODE_ORDER_DRIVER_ACCEPTED:
                 $orderModel->order_status = ORDER_APPROVED_STATUS_DRIVER_ACCEPTED;
 
-                $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have a new incoming order.'], [$vendorDetails->device_token], []);
+                //$oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have a new incoming order.'], [$vendorDetails->device_token], []);
                 //print_r($oneSignalVendor);exit;
+
+                /** Send order push notification to rider from FireBase **/
+                $fireBaseVendor  = FireBase::getInstance()->setAppType(FIRE_BASE_VENDOR_APP)->push('Orders', 'New order', 'You have a new incoming order.', $vendorDetails->device_token, []);
+                //print_r($fireBaseVendor);exit;
             break;
             case NODE_ORDER_DRIVER_REJECTED:
                 //$orderModel->order_status = ORDER_DRIVER_REJECTED;

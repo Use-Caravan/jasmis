@@ -51,6 +51,7 @@ use Storage;
 use Validator;
 use App\Vendor as CommonVendor;
 use App\Helpers\OneSignal;
+use App\Helpers\FireBase;
 //use App\Helpers\Curl;
 
 class OrderController extends Controller
@@ -89,7 +90,6 @@ class OrderController extends Controller
 
     public function changeStatus($order_key)
     {   
-        
         $order = Order::findByKey($order_key);  
         
 
@@ -205,8 +205,12 @@ class OrderController extends Controller
                     $deviceTokenRider = ( isset( $response_push['data']['device_token'] ) ) ? $response_push['data']['device_token'] : "";
 
                     if( !empty( $deviceTokenRider ) ) {
-                        $oneSignalRider  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_DRIVER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup."], [$deviceTokenRider], []);
+                        //$oneSignalRider  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_DRIVER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup."], [$deviceTokenRider], []);
                         //print_r($oneSignalRider);exit;
+
+                        /** Send order is ready to pickup push notification to rider from FireBase **/
+                        $fireBaseRider  = FireBase::getInstance()->setAppType(FIRE_BASE_DRIVER_APP)->push('Orders', 'Order Status', 'Order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup.', $deviceTokenRider, []);
+                        //print_r($fireBaseRider);exit;
                     }
                 }
             }

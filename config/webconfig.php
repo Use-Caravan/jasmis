@@ -148,17 +148,17 @@ return [
     "payment_gateway_failiur_url" => "https://caravan.brigita.co/api/v1/payment-gateway/failiur", 
     
     
-    //"credimaxpay_benefit_checkout_url" => "https://api.credimaxpay.com/api/benefit_checkout",
-    //"credimaxpay_credit_card_checkout_url" => "https://api.credimaxpay.com/api/v2/checkout",
+    "credimaxpay_benefit_checkout_url" => "https://api.credimaxpay.com/api/benefit_checkout",
+    "credimaxpay_credit_card_checkout_url" => "https://api.credimaxpay.com/api/v2/checkout",
 
     //Credimax updated URLs https://docs.google.com/document/d/1uz68G4LHUxjL_P1cy06kefJgz3JoPBtBIgPCJ_V4ez4/edit
-    "credimaxpay_benefit_checkout_url" => "https://api.paygcc.com/api/v2/benefit_checkout",
-    "credimaxpay_credit_card_checkout_url" => "https://api.paygcc.com/api/v2/checkout",
+    //"credimaxpay_benefit_checkout_url" => "https://api.paygcc.com/api/v2/benefit_checkout",
+    //"credimaxpay_credit_card_checkout_url" => "https://api.paygcc.com/api/v2/checkout",
 
     "credimaxpay_company_code" => "iRSn0PAEcsKwHpKCICx8vjLEsBAk0SltAXWx4b83eXdZVZ9OXSb0OOB1SOO9NWh8",
 
-    //"credimaxpay_payment_details_url" => "https://api.credimaxpay.com/api/orderPaymentDetails",
-    "credimaxpay_payment_details_url" => "https://api.paygcc.com/api/orderPaymentDetails",
+    "credimaxpay_payment_details_url" => "https://api.credimaxpay.com/api/orderPaymentDetails",
+    //"credimaxpay_payment_details_url" => "https://api.paygcc.com/api/orderPaymentDetails",
     
     "credimax_payment_gateway_success_url" => "/api/v1/payment-gateway/credimax-success",
     "credimax_payment_gateway_failure_url" => "/api/v1/payment-gateway/credimax-failure",
@@ -166,5 +166,11 @@ return [
     "credimax_payment_gateway_wallet_failure_url" => "/api/v1/payment-gateway/credimax-wallet-failure",
     "credimax_payment_gateway_success_url_debit" => "/api/v1/payment-gateway/credimax-success-debit",
     "credimax_payment_gateway_failure_url_debit" => "/api/v1/payment-gateway/credimax-failure-debit",
+
+    "fcm_url" => "https://fcm.googleapis.com/fcm/send",
+
+    "customer_fire_base_key" => "",
+    "vendor_fire_base_key" => "AAAAwaHNQFE:APA91bGhnfqoQEu47cZ4cPJqgZn11dD9ZWFVpTp5poPd65aaWedkoB56y-eeAI6Sw8b_LoHx-69gnAp3uh5hPSfXDrzd_IITwFQO2Y9yEbexeqTmhdj56GMQkSj1GN-a38t0wjwuZYYr",
+    "rider_fire_base_key" => "AAAA04e1qe8:APA91bH6m3x_KFNQ9ovSUov8g6jd3XM8gUuo_UKsYCkVLSsfD92yNJvuMKwktVW-21ze2l2v48NFHcULl9zTNfl2hvhKGHOjbV19J9tZwKX4LD7LvjjDbWDNK9FYpBGKeaaiSO57o3r0",
 ];
 

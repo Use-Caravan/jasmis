@@ -474,4 +474,8 @@
     const TRANSACTION_TYPE_CREDIT = 1;
     const TRANSACTION_TYPE_DEBIT = 2;
 
+    const FIRE_BASE_USER_APP = 1;
+    const FIRE_BASE_VENDOR_APP = 2;
+    const FIRE_BASE_DRIVER_APP = 3;
+
 ?>
