@@ -573,7 +573,12 @@ class OrderController extends Controller
                         (new CartController())->clearCart();
 
                         $vendor = Vendor::find($this->branchDetails->vendor_id); 
-                        $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+                        //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+
+                        /** Send push notification to customer app from firebase **/
+                        $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Notification', 'Order placed successfully.', $deviceToken, [], "No");
+                        //print_r($fireBaseCustomer);exit;
+
                         //$oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
                         
                         if($vendor->web_app_id !== null) {
@@ -607,7 +612,12 @@ class OrderController extends Controller
                         (new CartController())->clearCart();
 
                         $vendor = Vendor::find($this->branchDetails->vendor_id); 
-                        $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+                        //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+
+                        /** Send push notification to customer app from firebase **/
+                        $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Notification', 'Order placed successfully.', $deviceToken, [], "No");
+                        //print_r($fireBaseCustomer);exit;
+
                         //$oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
                         
                         if($vendor->web_app_id !== null) {
@@ -615,7 +625,7 @@ class OrderController extends Controller
                         } 
                     
                         //if(!$oneSignalCustomer || !$oneSignalVendor) {
-                        if(!$oneSignalCustomer) {
+                        if(!$fireBaseCustomer) {
                             $this->commonError(__("apimsg.Notification not send") );
                         }
                     }
@@ -686,7 +696,12 @@ class OrderController extends Controller
                     }
                     
                     $vendor = Vendor::find($this->branchDetails->vendor_id); 
-                    $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+                    //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+
+                    /** Send push notification to customer app from firebase **/
+                    $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Notification', 'Order placed successfully.', $deviceToken, [], "No");
+                    //print_r($fireBaseCustomer);exit;
+
                     //$oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
                     
                     if($vendor->web_app_id !== null) {
@@ -694,7 +709,7 @@ class OrderController extends Controller
                     } 
                 
                     //if(!$oneSignalCustomer || !$oneSignalVendor) {
-                    if(!$oneSignalCustomer) {
+                    if(!$fireBaseCustomer) {
                         $this->commonError(__("apimsg.Notification not send") );
                     }
 
@@ -745,7 +760,12 @@ class OrderController extends Controller
                             (new CartController())->clearCart();
 
                             $vendor = Vendor::find($this->branchDetails->vendor_id); 
-                            $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+                            //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+
+                            /** Send push notification to customer app from firebase **/
+                            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Notification', 'Order placed successfully.', $deviceToken, [], "No");
+                            //print_r($fireBaseCustomer);exit;
+
                             //$oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
                             
                             if($vendor->web_app_id !== null) {
@@ -753,7 +773,7 @@ class OrderController extends Controller
                             } 
                         
                             //if(!$oneSignalCustomer || !$oneSignalVendor) {
-                            if(!$oneSignalCustomer) {
+                            if(!$fireBaseCustomer) {
                                 $this->commonError(__("apimsg.Notification not send") );
                             }
                         }
@@ -831,13 +851,18 @@ class OrderController extends Controller
                             }
                         }
 
-                        $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+                        //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Notification'], ['en' => 'Order placed successfully.'], [$deviceToken], []);
+
+                        /** Send push notification to customer app from firebase **/
+                        $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Notification', 'Order placed successfully.', $deviceToken, [], "No");
+                        //print_r($fireBaseCustomer);exit;
+
                         //$oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$this->branchDetails->device_token], []);
                         if($vendor->web_app_id !== null) {
                             $oneSignalVendorWeb  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_WEB_APP)->push(['en' => 'New order'], ['en' => 'You have new incoming order.'], [$vendor->web_app_id], []);
                         } 
                         //if(!$oneSignalCustomer || !$oneSignalVendor) {
-                        if(!$oneSignalCustomer) {
+                        if(!$fireBaseCustomer) {
                             $this->commonError(__("apimsg.Notification not send") );
                         }
                     }
@@ -993,7 +1018,7 @@ class OrderController extends Controller
                             //print_r($oneSignalRider);exit;
 
                             /** Send order push notification to rider from FireBase **/
-                            $fireBaseRider  = FireBase::getInstance()->setAppType(FIRE_BASE_DRIVER_APP)->push('Orders', 'New order', 'You have a new incoming order.', $deviceTokenRider, []);
+                            $fireBaseRider  = FireBase::getInstance()->setAppType(FIRE_BASE_DRIVER_APP)->push('Orders', 'New order', 'You have a new incoming order.', $deviceTokenRider, [], "Yes");
                             //print_r($fireBaseRider);exit;
                         }                    
                     }
@@ -2974,14 +2999,22 @@ class OrderController extends Controller
             break;
             case NODE_ORDER_ONTHEWAY:
                 $orderModel->order_status = ORDER_ONTHEWAY;
-                $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$orderModel->order_number." has been picked by driver and its on the way."], [$userDetails->device_token], []);
+                //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$orderModel->order_number." has been picked by driver and its on the way."], [$userDetails->device_token], []);
+
+                /** Send push notification to customer app from firebase **/
+                $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "Order #".config('webconfig.app_inv_prefix').$orderModel->order_number." has been picked by driver and its on the way.", $userDetails->device_token, [], "No");
+                //print_r($fireBaseCustomer);exit;
             break; 
             case NODE_ORDER_DELIVERED:
                 $orderModel->order_status = ORDER_APPROVED_STATUS_DELIVERED;
                 $orderModel->payment_status = ORDER_PAYMENT_STATUS_SUCCESS;
                 Order::addLoyaltyPoints($orderModel);
                 /* $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'Order Status'], ['en' => "Your order #".config('webconfig.app_inv_prefix').$orderStatus->order_number." has been delivered."], [$vendorDetails->device_token], []); */
-                $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$orderModel->order_number." has been delivered successful."], [$userDetails->device_token], []);
+                //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$orderModel->order_number." has been delivered successful."], [$userDetails->device_token], []);
+
+                /** Send push notification to customer app from firebase **/
+                $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "Order #".config('webconfig.app_inv_prefix').$orderModel->order_number." has been delivered successful.", $userDetails->device_token, [], "No");
+                //print_r($fireBaseCustomer);exit;
             break;
             case NODE_ORDER_REJECTED:
                 $orderModel->order_status = ORDER_APPROVED_STATUS_REJECTED;
@@ -2996,7 +3029,7 @@ class OrderController extends Controller
                 //print_r($oneSignalVendor);exit;
 
                 /** Send order push notification to rider from FireBase **/
-                $fireBaseVendor  = FireBase::getInstance()->setAppType(FIRE_BASE_VENDOR_APP)->push('Orders', 'New order', 'You have a new incoming order.', $vendorDetails->device_token, []);
+                $fireBaseVendor  = FireBase::getInstance()->setAppType(FIRE_BASE_VENDOR_APP)->push('Orders', 'New order', 'You have a new incoming order.', $vendorDetails->device_token, [], "Yes");
                 //print_r($fireBaseVendor);exit;
             break;
             case NODE_ORDER_DRIVER_REJECTED:
@@ -3008,7 +3041,11 @@ class OrderController extends Controller
                 $orderModel->payment_status = ORDER_PAYMENT_STATUS_SUCCESS;
                 Order::addLoyaltyPoints($orderModel);
                 /* $oneSignalVendor  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_VENDOR_APP)->push(['en' => 'Order Status'], ['en' => "Your order #".config('webconfig.app_inv_prefix').$orderStatus->order_number." has been delivered."], [$vendorDetails->device_token], []); */
-                $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$orderModel->order_number." has been delivered successful."], [$userDetails->device_token], []);
+                //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$orderModel->order_number." has been delivered successful."], [$userDetails->device_token], []);
+
+                /** Send push notification to customer app from firebase **/
+                $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "Order #".config('webconfig.app_inv_prefix').$orderModel->order_number." has been delivered successful.", $userDetails->device_token, [], "No");
+                //print_r($fireBaseCustomer);exit;
             break;
             case NODE_ORDER_DRIVER_REQUESTED:
                 $orderModel->order_status = ORDER_DRIVER_REQUESTED;

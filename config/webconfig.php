@@ -169,7 +169,7 @@ return [
 
     "fcm_url" => "https://fcm.googleapis.com/fcm/send",
 
-    "customer_fire_base_key" => "",
+    "customer_fire_base_key" => "AAAAgpIqCu8:APA91bE7s_eKz9DfVfSPanYCODbgzo78FJYTQAGCw9uMZfdv9JQdBlOkPAGOzbTESILHnJLyx8b0E9OmfeePWOVvEoEnaC86QD_hkfZQQjtvKtPp0mpHlT3ykOJnyBp2GMgx9eOWAHPs",
     "vendor_fire_base_key" => "AAAAwaHNQFE:APA91bGhnfqoQEu47cZ4cPJqgZn11dD9ZWFVpTp5poPd65aaWedkoB56y-eeAI6Sw8b_LoHx-69gnAp3uh5hPSfXDrzd_IITwFQO2Y9yEbexeqTmhdj56GMQkSj1GN-a38t0wjwuZYYr",
     "rider_fire_base_key" => "AAAA04e1qe8:APA91bH6m3x_KFNQ9ovSUov8g6jd3XM8gUuo_UKsYCkVLSsfD92yNJvuMKwktVW-21ze2l2v48NFHcULl9zTNfl2hvhKGHOjbV19J9tZwKX4LD7LvjjDbWDNK9FYpBGKeaaiSO57o3r0",
 ];

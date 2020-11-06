@@ -163,7 +163,11 @@ class OrderController extends Controller
                         $assign_driver_count++;          
                 }//echo "assign_driver_count = ".$assign_driver_count;
             }*/
-            $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." is accepted by restaurant."], [$userDetails->device_token], []);
+            //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." is accepted by restaurant."], [$userDetails->device_token], []);
+
+            /** Send push notification to customer app from firebase **/
+            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "Order #".config('webconfig.app_inv_prefix').$order->order_number." is accepted by restaurant.", $userDetails->device_token, [], "No");
+            //print_r($fireBaseCustomer);exit;
         }
         
         if(request()->order_status == ORDER_APPROVED_STATUS_REJECTED) {
@@ -180,7 +184,11 @@ class OrderController extends Controller
             $order_datetime = $order->order_datetime;
             $order_date = date( "dmY", strtotime( $order_datetime ) );
             $order_time = date( "Hi", strtotime( $order_datetime ) );
-            $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "We regret to inform you that your order #".config('webconfig.app_inv_prefix').$order->order_number." placed on ".$order_date." at ".$order_time." has been cancelled. If you have paid for the order, it'll be added to your cPocket wallet and you can use it for future orders."], [$user->device_token], []);
+            //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "We regret to inform you that your order #".config('webconfig.app_inv_prefix').$order->order_number." placed on ".$order_date." at ".$order_time." has been cancelled. If you have paid for the order, it'll be added to your cPocket wallet and you can use it for future orders."], [$user->device_token], []);
+
+            /** Send push notification to customer app from firebase **/
+            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "We regret to inform you that your order #".config('webconfig.app_inv_prefix').$order->order_number." placed on ".$order_date." at ".$order_time." has been cancelled. If you have paid for the order, it'll be added to your cPocket wallet and you can use it for future orders.", $user->device_token, [], "No");
+
             //print_r($oneSignalCustomer);exit;
             /** Send push notification to customer if order cancelled in vendor app **/
 
@@ -209,18 +217,24 @@ class OrderController extends Controller
                         //print_r($oneSignalRider);exit;
 
                         /** Send order is ready to pickup push notification to rider from FireBase **/
-                        $fireBaseRider  = FireBase::getInstance()->setAppType(FIRE_BASE_DRIVER_APP)->push('Orders', 'Order Status', 'Order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup.', $deviceTokenRider, []);
+                        $fireBaseRider  = FireBase::getInstance()->setAppType(FIRE_BASE_DRIVER_APP)->push('Orders', 'Order Status', "Order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup.", $deviceTokenRider, [], "No");
                         //print_r($fireBaseRider);exit;
                     }
                 }
             }
 
-            $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup."], [$userDetails->device_token], []);
+            //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup."], [$userDetails->device_token], []);
+
+            /** Send push notification to customer app from firebase **/
+            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "Order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup.", $userDetails->device_token, [], "No");
         }
 
         if(request()->order_status == ORDER_APPROVED_STATUS_DELIVERED) {
             Order::addLoyaltyPoints($order);
-            $oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." has been delivered successfully."], [$userDetails->device_token], []);
+            //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." has been delivered successfully."], [$userDetails->device_token], []);
+
+            /** Send push notification to customer app from firebase **/
+            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "Order #".config('webconfig.app_inv_prefix').$order->order_number." has been delivered successfully.", $userDetails->device_token, [], "No");
         }
 
         $order->order_status = request()->order_status;        

@@ -74,7 +74,7 @@ class FireBase
      * @return mixed
      * @throws \yii\base\InvalidParamException
      */    
-    public function push( $header_text, $title, $message, $device_token, array $data )
+    public function push( $header_text, $title, $message, $device_token, array $data, $is_new_order = "No" )
     {
         $fcmUrl = config('webconfig.fcm_url');
         $token = $device_token;
@@ -84,6 +84,7 @@ class FireBase
             'title' => $title,
             'content' => $message,
             'imageUrl' => "",
+            "order" => $is_new_order,
             'sound' => true,
             'type' => 1
         ];
@@ -93,7 +94,7 @@ class FireBase
             'to'        => $token, //single token
             'data' => $notification
         ];
-        
+
         $headers = [
             'Authorization: key='.$this->fireBaseKey,
             'Content-Type: application/json'
