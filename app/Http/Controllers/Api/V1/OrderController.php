@@ -586,7 +586,7 @@ class OrderController extends Controller
                         } 
 
                         //if(!$oneSignalCustomer || !$oneSignalVendor) {
-                        if(!$oneSignalCustomer) {
+                        if(!$fireBaseCustomer) {
                             $this->commonError(__("apimsg.Notification not send") );
                         }
                     }
