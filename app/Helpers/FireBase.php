@@ -88,11 +88,21 @@ class FireBase
             'sound' => true,
             'type' => 1
         ];
+
+        $webpush = [
+            'headers' => [ 'Urgency' => 'high' ]
+        ];
+
+        $android = [
+            'priority' => 'normal'
+        ];
         
         $fcmNotification = [
             //'registration_ids' => $tokenList, //multple token array
             'to'        => $token, //single token
-            'data' => $notification
+            'data' => $notification,
+            'webpush' => $webpush, 
+            'android' => $android
         ];
 
         $headers = [
