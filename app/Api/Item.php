@@ -131,7 +131,7 @@ class Item extends CommonItem
                 ->whereNull(DeliveryArea::tableName().".deleted_at")
                 ->whereNull(Branch::tableName().".deleted_at")->get();
 
-
+                //print_r($deliveryAreasCircle);exit;
                 if($deliveryAreasCircle !== null) {                
                     $deliveryAreasCircle = $deliveryAreasCircle->toArray();
                     $deliveryBranchCircle = array_column($deliveryAreasCircle,'branch_id');
@@ -157,6 +157,7 @@ class Item extends CommonItem
                 ->whereRaw("ST_CONTAINS(".DeliveryArea::tableName().".zone_latlng, Point(".request()->latitude.", ".request()->longitude."))")
                 ->groupBy(BranchDeliveryArea::tableName().".branch_id")->get(); 
                             
+                //print_r($deliveryAreasPolygon);exit;
                 if($deliveryAreasPolygon !== null) {
                     $deliveryAreasPolygon = $deliveryAreasPolygon->toArray();
                     $deliveryBranchPolygons = array_column($deliveryAreasPolygon,'branch_id');
@@ -173,6 +174,7 @@ class Item extends CommonItem
                  
 
                 $distance_array = [];
+                $nearest = [];
                 foreach ($deliveryBranchIDs as $distances) {
                     //find distances
                    $branch_nearest = Branch::where('branch_id',$distances)->first();
@@ -225,6 +227,7 @@ class Item extends CommonItem
                     array_push($nearest,$sort['branch_id']);
                 }
                 //print_r($nearest);exit;
+                //echo '<pre>'; var_dump($query->toSql()); exit;
                 $query = $query->whereIn(Branch::tableName().".branch_id", $nearest);
                 //echo '<pre>'; var_dump($query->toSql()); exit;
                 //print_r($query->get());exit;
@@ -239,15 +242,18 @@ class Item extends CommonItem
             {
                 $query->whereNull(Branch::tableName().".deleted_at");
             }
+            //echo '<pre>'; var_dump($query->toSql()); exit;
             
             ItemLang::selectTranslation($query,'IL');
             VendorLang::selectTranslation($query,'VL');
             BranchLang::selectTranslation($query,'BRL');
             if(request()->item_name !== null) {
                 $query = $query->Where("IL.item_name", 'like' , "%".request()->item_name."%")
-                               ->orWhere("branch_name", 'like' , "%".request()->item_name."%")
-                               ->orWhere("VL.vendor_name", 'like' , "%".request()->item_name."%")
+                               //->orWhere("branch_name", 'like' , "%".request()->item_name."%")
+                               //->orWhere("VL.vendor_name", 'like' , "%".request()->item_name."%")
                                ->where([Vendor::tableName().".approved_status" => BRANCH_APPROVED_STATUS_APPROVED,Vendor::tableName().".approved_status" => ITEM_ACTIVE]);
+
+                //$query = $query->where([Vendor::tableName().".approved_status" => BRANCH_APPROVED_STATUS_APPROVED,Vendor::tableName().".approved_status" => ITEM_ACTIVE]);
             }
             //echo '<pre>'; var_dump($query->toSql()); exit;
             //print_r($deliveryBranchIDs);exit;
