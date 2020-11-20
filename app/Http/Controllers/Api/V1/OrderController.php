@@ -1099,7 +1099,8 @@ class OrderController extends Controller
 
                 //echo count($branchDeliveryArea);exit;
 
-                if($branchDeliveryArea === null || count($branchDeliveryArea) == 0) {
+                //if($branchDeliveryArea === null || count($branchDeliveryArea) == 0) {
+                if($branchDeliveryArea === null || count(array($branchDeliveryArea)) == 0) {
                     //return ['status'=> false, 'error' => __('apimsg.The selected address in not within the delivery area of the branch')];
                     return 0;
                 }
