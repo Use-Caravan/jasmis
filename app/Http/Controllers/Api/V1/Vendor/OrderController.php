@@ -166,7 +166,7 @@ class OrderController extends Controller
             //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." is accepted by restaurant."], [$userDetails->device_token], []);
 
             /** Send push notification to customer app from firebase **/
-            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "Order #".config('webconfig.app_inv_prefix').$order->order_number." is accepted by restaurant.", $userDetails->device_token, [], "No");
+            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "Order #".config('webconfig.app_inv_prefix').$order->order_number." is accepted by restaurant.", $userDetails->device_token, [], "No", $userDetails->device_type);
             //print_r($fireBaseCustomer);exit;
         }
         
@@ -187,7 +187,7 @@ class OrderController extends Controller
             //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "We regret to inform you that your order #".config('webconfig.app_inv_prefix').$order->order_number." placed on ".$order_date." at ".$order_time." has been cancelled. If you have paid for the order, it'll be added to your cPocket wallet and you can use it for future orders."], [$user->device_token], []);
 
             /** Send push notification to customer app from firebase **/
-            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "We regret to inform you that your order #".config('webconfig.app_inv_prefix').$order->order_number." placed on ".$order_date." at ".$order_time." has been cancelled. If you have paid for the order, it'll be added to your cPocket wallet and you can use it for future orders.", $user->device_token, [], "No");
+            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "We regret to inform you that your order #".config('webconfig.app_inv_prefix').$order->order_number." placed on ".$order_date." at ".$order_time." has been cancelled. If you have paid for the order, it'll be added to your cPocket wallet and you can use it for future orders.", $user->device_token, [], "No", $user->device_type);
 
             //print_r($oneSignalCustomer);exit;
             /** Send push notification to customer if order cancelled in vendor app **/
@@ -226,7 +226,7 @@ class OrderController extends Controller
             //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup."], [$userDetails->device_token], []);
 
             /** Send push notification to customer app from firebase **/
-            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "Order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup.", $userDetails->device_token, [], "No");
+            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "Order #".config('webconfig.app_inv_prefix').$order->order_number." is ready to pickup.", $userDetails->device_token, [], "No", $userDetails->device_type);
         }
 
         if(request()->order_status == ORDER_APPROVED_STATUS_DELIVERED) {
@@ -234,7 +234,7 @@ class OrderController extends Controller
             //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "Order #".config('webconfig.app_inv_prefix').$order->order_number." has been delivered successfully."], [$userDetails->device_token], []);
 
             /** Send push notification to customer app from firebase **/
-            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "Order #".config('webconfig.app_inv_prefix').$order->order_number." has been delivered successfully.", $userDetails->device_token, [], "No");
+            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "Order #".config('webconfig.app_inv_prefix').$order->order_number." has been delivered successfully.", $userDetails->device_token, [], "No", $userDetails->device_type);
         }
 
         $order->order_status = request()->order_status;        

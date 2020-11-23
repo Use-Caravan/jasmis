@@ -74,52 +74,76 @@ class FireBase
      * @return mixed
      * @throws \yii\base\InvalidParamException
      */    
-    public function push( $header_text, $title, $message, $device_token, array $data, $is_new_order = "No" )
+    public function push( $header_text, $title, $message, $device_token, array $data, $is_new_order = "No", $deviceType = 2 )
     {
         $fcmUrl = config('webconfig.fcm_url');
         $token = $device_token;
 
-        $notification = [
-            'headerText' => $header_text,
-            'title' => $title,
-            'content' => $message,
-            'imageUrl' => "",
-            "order" => $is_new_order,
-            'sound' => true,
-            'type' => 1
-        ];
+        $deviceType = ( $deviceType > 0 ) ? $deviceType : 2; 
 
-        $webpush = [
-            'headers' => [ 'Urgency' => 'high' ]
-        ];
+        /*** Send push notification to android app ***/
+        if( $deviceType == 2 ) {
+            $notification = [
+                'headerText' => $header_text,
+                'title' => $title,
+                'content' => $message,
+                'body' => $message,
+                'imageUrl' => "",
+                "order" => $is_new_order,
+                'sound' => true,
+                'type' => 1
+            ];
 
-        $android = [
-            'priority' => 'normal'
-        ];
-        
-        $fcmNotification = [
-            //'registration_ids' => $tokenList, //multple token array
-            'to'        => $token, //single token
-            'data' => $notification,
-            'webpush' => $webpush, 
-            'android' => $android
-        ];
+            $webpush = [
+                'headers' => [ 'Urgency' => 'high' ]
+            ];
 
-        $headers = [
-            'Authorization: key='.$this->fireBaseKey,
-            'Content-Type: application/json'
-        ];
+            $android = [
+                'priority' => 'normal'
+            ];
+            
+            $fcmNotification = [
+                //'registration_ids' => $tokenList, //multple token array
+                'to'        => $token, //single token
+                'data' => $notification,
+                'webpush' => $webpush, 
+                'android' => $android,
+                'body' => $message
+            ];
+        }
+        else if( $deviceType == 3 ) { /*** Send push notification to android app ***/
+            //Creating the notification array.
+            $notification = array(
+                'title' => $title, 
+                'body' => $message,
+                'text' => $message, 
+                'content' => $message,
+                'imageUrl' => "",
+                "order" => $is_new_order,
+                'sound' => true);
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL,$fcmUrl);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fcmNotification));
-        $result = curl_exec($ch);
-        curl_close($ch);
+            //This array contains, the token and the notification. The 'to' attribute stores the token.
+            $fcmNotification = array('to' => $token, 'notification' => $notification, 'body' => $message, 'priority' => 'high');
+            //print_r($fcmNotification);exit;
+        }
 
-        return $result;
+        if( $deviceType == 2 || $deviceType == 3 ) {
+            $headers = [
+                'Authorization: key='.$this->fireBaseKey,
+                'Content-Type: application/json'
+            ];
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL,$fcmUrl);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fcmNotification));
+            $result = curl_exec($ch);
+            curl_close($ch);
+
+            return $result;
+        }
     }
 }

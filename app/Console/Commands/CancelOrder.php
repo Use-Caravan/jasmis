@@ -90,7 +90,7 @@ class CancelOrder extends Command
                             //$oneSignalCustomer  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_USER_APP)->push(['en' => 'Order Status'], ['en' => "We regret to inform you that your order #".config('webconfig.app_inv_prefix').$model->order_number." placed on ".$order_date." at ".$order_time." has been cancelled. If you have paid for the order, it'll be added to your cPocket wallet and you can use it for future orders."], [$user->device_token], []);
 
                             /** Send push notification to customer app from firebase **/
-                            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "We regret to inform you that your order #".config('webconfig.app_inv_prefix').$model->order_number." placed on ".$order_date." at ".$order_time." has been cancelled. If you have paid for the order, it'll be added to your cPocket wallet and you can use it for future orders.", $user->device_token, [], "No");
+                            $fireBaseCustomer  = FireBase::getInstance()->setAppType(FIRE_BASE_USER_APP)->push('Orders', 'Order Status', "We regret to inform you that your order #".config('webconfig.app_inv_prefix').$model->order_number." placed on ".$order_date." at ".$order_time." has been cancelled. If you have paid for the order, it'll be added to your cPocket wallet and you can use it for future orders.", $user->device_token, [], "No", $user->device_type);
                             /** Send push notification to customer if order second cut off time limit exceed **/
 
                             /** Change order status to rejected **/
