@@ -80,6 +80,8 @@ class ItemResource extends JsonResource
             'flat_item_price' => $this->item_price,
             'item_description' => $this->item_description,
             'arabic_item_description' => ItemLang::where('item_id',$this->item_id)->where('language_code','ar')->value('item_description'),
+            'price_on_selection' => $this->price_on_selection,         
+            'price_on_selection_options' => !empty( $this->price_on_selection_options ) ? json_decode( $this->price_on_selection_options ) : array(),
             'category_name' => $this->category_name,
             'arabic_category_name' => CategoryLang::where('category_id',$this->category_id)->where('language_code','ar')->value('category_name'),
             'cuisine_name' => $this->cuisine_name,    
