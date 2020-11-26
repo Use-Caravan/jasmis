@@ -41,6 +41,8 @@ class CartController extends Controller
                 'branch_key' => 'required|exists:branch,branch_key',
                 'item_key' => 'required|exists:item,item_key',
                 'quantity' => 'required|numeric',
+                //'price_on_selection' => 'required|numeric|in:1,0',
+                //'sub_items' => 'required_unless:price_on_selection,0',
             ]);
             
             if($validator->fails()) {
@@ -63,7 +65,18 @@ class CartController extends Controller
             if($item === null) {
                 return $this->commonError( __("apimsg.Item Not Found") );
             }
+
             
+            if($item->price_on_selection == 1) {
+                if( !isset( $rawData['sub_items'] ) )
+                    return $this->commonError( __("apimsg.The sub items field is required unless price on selection is in 0.") );
+            }
+
+            //print_r($rawData['sub_items']);exit;
+            
+            $sub_items = isset( $rawData['sub_items'] ) && !empty( $rawData['sub_items'] ) ? $rawData['sub_items'] : array();
+            //print_r($sub_items);exit;
+
             $cart = Cart::where(['branch_id' => $branchDetails->branch_id,'user_id' => $userID])->first();
             
             if($cart === null) {               
@@ -86,12 +99,43 @@ class CartController extends Controller
                     //     $catItemID = $value->cart_item_id;
                     //     goto cartItemUpdate;
                     // } // code commented for item add issue with and without ingredient 
-                    $existsIngredients = json_decode($value->ingredients,true);
-                    $currentIngredients = $rawData['ingrdient_groups'];
-                    if($existsIngredients == $currentIngredients) {
+                    if( empty( $sub_items ) ) {
+                        $existsIngredients = json_decode($value->ingredients,true);
+                        $currentIngredients = $rawData['ingrdient_groups'];
+                        if($existsIngredients == $currentIngredients) {
+                            $catItemID = $value->cart_item_id;
+                        
+                            goto cartItemUpdate;                                                
+                        }
+                    }
+                    else {
+                        /*$existsSubItems = json_decode($value->price_on_selection_options,true);
+                        //print_r($existsSubItems);exit;
+                        $currentSubItems = $sub_items;
+                        if($existsSubItems == $currentSubItems) {
+                            $catItemID = $value->cart_item_id;
+                        
+                            goto cartItemUpdate;                                                
+                        }*/
+
+                        $item_price_on_selection_options = !empty( $item->price_on_selection_options ) ? json_decode($item->price_on_selection_options) : array();
+                        $sub_item_exists_count = 0;
+                        foreach( $item_price_on_selection_options as $item_price_on_selection_option ) {
+                            foreach( $sub_items as $sub_item ) {
+                                //echo $sub_item['sub_item_name'];exit;
+                                if( $item_price_on_selection_option->option_name == $sub_item['sub_item_name'] )
+                                    $sub_item_exists_count++;
+                            }   
+                        }
+
+                        $price_on_selection = isset($rawData['price_on_selection']) ? $rawData['price_on_selection'] : 0;
+                        if( $sub_item_exists_count == 0 && $price_on_selection == 1 ) {
+                            return $this->commonError( __("apimsg.Invalid sub items selected.") );
+                        }
+
                         $catItemID = $value->cart_item_id;
-                    
-                        goto cartItemUpdate;                                                
+                        
+                        goto cartItemUpdate;
                     }
                 }                
                 goto cartItemAdd;
@@ -99,27 +143,62 @@ class CartController extends Controller
             
             cartItemAdd:
             
-                if($rawData['quantity'] == 0) {
+                if( $rawData['quantity'] == 0 && empty( $sub_items ) ) {
                     goto cartDelete;
                 }
                 
-                $isIngredient = ($rawData['ingrdient_groups'] === null || empty($rawData['ingrdient_groups']) || (count($rawData['ingrdient_groups']) == 0) ) ? 0 : 1;
-                $cartItem = new CartItem();
-                $cartItem = $cartItem->fill([
-                    'cart_id' => $cart->cart_id,
-                    'item_id' => $item->item_id,
-                    'quantity' => $rawData['quantity'],
-                    'is_ingredient' => $isIngredient,
-                    'ingredients' => json_encode($rawData['ingrdient_groups']),
-                    'item_instruction' => isset($rawData['item_instruction']) ? $rawData['item_instruction'] : "",
-                ]);
-                $cartItem->save();
+                if( empty( $sub_items ) ) {
+                    $isIngredient = ($rawData['ingrdient_groups'] === null || empty($rawData['ingrdient_groups']) || (count($rawData['ingrdient_groups']) == 0) ) ? 0 : 1;
+                    $cartItem = new CartItem();
+                    $cartItem = $cartItem->fill([
+                        'cart_id' => $cart->cart_id,
+                        'item_id' => $item->item_id,
+                        'quantity' => $rawData['quantity'],
+                        'is_ingredient' => $isIngredient,
+                        'ingredients' => json_encode($rawData['ingrdient_groups']),
+                        'item_instruction' => isset($rawData['item_instruction']) ? $rawData['item_instruction'] : "",
+                    ]);
+                    $cartItem->save();
+                }
+                else {
+                    $isIngredient = ($rawData['ingrdient_groups'] === null || empty($rawData['ingrdient_groups']) || (count($rawData['ingrdient_groups']) == 0) ) ? 0 : 1;
+
+                    $item_price_on_selection_options = !empty( $item->price_on_selection_options ) ? json_decode($item->price_on_selection_options) : array();
+                    //print_r($item_price_on_selection_options);exit;
+
+                    $sub_item_exists_count = 0;
+                    foreach( $item_price_on_selection_options as $item_price_on_selection_option ) {
+                        foreach( $sub_items as $sub_item ) {
+                            //echo $sub_item['sub_item_name'];exit;
+                            if( $item_price_on_selection_option->option_name == $sub_item['sub_item_name'] )
+                                $sub_item_exists_count++;
+                        }   
+                    }
+
+                    $price_on_selection = isset($rawData['price_on_selection']) ? $rawData['price_on_selection'] : 0;
+                    if( $sub_item_exists_count == 0 && $price_on_selection == 1 ) {
+                        return $this->commonError( __("apimsg.Invalid sub items selected.") );
+                    }
+            
+                    $cartItem = new CartItem();
+                    $cartItem = $cartItem->fill([
+                        'cart_id' => $cart->cart_id,
+                        'item_id' => $item->item_id,
+                        'quantity' => $rawData['quantity'],
+                        'is_ingredient' => $isIngredient,
+                        'ingredients' => json_encode($rawData['ingrdient_groups']),
+                        'item_instruction' => isset($rawData['item_instruction']) ? $rawData['item_instruction'] : "",
+                        'price_on_selection' => isset($rawData['price_on_selection']) ? $rawData['price_on_selection'] : 0,
+                        'price_on_selection_options' => ( isset($sub_items) && $price_on_selection == 1 ) ? json_encode($sub_items) : ""
+                    ]);
+                    $cartItem->save();
+                }
                 
                 goto response;
 
             cartItemUpdate:
             
-                if($rawData['quantity'] == 0) {
+                if($rawData['quantity'] == 0 && empty( $sub_items )) {
                     goto cartDelete;
                 }     
                                 
@@ -138,6 +217,10 @@ class CartController extends Controller
                 if(isset($rawData['item_instruction'])) {
                     $cartItem->item_instruction =  $rawData['item_instruction'];
                 }
+
+                $cartItem->price_on_selection = isset($rawData['price_on_selection']) ? $rawData['price_on_selection'] : 0;
+                $cartItem->price_on_selection_options = ( isset($sub_items) && $price_on_selection == 1 ) ? json_encode($sub_items) : "";
+
                 $cartItem->update();
                 goto response;
 

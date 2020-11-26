@@ -144,4 +144,5 @@ return [
     'Requested redeem amount below the minimum amount to redeem' => 'Requested redeem amount below the minimum amount to redeem',
     'Delivery Charge' =>  'Delivery Charge',
     'Sub Total' => 'Sub Total',
+    'The sub items field is required unless price on selection is in 0.' => 'The sub items field is required unless price on selection is in 0.',
 ];

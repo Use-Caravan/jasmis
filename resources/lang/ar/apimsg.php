@@ -145,4 +145,7 @@ return [
     'Requested redeem amount below the minimum amount to redeem' => 'طلب استرداد المبلغ أقل من الحد الأدنى للمبلغ المراد استرداده',
     'Delivery Charge' =>  'رسوم التوصيل',
     'Sub Total' => 'المجموع الفرعي',
+    'The sub items field is required unless price on selection is in 0.' => 'حقل العناصر الفرعية مطلوب ما لم يكن السعر المحدد بقيمة 0.',
+    'Invalid sub items selected.' => 'تم تحديد عناصر فرعية غير صالحة.',
 ];
+
