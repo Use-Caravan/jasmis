@@ -14,7 +14,12 @@ use App\{
     Api\VendorLang,
     Api\Item,
     Api\CuisineLang,
-    Api\BranchCuisine
+    Api\BranchCuisine,
+    Api\IngredientGroupLang,
+    Api\IngredientGroup,
+    Api\Ingredient,
+    Api\IngredientLang,
+    Api\IngredientGroupMapping
 };
 use App;
 use Validator;
@@ -120,16 +125,21 @@ class CartController extends Controller
 
                         $item_price_on_selection_options = !empty( $item->price_on_selection_options ) ? json_decode($item->price_on_selection_options) : array();
                         $sub_item_exists_count = 0;
+                        $cnt = 0;
                         foreach( $item_price_on_selection_options as $item_price_on_selection_option ) {
                             foreach( $sub_items as $sub_item ) {
                                 //echo $sub_item['sub_item_name'];exit;
-                                if( $item_price_on_selection_option->option_name == $sub_item['sub_item_name'] )
+                                if( $item_price_on_selection_option->option_name == $sub_item['sub_item_name'] ) {
                                     $sub_item_exists_count++;
+                                    $sub_items[$cnt]['sub_item_price'] = $item_price_on_selection_option->option_price;
+                                    $cnt++;
+                                }                                
                             }   
                         }
+                        //print_r($sub_items);exit;
 
                         $price_on_selection = isset($rawData['price_on_selection']) ? $rawData['price_on_selection'] : 0;
-                        if( $sub_item_exists_count == 0 && $price_on_selection == 1 ) {
+                        if( ( $sub_item_exists_count < count( $sub_items ) ) && $price_on_selection == 1 ) {
                             return $this->commonError( __("apimsg.Invalid sub items selected.") );
                         }
 
@@ -167,11 +177,15 @@ class CartController extends Controller
                     //print_r($item_price_on_selection_options);exit;
 
                     $sub_item_exists_count = 0;
+                    $cnt = 0;
                     foreach( $item_price_on_selection_options as $item_price_on_selection_option ) {
                         foreach( $sub_items as $sub_item ) {
                             //echo $sub_item['sub_item_name'];exit;
-                            if( $item_price_on_selection_option->option_name == $sub_item['sub_item_name'] )
+                            if( $item_price_on_selection_option->option_name == $sub_item['sub_item_name'] ) {
                                 $sub_item_exists_count++;
+                                $sub_items[$cnt]['sub_item_price'] = $item_price_on_selection_option->option_price;
+                                $cnt++;
+                            }
                         }   
                     }
 
@@ -273,6 +287,71 @@ class CartController extends Controller
         return $this->asJson();
     }
 
+    public function get_sub_item_ingrdients( $ingrdient_groups, $itemQuantity, $itemSubTotal )
+    {
+        $sub_items_ingredient_groups = array();
+        if(isset($ingrdient_groups) && !empty($ingrdient_groups)) {
+            foreach($ingrdient_groups as $igKey => $igValue) {
+                $ingredientGroup = IngredientGroup::select(IngredientGroup::tableName().'.*');
+                IngredientGroupLang::selectTranslation($ingredientGroup);
+                //$igValue = (array)$igValue;
+                //print_r($igValue);exit;
+                $ingredientGroup = $ingredientGroup->where('ingredient_group_key',$igValue->ingredient_group_key)->first();
+                if($ingredientGroup === null) {                    
+                    return ['status'=> false, 'error' => __('apimsg.Invalid Ingredient group key')];
+                }
+                $sub_items_ingredient_groups[$igKey] = [
+
+                    'ingredient_group_key' => $ingredientGroup->ingredient_group_key,
+                    'ingredient_group_id' => $ingredientGroup->ingredient_group_id,
+                    'ingredient_group_name' => $ingredientGroup->ingredient_group_name,
+                    'arabic_ingredient_group_name' => IngredientGroupLang::where('ingredient_group_id',$ingredientGroup->ingredient_group_id)->where('language_code','ar')->value('ingredient_group_name'), 
+                ];                
+                $ingredientGroupSubTotal = 0;                
+                if(!isset($igValue->ingredients)) {
+                    return ['status'=> false, 'error' => __('apimsg.Ingredients are missing')];
+                }
+                foreach($igValue->ingredients as $iKey => $iValue) {
+                    //$iValue = (array)$iValue;
+                    $ingredients = IngredientGroupMapping::select(IngredientGroupMapping::tableName().".*",Ingredient::tableName().".*")
+                    ->leftJoin(Ingredient::tableName(),IngredientGroupMapping::tableName().'.ingredient_id','=',Ingredient::tableName().'.ingredient_id');
+                    IngredientLang::selectTranslation($ingredients);
+                    $ingredients = $ingredients->where([
+                        Ingredient::tableName().".ingredient_key" => $iValue->ingredient_key,
+                        Ingredient::tableName().".status" => ITEM_ACTIVE,
+                        'ingredient_group_mapping.ingredient_group_id' => $ingredientGroup->ingredient_group_id
+                        ])->first();
+                    if($ingredients === null) {
+                        return ['status'=> false, 'error' => 'Invalid Ingredient key'];
+                    }
+                    $ingredientSubtotal = (int)$iValue->quantity * ( (float)$ingredients->price * $itemQuantity) ;
+                    $sub_items_ingredient_groups[$igKey]['ingredient_name'] = $ingredients->ingredient_name;
+                    $sub_items_ingredient_groups[$igKey]['arabic_ingredient_name'] = IngredientLang::where('ingredient_id',$ingredients->ingredient_id)->where('language_code','ar')->value('ingredient_name');
+                    $sub_items_ingredient_groups[$igKey]['ingredients'][$iKey] = [
+                        'ingredient_key' => $ingredients->ingredient_key,
+                        'ingredient_id' => $ingredients->ingredient_id,
+                        'price' => Common::currency($ingredients->price),
+                        'cprice' => (float)$ingredients->price,
+                        'quantity' => $iValue->quantity,
+                        'ingredient_subtotal' => Common::currency($ingredientSubtotal),
+                        'ingredient_csubtotal' => $ingredientSubtotal,
+                    ];
+                    $itemSubTotal += $ingredientSubtotal;
+                    $ingredientGroupSubTotal += $ingredientSubtotal;
+                }
+
+                $sub_items_ingredient_groups[$igKey]['ingredient_group_subtotal'] = Common::currency($ingredientGroupSubTotal);
+                $sub_items_ingredient_groups[$igKey]['ingredient_group_csubtotal'] = $ingredientGroupSubTotal;
+                                
+                $sub_items_ingredient_groups['subtotal'] = $itemSubTotal;                
+            }
+        }
+
+        //print_r($sub_items_ingredient_groups);exit;
+
+        return $sub_items_ingredient_groups;
+    }
+
     public function getCart()
     {
         if(!auth()->check()){
@@ -328,11 +407,104 @@ class CartController extends Controller
                 }
                 continue;
             }
+
+            /** Get sub items details and price calculation while price on selection is 1 **/
+            $price_on_selection_options = [];
+            $cnt = 0;
+            
+            if( $value->price_on_selection == 1 && !empty( $value->price_on_selection_options ) ) {
+                $price_on_selection_options = json_decode( $value->price_on_selection_options );
+                
+                $sub_items = [];
+                $sub_items_total_price = 0;
+                foreach( $price_on_selection_options as $key => $price_on_selection_option ) {
+                    $itemSubTotal = $price_on_selection_option->sub_item_price * (int)$price_on_selection_option->quantity;
+                    $price_on_selection_options[$cnt]->sub_item_subtotal = $itemSubTotal;
+
+                    $sub_items[$key]['sub_item_id'] = $price_on_selection_option->sub_item_id;
+                    $sub_items[$key]['sub_item_name'] = $price_on_selection_option->sub_item_name;
+                    $sub_items[$key]['sub_item_price'] = $price_on_selection_option->sub_item_price;
+                    $sub_items[$key]['quantity'] = $price_on_selection_option->quantity;    
+                    $sub_items[$key]['sub_item_subtotal'] = $itemSubTotal;   
+
+                    $sub_items[$key] = [
+                        'ingredient_groups' => [],
+                        'ingredient_name' => "",
+                        'arabic_ingredient_name' => "",
+                        'subtotal' => $itemSubTotal
+                    ];
+
+                    if(isset($price_on_selection_option->ingrdient_groups) && !empty($price_on_selection_option->ingrdient_groups)) {
+                        foreach($price_on_selection_option->ingrdient_groups as $igKey => $igValue) {
+                            $ingredientGroup = IngredientGroup::select(IngredientGroup::tableName().'.*');
+                            IngredientGroupLang::selectTranslation($ingredientGroup);
+                            $ingredientGroup = $ingredientGroup->where('ingredient_group_key',$igValue->ingredient_group_key)->first();
+                            if($ingredientGroup === null) {                    
+                                return ['status'=> false, 'error' => __('apimsg.Invalid Ingredient group key')];
+                            }
+                            $sub_items[$key]['ingredient_groups'][$igKey] = [
+                                'ingredient_group_key' => $ingredientGroup->ingredient_group_key,
+                                'ingredient_group_id' => $ingredientGroup->ingredient_group_id,
+                                'ingredient_group_name' => $ingredientGroup->ingredient_group_name,
+                                'arabic_ingredient_group_name' => IngredientGroupLang::where('ingredient_group_id',$ingredientGroup->ingredient_group_id)->where('language_code','ar')->value('ingredient_group_name'), 
+                            ];                
+                            $ingredientGroupSubTotal = 0;                
+                            if(!isset($igValue->ingredients)) {
+                                return ['status'=> false, 'error' => __('apimsg.Ingredients are missing')];
+                            }
+                            foreach($igValue->ingredients as $iKey => $iValue) {
+                                $ingredients = IngredientGroupMapping::select(IngredientGroupMapping::tableName().".*",Ingredient::tableName().".*")
+                                ->leftJoin(Ingredient::tableName(),IngredientGroupMapping::tableName().'.ingredient_id','=',Ingredient::tableName().'.ingredient_id');
+                                IngredientLang::selectTranslation($ingredients);
+                                $ingredients = $ingredients->where([
+                                    Ingredient::tableName().".ingredient_key" => $iValue->ingredient_key,
+                                    Ingredient::tableName().".status" => ITEM_ACTIVE,
+                                    'ingredient_group_mapping.ingredient_group_id' => $ingredientGroup->ingredient_group_id
+                                    ])->first();
+                                if($ingredients === null) {
+                                    return ['status'=> false, 'error' => 'Invalid Ingredient key'];
+                                }
+                                $ingredientSubtotal = (int)$iValue->quantity * ( (float)$ingredients->price * $price_on_selection_option->quantity) ;
+                                $sub_items[$key]['ingredient_name'] = (isset($items[$key]['ingredient_name']) && $items[$key]['ingredient_name'] != '') ? $items[$key]['ingredient_name'].", ".$ingredients->ingredient_name : $ingredients->ingredient_name;
+                                $sub_items[$key]['arabic_ingredient_name'] = (isset($items[$key]['arabic_ingredient_name']) && $items[$key]['arabic_ingredient_name'] != '') ? $items[$key]['arabic_ingredient_name']. "," .IngredientLang::where('ingredient_id',$ingredients->ingredient_id)->where('language_code','ar')->value('ingredient_name'):IngredientLang::where('ingredient_id',$ingredients->ingredient_id)->where('language_code','ar')->value('ingredient_name');
+                                $sub_items[$key]['ingredient_groups'][$igKey]['ingredients'][$iKey] = [
+                                    'ingredient_key' => $ingredients->ingredient_key,
+                                    'ingredient_id' => $ingredients->ingredient_id,
+                                    'price' => Common::currency($ingredients->price),
+                                    'cprice' => (float)$ingredients->price,
+                                    'quantity' => $iValue->quantity,
+                                    'ingredient_subtotal' => Common::currency($ingredientSubtotal),
+                                    'ingredient_csubtotal' => $ingredientSubtotal,
+                                ];
+                                $itemSubTotal += $ingredientSubtotal;
+                                $ingredientGroupSubTotal += $ingredientSubtotal;
+                            }
+
+                            $sub_items[$key]['ingredient_groups'][$igKey]['ingredient_group_subtotal'] = Common::currency($ingredientGroupSubTotal);
+                            $sub_items[$key]['ingredient_groups'][$igKey]['ingredient_group_csubtotal'] = $ingredientGroupSubTotal;
+                                            
+                            $sub_items[$key]['subtotal'] = $itemSubTotal;
+                        }
+                    }
+                    //print_r($sub_items);exit;
+
+                    $price_on_selection_options[$cnt]->ingrdient_groups = $sub_items[$cnt]['ingredient_groups'];
+                    $price_on_selection_options[$cnt]->subtotal = $sub_items[$cnt]['subtotal'];
+                    $sub_items_total_price += $sub_items[$cnt]['subtotal'];
+
+                    $cnt++;
+                }
+            }
+            //echo $sub_items_total_price;exit;
+
             $itemArray['items'][] = [
                 'cart_item_key' => $value->cart_item_key,
                 'item_key' => $item->item_key,
                 'quantity' => $value->quantity,
                 'ingrdient_groups' =>  json_decode($value->ingredients,true),
+                'price_on_selection' => $value->price_on_selection,
+                'sub_items' => $price_on_selection_options,
+                'sub_items_total_price' => ( $value->price_on_selection == 1 && !empty( $value->price_on_selection_options ) ) ? $sub_items_total_price : 0
             ];
         }     
         
@@ -347,6 +519,7 @@ class CartController extends Controller
         
 
         $cart = (new OrderController())->dataFormat(['items' => $items['data']]); 
+        //print_r($cart);exit;
         if( count($cart['items']) <= 0) {
             $this->commonError( __("apimsg.There is no items in your cart") );
         } else {
@@ -371,9 +544,15 @@ class CartController extends Controller
             $cart['payment_details'] = [];
             $itemSubtotal = 0;
             foreach($cart['items'] as $key => $value) {
-                $itemSubtotal += $value['subtotal'];
-                $cart['items'][$key]['subtotal'] = Common::currency($value['subtotal']);
-
+                if( isset( $value['price_on_selection'] ) && $value['price_on_selection'] == 1 ) {
+                    //print_r($value['sub_items_total_price']);exit;
+                    $itemSubtotal += $value['sub_items_total_price'];
+                    $cart['items'][$key]['price_on_selection_subtotal'] = Common::currency($value['sub_items_total_price']);
+                }
+                else {
+                    $itemSubtotal += $value['subtotal'];
+                    $cart['items'][$key]['subtotal'] = Common::currency($value['subtotal']);
+                }
             }
             /* vendor details */
 

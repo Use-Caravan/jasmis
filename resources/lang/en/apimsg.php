@@ -145,4 +145,5 @@ return [
     'Delivery Charge' =>  'Delivery Charge',
     'Sub Total' => 'Sub Total',
     'The sub items field is required unless price on selection is in 0.' => 'The sub items field is required unless price on selection is in 0.',
+    'Invalid sub items selected.' => 'Invalid sub items selected.',
 ];
