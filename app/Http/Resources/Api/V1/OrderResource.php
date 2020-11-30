@@ -33,7 +33,7 @@ class OrderResource extends JsonResource
 						
 	   $user_rating = BranchReview::where('vendor_id',$this->vendor_id)->where('branch_id',$this->branch_id)->
                        where('user_id',$this->user_id)->first();
-        
+
         return [
             'order_key' => $this->order_key,            
             'order_number' => ($this->order_number === null) ? '' : "#".config('webconfig.app_inv_prefix').$this->order_number,
@@ -74,6 +74,7 @@ class OrderResource extends JsonResource
             'branch_longitude' => ($this->branch_longitude === null) ? '' : $this->branch_longitude,
             'user_latitude' => ($this->user_latitude === null) ? '' : $this->user_latitude,
             'user_longitude' => ($this->user_longitude === null) ? '' : $this->user_longitude,
+            //'order_items' => OrderItemResource::collection( OrderItem::getOrderItems($this->order_id) ),
             'item_namelist' => OrderItem::getOrderItems($this->order_id)->pluck('item_name'),
             'arabic_item_namelist' => OrderItem::getOrderItemsArabic($this->order_id)->pluck('item_name'),
             $this->mergeWhen($request->order_key, [                

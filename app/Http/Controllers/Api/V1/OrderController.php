@@ -123,6 +123,7 @@ class OrderController extends Controller
         if($orders === null){
             return $this->commonError( __('apimsg.Invalid order') );
         }
+        //print_r($orders);exit;
         $orders = new OrderResource($orders);   
         $this->setMessage( __('apimsg.Orders are fetched') );
         return $this->asJson($orders);
@@ -231,7 +232,8 @@ class OrderController extends Controller
         $url = config('webconfig.deliveryboy_url')."/api/v1/driver/company?company_id=".config('webconfig.company_id');
         $data = Curl::instance()->setUrl($url)->send();
         $response = json_decode($data,true);
-        $driverslist = $response['data'];
+        //print_r($response);exit;
+        $driverslist = isset( $response['data'] ) ? $response['data'] : [];
         
 
 
@@ -258,6 +260,7 @@ class OrderController extends Controller
         $this->cartDetails = Cart::where(['user_id' => request()->user()->user_id])->first();
         //print_r($this->cartDetails);exit;
         $responseData = $this->checkoutQuotation(true);
+        //print_r($responseData);exit;
         
         if($responseData['status'] === false && $responseData['type'] === EXPECTATION_FAILED) {
             return $this->commonError($responseData['error']);
@@ -360,6 +363,7 @@ class OrderController extends Controller
                 'second_cut_off_time' => $second_cut_off_time,
             ];
 
+            //print_r($paymentDetails['items']);exit;
             $order = new Order();
             $order = $order->fill($fillables);
             $order->save();
@@ -384,13 +388,33 @@ class OrderController extends Controller
                 
                 /** Order Item and Item Lang */
                 $orderItem = new OrderItem();
+
+                if( isset( $value['price_on_selection'] ) && $value['price_on_selection'] == 1 ) {
+                    $base_price = $value['cprice'];
+                    $item_quantity = $value['quanity'];
+
+                    $value['sub_items_total_price'] = isset( $value['sub_items_total_price'] ) && $value['sub_items_total_price'] > 0 ? $value['sub_items_total_price'] : 0;
+                    $value['sub_items_ingredient_group_total_price'] = isset( $value['sub_items_ingredient_group_total_price'] ) && $value['sub_items_ingredient_group_total_price'] > 0 ? $value['sub_items_ingredient_group_total_price'] : 0;
+
+                    $item_total_price = ( $value['sub_items_total_price'] > 0 ) ? ( $value['sub_items_total_price'] - $value['sub_items_ingredient_group_total_price'] ) : 0;
+                    $item_subtotal = $value['sub_items_total_price'];                       
+                }
+                else {
+                    $base_price = $value['cprice'];
+                    $item_quantity = $value['quanity'];
+                    $item_total_price = $value['cprice'] * $value['quanity'];
+                    $item_subtotal = $value['csubtotal'];
+                }
+
                 $items = [
                     'order_id' => $orderID,
                     'item_id' => $value['item_id'],
-                    'base_price' => $value['cprice'],
-                    'item_quantity' => $value['quanity'],
-                    'item_total_price' => $value['cprice'] * $value['quanity'],
-                    'item_subtotal' => $value['csubtotal'],
+                    'price_on_selection' => isset( $value['price_on_selection'] ) ? $value['price_on_selection'] : 0,
+                    'price_on_selection_options' => isset( $value['sub_items'] ) && !empty( $value['sub_items'] ) ? json_encode($value['sub_items']) : "",
+                    'base_price' => $base_price,//$value['cprice'],
+                    'item_quantity' => $item_quantity,//$value['quanity'],
+                    'item_total_price' => $item_total_price,//$value['cprice'] * $value['quanity'],
+                    'item_subtotal' => $item_subtotal,//$value['csubtotal'],
                     'item_instruction' => isset($value['item_instruction']) ? $value['item_instruction'] : '',
                 ];
                 $orderItem = $orderItem->fill($items);
@@ -437,65 +461,131 @@ class OrderController extends Controller
                 }
                 /** Order Item and Item Lang */
 
-                /** Order Item Ingredient Group and Ingredient Group  Lang */
-                foreach($value['ingredient_groups'] as $IGValue) {
+                /** Order Item Ingredient Group and Ingredient Group  Lang for Price On Selection */
+                if( isset( $value['price_on_selection'] ) && $value['price_on_selection'] == 1 ) {
+                    foreach($value['sub_items'] as $sub_item ) {
+                        foreach($sub_item->ingrdient_groups as $IGValue) {
+                            $orderingredientGroup = new OrderItemIngredientGroup();
+                            $ingredientGroupDetails = IngredientGroup::find($IGValue['ingredient_group_id']);
+                            $orderingredientGroup = $orderingredientGroup->fill([
+                                'order_id' => $orderID,
+                                'order_item_id' => $orderItemID,
+                                'order_sub_item_id' => $sub_item->sub_item_id,
+                                'ingredient_group_id' => $IGValue['ingredient_group_id'],
+                                'ingredient_type' => $ingredientGroupDetails->ingredient_type,
+                                'minimum' => $ingredientGroupDetails->minimum,
+                                'maximum' => $ingredientGroupDetails->maximum,
+                                'ingredient_group_subtotal' => $IGValue['ingredient_group_csubtotal']
+                            ]);
+                            $orderingredientGroup->save();
+                            $orderingredientGroupID = $orderingredientGroup->getKey();
+                            $ingredientGroupLang = IngredientGroupLang::where('ingredient_group_id',$IGValue['ingredient_group_id'])->get();
+                            foreach($ingredientGroupLang as $IGroupLang) {
+                                $orderIngredientGropuLang = new OrderItemIngredientGroupLang();
+                                $orderIngredientGropuLang = $orderIngredientGropuLang->fill([
+                                    'order_item_ingredient_group_id' => $orderingredientGroupID,
+                                    'language_code' => $IGroupLang->language_code,
+                                    'group_name' => $IGroupLang->ingredient_group_name,
+                                    'arabic_group_name' => IngredientGroupLang::where('ingredient_group_id', $IGroupLang->ingredient_group_id)->where('language_code','ar')->value('ingredient_group_name'),                      
+                                ]);
+                                $orderIngredientGropuLang->save();
+                            }
+                            /** Order Item Ingredient Group and Ingredient Group  Lang */
 
-                    $orderingredientGroup = new OrderItemIngredientGroup();
-                    $ingredientGroupDetails = IngredientGroup::find($IGValue['ingredient_group_id']);
-                    $orderingredientGroup = $orderingredientGroup->fill([
-                        'order_id' => $orderID,
-                        'order_item_id' => $orderItemID,
-                        'ingredient_group_id' => $IGValue['ingredient_group_id'],
-                        'ingredient_type' => $ingredientGroupDetails->ingredient_type,
-                        'minimum' => $ingredientGroupDetails->minimum,
-                        'maximum' => $ingredientGroupDetails->maximum,
-                        'ingredient_group_subtotal' => $IGValue['ingredient_group_csubtotal']
-                    ]);
-                    $orderingredientGroup->save();
-                    $orderingredientGroupID = $orderingredientGroup->getKey();
-                    $ingredientGroupLang = IngredientGroupLang::where('ingredient_group_id',$IGValue['ingredient_group_id'])->get();
-                    foreach($ingredientGroupLang as $IGroupLang) {
-                        $orderIngredientGropuLang = new OrderItemIngredientGroupLang();
-                        $orderIngredientGropuLang = $orderIngredientGropuLang->fill([
-                            'order_item_ingredient_group_id' => $orderingredientGroupID,
-                            'language_code' => $IGroupLang->language_code,
-                            'group_name' => $IGroupLang->ingredient_group_name,
-                            'arabic_group_name' => IngredientGroupLang::where('ingredient_group_id', $IGroupLang->ingredient_group_id)->where('language_code','ar')->value('ingredient_group_name'),                      
-                        ]);
-                        $orderIngredientGropuLang->save();
+                            /** Order Item Ingredient and Ingredient Lang */
+                            $deliveryboyItems[$countItems]['ingredients'] = [];
+                            foreach($IGValue['ingredients'] as $Ivalue) {
+                                $ingredientDetails = Ingredient::find($Ivalue['ingredient_id']);
+                                $orderIngredient = new OrderIngredient();
+                                $orderIngredient = $orderIngredient->fill([
+                                    'order_id' => $orderID,
+                                    'order_item_id' => $orderItemID,
+                                    'order_sub_item_id' => $sub_item->sub_item_id,
+                                    'order_item_ingredient_group_id' => $orderingredientGroupID,
+                                    'ingredient_id' => $Ivalue['ingredient_id'],
+                                    'ingredient_price' => $Ivalue['cprice'],
+                                    'ingredient_quanitity' => $Ivalue['quantity'],
+                                    'ingredient_subtotal' => $Ivalue['ingredient_csubtotal']
+                                ]);
+                                $orderIngredient->save();
+                                $orderIngredientID = $orderIngredient->getKey();
+                                $ingredientLangDetails = IngredientLang::where('ingredient_id',$Ivalue['ingredient_id'])->get();                        
+
+                                foreach($ingredientLangDetails as $ingredientLang) {
+                                    $orderIngredientLang = new OrderIngredientLang();
+                                    $orderIngredientLang = $orderIngredientLang->fill([
+                                        'order_ingredient_id' => $orderIngredientID,
+                                        'language_code' => $ingredientLang->language_code,
+                                        'ingredient_name' => $ingredientLang->ingredient_name,
+                                        'arabic_ingredient_name' => IngredientLang::where('ingredient_id', $ingredientLang->ingredient_id)->where('language_code','ar')->value('ingredient_name'),
+                                    ]);                            
+                                    $orderIngredientLang->save();
+                                    $deliveryboyItems[$countItems]['ingredients']['name'] = $ingredientLang->ingredient_name;
+                                }
+                            }
+                        }
                     }
+                }
+                else {
                     /** Order Item Ingredient Group and Ingredient Group  Lang */
-
-                    /** Order Item Ingredient and Ingredient Lang */
-                    $deliveryboyItems[$countItems]['ingredients'] = [];
-                    foreach($IGValue['ingredients'] as $Ivalue) {
-
-
-                        $ingredientDetails = Ingredient::find($Ivalue['ingredient_id']);
-                        $orderIngredient = new OrderIngredient();
-                        $orderIngredient = $orderIngredient->fill([
+                    foreach($value['ingredient_groups'] as $IGValue) {
+                        $orderingredientGroup = new OrderItemIngredientGroup();
+                        $ingredientGroupDetails = IngredientGroup::find($IGValue['ingredient_group_id']);
+                        $orderingredientGroup = $orderingredientGroup->fill([
                             'order_id' => $orderID,
                             'order_item_id' => $orderItemID,
-                            'order_item_ingredient_group_id' => $orderingredientGroupID,
-                            'ingredient_id' => $Ivalue['ingredient_id'],
-                            'ingredient_price' => $Ivalue['cprice'],
-                            'ingredient_quanitity' => $Ivalue['quantity'],
-                            'ingredient_subtotal' => $Ivalue['ingredient_csubtotal']
+                            'ingredient_group_id' => $IGValue['ingredient_group_id'],
+                            'ingredient_type' => $ingredientGroupDetails->ingredient_type,
+                            'minimum' => $ingredientGroupDetails->minimum,
+                            'maximum' => $ingredientGroupDetails->maximum,
+                            'ingredient_group_subtotal' => $IGValue['ingredient_group_csubtotal']
                         ]);
-                        $orderIngredient->save();
-                        $orderIngredientID = $orderIngredient->getKey();
-                        $ingredientLangDetails = IngredientLang::where('ingredient_id',$Ivalue['ingredient_id'])->get();                        
+                        $orderingredientGroup->save();
+                        $orderingredientGroupID = $orderingredientGroup->getKey();
+                        $ingredientGroupLang = IngredientGroupLang::where('ingredient_group_id',$IGValue['ingredient_group_id'])->get();
+                        foreach($ingredientGroupLang as $IGroupLang) {
+                            $orderIngredientGropuLang = new OrderItemIngredientGroupLang();
+                            $orderIngredientGropuLang = $orderIngredientGropuLang->fill([
+                                'order_item_ingredient_group_id' => $orderingredientGroupID,
+                                'language_code' => $IGroupLang->language_code,
+                                'group_name' => $IGroupLang->ingredient_group_name,
+                                'arabic_group_name' => IngredientGroupLang::where('ingredient_group_id', $IGroupLang->ingredient_group_id)->where('language_code','ar')->value('ingredient_group_name'),                      
+                            ]);
+                            $orderIngredientGropuLang->save();
+                        }
+                        /** Order Item Ingredient Group and Ingredient Group  Lang */
 
-                        foreach($ingredientLangDetails as $ingredientLang) {
-                            $orderIngredientLang = new OrderIngredientLang();
-                            $orderIngredientLang = $orderIngredientLang->fill([
-                                'order_ingredient_id' => $orderIngredientID,
-                                'language_code' => $ingredientLang->language_code,
-                                'ingredient_name' => $ingredientLang->ingredient_name,
-                                'arabic_ingredient_name' => IngredientLang::where('ingredient_id', $ingredientLang->ingredient_id)->where('language_code','ar')->value('ingredient_name'),
-                            ]);                            
-                            $orderIngredientLang->save();
-                            $deliveryboyItems[$countItems]['ingredients']['name'] = $ingredientLang->ingredient_name;
+                        /** Order Item Ingredient and Ingredient Lang */
+                        $deliveryboyItems[$countItems]['ingredients'] = [];
+                        foreach($IGValue['ingredients'] as $Ivalue) {
+
+
+                            $ingredientDetails = Ingredient::find($Ivalue['ingredient_id']);
+                            $orderIngredient = new OrderIngredient();
+                            $orderIngredient = $orderIngredient->fill([
+                                'order_id' => $orderID,
+                                'order_item_id' => $orderItemID,
+                                'order_item_ingredient_group_id' => $orderingredientGroupID,
+                                'ingredient_id' => $Ivalue['ingredient_id'],
+                                'ingredient_price' => $Ivalue['cprice'],
+                                'ingredient_quanitity' => $Ivalue['quantity'],
+                                'ingredient_subtotal' => $Ivalue['ingredient_csubtotal']
+                            ]);
+                            $orderIngredient->save();
+                            $orderIngredientID = $orderIngredient->getKey();
+                            $ingredientLangDetails = IngredientLang::where('ingredient_id',$Ivalue['ingredient_id'])->get();                        
+
+                            foreach($ingredientLangDetails as $ingredientLang) {
+                                $orderIngredientLang = new OrderIngredientLang();
+                                $orderIngredientLang = $orderIngredientLang->fill([
+                                    'order_ingredient_id' => $orderIngredientID,
+                                    'language_code' => $ingredientLang->language_code,
+                                    'ingredient_name' => $ingredientLang->ingredient_name,
+                                    'arabic_ingredient_name' => IngredientLang::where('ingredient_id', $ingredientLang->ingredient_id)->where('language_code','ar')->value('ingredient_name'),
+                                ]);                            
+                                $orderIngredientLang->save();
+                                $deliveryboyItems[$countItems]['ingredients']['name'] = $ingredientLang->ingredient_name;
+                            }
                         }
                     }
                 }
@@ -982,50 +1072,54 @@ class OrderController extends Controller
 
         $response = $this->saveOrderOnDeliveryBoy($order_key);
         //print_r($response);exit;
-        $deliveryboyResponse = Common::compressData($response);
 
-        //echo "deliveryboyResponse Status = ".$deliveryboyResponse->status;
-        
-        if($deliveryboyResponse->status == HTTP_SUCCESS) {
-            $assign_driver_count = 0;
-            foreach($driverslist as $key => $value) {
-                $deliveryboy_key = $value['_id'];
+        $assign_driver_count = 0;
+        if( isset( $response ) ) {
+            $deliveryboyResponse = Common::compressData($response);
 
-                /** Check the driver's current location is within the branch delivery area are not **/
-                $delivery_area_count = $this->checkDeliveryBoyInDeliveryArea( $deliveryboy_key );
-                //echo $delivery_area_count;exit;
+            //echo "deliveryboyResponse Status = ".$deliveryboyResponse->status;
+            
+            if($deliveryboyResponse->status == HTTP_SUCCESS) {
+                $assign_driver_count = 0;
+                foreach($driverslist as $key => $value) {
+                    $deliveryboy_key = $value['_id'];
 
-                if( $delivery_area_count > 0 ) {
-                    $url = config('webconfig.deliveryboy_url')."/api/v1/order/$order_key/assign_driver/$deliveryboy_key?company_id=".config('webconfig.company_id');
-                    $data = Curl::instance()->action(METHOD_PUT)->setUrl($url)->send();        
-                    $response_assign = json_decode($data,true);
-                    //print_r($response_assign);
+                    /** Check the driver's current location is within the branch delivery area are not **/
+                    $delivery_area_count = $this->checkDeliveryBoyInDeliveryArea( $deliveryboy_key );
+                    //echo $delivery_area_count;exit;
 
-                    if( isset( $response_assign['status'] ) && $response_assign['status'] === HTTP_SUCCESS)
-                    {
-                        $assign_driver_count++;          
-                        $deviceTokenRider = ( isset($value['device_token']) ) ? $value['device_token'] : '';
+                    if( $delivery_area_count > 0 ) {
+                        $url = config('webconfig.deliveryboy_url')."/api/v1/order/$order_key/assign_driver/$deliveryboy_key?company_id=".config('webconfig.company_id');
+                        $data = Curl::instance()->action(METHOD_PUT)->setUrl($url)->send();        
+                        $response_assign = json_decode($data,true);
+                        //print_r($response_assign);
 
-                        $url_push = config('webconfig.deliveryboy_url')."/api/v1/driver/$deliveryboy_key?company_id=".config('webconfig.company_id');
-                        $response_push = new Curl();
-                        $response_push->setUrl($url_push);        
-                        $data_push = $response_push->send();
-                        $response_push = json_decode($data_push,true);
-                        //print_r($response_push);exit;
+                        if( isset( $response_assign['status'] ) && $response_assign['status'] === HTTP_SUCCESS)
+                        {
+                            $assign_driver_count++;          
+                            $deviceTokenRider = ( isset($value['device_token']) ) ? $value['device_token'] : '';
 
-                        $deviceTokenRider = ( $response_push['data']['device_token'] ) ? $response_push['data']['device_token'] : "";
+                            $url_push = config('webconfig.deliveryboy_url')."/api/v1/driver/$deliveryboy_key?company_id=".config('webconfig.company_id');
+                            $response_push = new Curl();
+                            $response_push->setUrl($url_push);        
+                            $data_push = $response_push->send();
+                            $response_push = json_decode($data_push,true);
+                            //print_r($response_push);exit;
 
-                        if( !empty( $deviceTokenRider ) ) {
-                            //$oneSignalRider  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_DRIVER_APP)->push(['en' => 'New order'], ['en' => 'You have a new incoming order.'], [$deviceTokenRider], []);
-                            //print_r($oneSignalRider);exit;
+                            $deviceTokenRider = ( $response_push['data']['device_token'] ) ? $response_push['data']['device_token'] : "";
 
-                            /** Send order push notification to rider from FireBase **/
-                            $fireBaseRider  = FireBase::getInstance()->setAppType(FIRE_BASE_DRIVER_APP)->push('Orders', 'New order', 'You have a new incoming order.', $deviceTokenRider, [], "Yes");
-                            //print_r($fireBaseRider);exit;
-                        }                    
+                            if( !empty( $deviceTokenRider ) ) {
+                                //$oneSignalRider  = OneSignal::getInstance()->setAppType(ONE_SIGNAL_DRIVER_APP)->push(['en' => 'New order'], ['en' => 'You have a new incoming order.'], [$deviceTokenRider], []);
+                                //print_r($oneSignalRider);exit;
+
+                                /** Send order push notification to rider from FireBase **/
+                                $fireBaseRider  = FireBase::getInstance()->setAppType(FIRE_BASE_DRIVER_APP)->push('Orders', 'New order', 'You have a new incoming order.', $deviceTokenRider, [], "Yes");
+                                //print_r($fireBaseRider);exit;
+                            }                    
+                        }
                     }
-                }
-            }//echo "assign_driver_count = ".$assign_driver_count;exit;
+                }//echo "assign_driver_count = ".$assign_driver_count;exit;
+            }
 
             if( $assign_driver_count > 0 )
                 return 1;
@@ -1102,12 +1196,13 @@ class OrderController extends Controller
                 //echo count($branchDeliveryArea);exit;
 
                 //if($branchDeliveryArea === null || count($branchDeliveryArea) == 0) {
-                if($branchDeliveryArea === null || count(array($branchDeliveryArea)) == 0) {
+                //if($branchDeliveryArea === null || count(array($branchDeliveryArea)) == 0) {
+                if($branchDeliveryArea === null || $branchDeliveryArea->count() == 0) {
                     //return ['status'=> false, 'error' => __('apimsg.The selected address in not within the delivery area of the branch')];
                     return 0;
                 }
                 else
-                    return count(array($branchDeliveryArea));
+                    return $branchDeliveryArea->count();
             }
         }
         else
@@ -1915,6 +2010,7 @@ class OrderController extends Controller
 
         $sub_items = [];
         $sub_items_total_price = 0;
+        $sub_items_ingredient_group_total_price = 0;
         
         if( $value->price_on_selection == 1 && !empty( $value->price_on_selection_options ) ) {
             $price_on_selection_options = json_decode( $value->price_on_selection_options );
@@ -1933,6 +2029,7 @@ class OrderController extends Controller
                     'ingredient_groups' => [],
                     'ingredient_name' => "",
                     'arabic_ingredient_name' => "",
+                    'ingredient_group_subtotal' => 0,
                     'subtotal' => $itemSubTotal
                 ];
 
@@ -1986,19 +2083,23 @@ class OrderController extends Controller
                         $sub_items[$key]['ingredient_groups'][$igKey]['ingredient_group_csubtotal'] = $ingredientGroupSubTotal;
                                         
                         $sub_items[$key]['subtotal'] = $itemSubTotal;
+
+                        $sub_items[$key]['ingredient_group_subtotal'] = $ingredientGroupSubTotal;
                     }
                 }
                 //print_r($sub_items);exit;
 
                 $price_on_selection_options[$cnt]->ingrdient_groups = $sub_items[$cnt]['ingredient_groups'];
+                $price_on_selection_options[$cnt]->ingredient_group_subtotal = $sub_items[$cnt]['ingredient_group_subtotal'];
                 $price_on_selection_options[$cnt]->subtotal = $sub_items[$cnt]['subtotal'];
+                $sub_items_ingredient_group_total_price += $sub_items[$cnt]['ingredient_group_subtotal'];
                 $sub_items_total_price += $sub_items[$cnt]['subtotal'];
 
                 $cnt++;
             }
         }
 
-        return array( "price_on_selection_options" => $price_on_selection_options, "sub_items_total_price" => $sub_items_total_price );
+        return array( "price_on_selection_options" => $price_on_selection_options, "sub_items_total_price" => $sub_items_total_price, "sub_items_ingredient_group_total_price" => $sub_items_ingredient_group_total_price );
     }
 
     /**     
@@ -2081,9 +2182,11 @@ class OrderController extends Controller
             /** Get sub items details and price calculation while price on selection is 1 **/
             $price_on_selection_options = [];
             $sub_items_total_price = 0;
+            $sub_items_ingredient_group_total_price = 0;
             if( $value->price_on_selection == 1 && !empty( $value->price_on_selection_options ) ) {
                 $price_on_selection_options_arr = $this->get_sub_item_ingrdients( $value );
                 $price_on_selection_options = isset( $price_on_selection_options_arr['price_on_selection_options'] ) ? $price_on_selection_options_arr['price_on_selection_options'] : [];
+                $sub_items_ingredient_group_total_price = isset( $price_on_selection_options_arr['sub_items_ingredient_group_total_price'] ) ? $price_on_selection_options_arr['sub_items_ingredient_group_total_price'] : 0;
                 $sub_items_total_price = isset( $price_on_selection_options_arr['sub_items_total_price'] ) ? $price_on_selection_options_arr['sub_items_total_price'] : 0;
             }
 
@@ -2095,6 +2198,7 @@ class OrderController extends Controller
                 'item_instruction' => $value->item_instruction,
                 'price_on_selection' => $value->price_on_selection,
                 'sub_items' => $price_on_selection_options,
+                'sub_items_ingredient_group_total_price' => ( $value->price_on_selection == 1 && !empty( $value->price_on_selection_options ) ) ? $sub_items_ingredient_group_total_price : 0,
                 'sub_items_total_price' => ( $value->price_on_selection == 1 && !empty( $value->price_on_selection_options ) ) ? $sub_items_total_price : 0
             ];
             $this->cartQuantity += $value->quantity;
@@ -2373,6 +2477,7 @@ class OrderController extends Controller
                 'item_instruction' => isset($value['item_instruction']) ? $value['item_instruction'] : '',
                 'price_on_selection' => $itemDetails->price_on_selection,
                 'sub_items' => isset($value['sub_items']) ? $value['sub_items'] : [],
+                'sub_items_ingredient_group_total_price' => isset( $value['sub_items_ingredient_group_total_price'] ) ? $value['sub_items_ingredient_group_total_price'] : 0,
                 'sub_items_total_price' => isset( $value['sub_items_total_price'] ) ? $value['sub_items_total_price'] : 0
             ];  
             if(isset($value['cart_item_key'])) {
@@ -2454,6 +2559,7 @@ class OrderController extends Controller
             return ['status'=> false, 'error' => __('apimsg.User address not found')];
         }
         $this->userAddress = $userAddress;
+        //print_r($userAddress);exit;
         //echo $branchZoneType->zone_type;exit;
         if($branchZoneType->zone_type == DELIVERY_AREA_ZONE_CIRCLE) {
             
@@ -2503,7 +2609,8 @@ class OrderController extends Controller
         //echo count(array($branchDeliveryArea));exit;
         //echo count( is_countable( $branchDeliveryArea ) ? $branchDeliveryArea : [] );exit;
 
-        if($branchDeliveryArea === null || count(array($branchDeliveryArea)) == 0) {
+        //if($branchDeliveryArea === null || count(array($branchDeliveryArea)) == 0) {
+        if($branchDeliveryArea === null || $branchDeliveryArea->count() == 0) {
         //if($branchDeliveryArea === null || count( is_countable( $branchDeliveryArea ) ? $branchDeliveryArea : [] ) == 0) {
             return ['status'=> false, 'error' => __('apimsg.The selected address in not within the delivery area of the branch')];
         }
@@ -3095,13 +3202,14 @@ class OrderController extends Controller
         $postData = json_encode($deliveryboyData);   
         $data = Curl::instance()->action('POST')->setUrl($url)->setContentType('text/plain')->send($postData);
         $response = json_decode($data,true);
-        if($response['status'] == HTTP_SUCCESS) {
+        if( isset( $response['status'] ) && $response['status'] == HTTP_SUCCESS) {
             $order = Order::findByKey($orderKey);
             $order->order_refkey = isset($response['data']['order_id']) ? $response['data']['order_id'] : '';
             $order->save();
             return $this->asJson($response['message']);            
         } else {
-            return $this->commonError($response['message']);                            
+            if( isset( $response['message'] ) )
+                return $this->commonError($response['message']);                            
         }
     } 
 

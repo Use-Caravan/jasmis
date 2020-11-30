@@ -233,7 +233,7 @@ class CartController extends Controller
                 }
 
                 $cartItem->price_on_selection = isset($rawData['price_on_selection']) ? $rawData['price_on_selection'] : 0;
-                $cartItem->price_on_selection_options = ( isset($sub_items) && $price_on_selection == 1 ) ? json_encode($sub_items) : "";
+                $cartItem->price_on_selection_options = ( isset($sub_items) && $rawData['price_on_selection'] == 1 ) ? json_encode($sub_items) : "";
 
                 $cartItem->update();
                 goto response;
@@ -411,6 +411,7 @@ class CartController extends Controller
             /** Get sub items details and price calculation while price on selection is 1 **/
             $price_on_selection_options = [];
             $cnt = 0;
+            $sub_items_ingredient_group_total_price = 0;
             
             if( $value->price_on_selection == 1 && !empty( $value->price_on_selection_options ) ) {
                 $price_on_selection_options = json_decode( $value->price_on_selection_options );
@@ -431,6 +432,7 @@ class CartController extends Controller
                         'ingredient_groups' => [],
                         'ingredient_name' => "",
                         'arabic_ingredient_name' => "",
+                        'ingredient_group_subtotal' => 0,
                         'subtotal' => $itemSubTotal
                     ];
 
@@ -484,12 +486,16 @@ class CartController extends Controller
                             $sub_items[$key]['ingredient_groups'][$igKey]['ingredient_group_csubtotal'] = $ingredientGroupSubTotal;
                                             
                             $sub_items[$key]['subtotal'] = $itemSubTotal;
+
+                            $sub_items[$key]['ingredient_group_subtotal'] = $ingredientGroupSubTotal;
                         }
                     }
                     //print_r($sub_items);exit;
 
                     $price_on_selection_options[$cnt]->ingrdient_groups = $sub_items[$cnt]['ingredient_groups'];
+                    $price_on_selection_options[$cnt]->ingredient_group_subtotal = $sub_items[$cnt]['ingredient_group_subtotal'];
                     $price_on_selection_options[$cnt]->subtotal = $sub_items[$cnt]['subtotal'];
+                    $sub_items_ingredient_group_total_price += $sub_items[$cnt]['ingredient_group_subtotal'];
                     $sub_items_total_price += $sub_items[$cnt]['subtotal'];
 
                     $cnt++;
@@ -504,6 +510,7 @@ class CartController extends Controller
                 'ingrdient_groups' =>  json_decode($value->ingredients,true),
                 'price_on_selection' => $value->price_on_selection,
                 'sub_items' => $price_on_selection_options,
+                'sub_items_ingredient_group_total_price' => ( $value->price_on_selection == 1 && !empty( $value->price_on_selection_options ) ) ? $sub_items_ingredient_group_total_price : 0,
                 'sub_items_total_price' => ( $value->price_on_selection == 1 && !empty( $value->price_on_selection_options ) ) ? $sub_items_total_price : 0
             ];
         }     

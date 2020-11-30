@@ -29,6 +29,8 @@ class OrderItemResource extends JsonResource
             'arabic_item_description' => ItemLang::where('item_id',$this->item_id)->where('language_code','ar')->value('item_description'),
             'ingredients' => $this->ingredients,
             'arabic_ingredients' => $this->arabic_ingredients,
+            'price_on_selection' => $this->price_on_selection,
+            'sub_items' => ( isset( $this->price_on_selection ) && $this->price_on_selection == 1 && !empty( isset( $this->price_on_selection_options ) ) ) ? json_decode( $this->price_on_selection_options ) : [],
         ];
     }
     /**
