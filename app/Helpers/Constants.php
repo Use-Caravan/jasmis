@@ -137,7 +137,7 @@
     const APP_CATEGORY_PATH = 'gallery/category';
 
     /** Payment Options */
-    const PAYMENT_OPTION_ONLINE = 1;//Credimax with credit card
+    const PAYMENT_OPTION_ONLINE = 1;//Credimax with debit card
     const PAYMENT_OPTION_COD = 2;
     const PAYMENT_OPTION_WALLET = 3;
     const PAYMENT_OPTION_ALL = 4;

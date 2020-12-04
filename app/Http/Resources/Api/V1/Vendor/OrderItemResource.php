@@ -22,22 +22,25 @@ class OrderItemResource extends JsonResource
         //return parent::toArray($request);
         return [
             'item_name' => $this->item_name, 
-            'item_price' => $this->base_price,                       
+            'item_price' => $this->base_price,     
+            'item_quantity' => $this->item_quantity,                  
+            'item_total_price' => Common::currency($this->item_total_price),
             'item_subtotal' => Common::currency($this->item_subtotal),
-            'item_quantity' => $this->item_quantity,
             'item_image_path' => FileHelper::loadImage($this->item_image_path),
             'item_description' => $this->item_description,
+            'price_on_selection' => $this->price_on_selection,
+            'sub_items' => ( isset( $this->price_on_selection ) && $this->price_on_selection == 1 && !empty( isset( $this->price_on_selection_options ) ) ) ? json_decode( $this->price_on_selection_options ) : [],
             'ingredients' => $this->when(
                 /*$this->order_item_id, function(){
                     //$orderItems = OrderItem::getOrderItems($this->order_id); 
-		    $orderItems = OrderItem::getOrderItemsByItemId($this->order_item_id);
-		    //print_r($orderItems);exit;                   
+        		    $orderItems = OrderItem::getOrderItemsByItemId($this->order_item_id);
+        		    //print_r($orderItems);exit;                   
                     return IngredientResource::collection($orderItems);
                 }*/
                 $this->order_item_id, function(){
                     //$orderItems = OrderItem::getOrderItems($this->order_id); 
-		    $orderItems = OrderItem::getOrderItemsByItemId($this->order_item_id);
-		    return IngredientResource::collection($orderItems);			
+        		    $orderItems = OrderItem::getOrderItemsByItemId($this->order_item_id);
+        		    return IngredientResource::collection($orderItems);			
                 }
             ),
         ];

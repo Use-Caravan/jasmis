@@ -1932,6 +1932,7 @@ class OrderController extends Controller
         $this->cartDetails = Cart::where(['user_id' => request()->user()->user_id, 'deleted_at' => NULL])->orderBy('cart_id','DESC')->first();
         //print_r($this->cartDetails);exit;
         $responseData = $this->checkoutQuotation();
+        //print_r($responseData);exit;
         
         if($responseData['status'] === false && $responseData['type'] === EXPECTATION_FAILED) {
             return $this->commonError($responseData['error']);
@@ -2446,6 +2447,7 @@ class OrderController extends Controller
         //print_r($branchDetails);exit;
         foreach($branchDetails['items'] as $key => $value) {
             $itemDetails = Item::getItems($value['item_key'])->first();
+            //print_r($itemDetails);exit;
             
             if($itemDetails === null) {
                 $inactiveItem = Item::findByKey($value['item_key']);
@@ -2459,7 +2461,9 @@ class OrderController extends Controller
             } else {                
                 $itemPrice = $itemDetails->item_price - (($itemDetails->item_price/100) * $itemDetails->offer_value);
             }
+
             $itemSubTotal = (int)$value['quantity'] * (float)$itemPrice;
+            //echo $itemSubTotal;exit;
             $itemQuantity = $value['quantity'];
             $items[$key] = [
                 'item_key' => $itemDetails->item_key,

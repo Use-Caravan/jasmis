@@ -132,6 +132,7 @@ class CartController extends Controller
                                 if( $item_price_on_selection_option->option_name == $sub_item['sub_item_name'] ) {
                                     $sub_item_exists_count++;
                                     $sub_items[$cnt]['sub_item_price'] = $item_price_on_selection_option->option_price;
+                                    $sub_items[$cnt]['sub_item_sub_total'] = $item_price_on_selection_option->option_price * $sub_item['quantity'];
                                     $cnt++;
                                 }                                
                             }   
@@ -184,6 +185,7 @@ class CartController extends Controller
                             if( $item_price_on_selection_option->option_name == $sub_item['sub_item_name'] ) {
                                 $sub_item_exists_count++;
                                 $sub_items[$cnt]['sub_item_price'] = $item_price_on_selection_option->option_price;
+                                $sub_items[$cnt]['sub_item_sub_total'] = $item_price_on_selection_option->option_price * $sub_item['quantity'];
                                 $cnt++;
                             }
                         }   

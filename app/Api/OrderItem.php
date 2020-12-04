@@ -26,11 +26,11 @@ class OrderItem extends CommonOrderItem
                     LEFT JOIN order_ingredient AS OI ON OI.order_ingredient_id = OIL.order_ingredient_id
                     WHERE  OI.order_item_id = order_item.order_item_id AND language_code = "ar")
                  as arabic_ingredients'),
-               DB::raw(' 
+                DB::raw(' 
                     (SELECT GROUP_CONCAT( `ingredient_price` ) FROM `order_ingredient` AS OIL
                     WHERE OIL.order_item_id = order_item.order_item_id)
                  as ingredient_price'),
-		OrderItem::tableName().".item_quantity",
+		        OrderItem::tableName().".item_quantity",
                 OrderItem::tableName().".item_subtotal"
             ])->where([
             OrderItem::tableName().'.order_id' => $orderID
@@ -85,7 +85,7 @@ class OrderItem extends CommonOrderItem
     {        
         $query = OrderItem::select([
                 OrderItem::tableName().".*",
-		DB::raw('group_concat( DISTINCT(order_ingredient_id) ) as ingredient_ids'),
+		        DB::raw('group_concat( DISTINCT(order_ingredient_id) ) as ingredient_ids'),
                 DB::raw(' 
                     (SELECT GROUP_CONCAT( `ingredient_name` ) FROM `order_ingredient_lang` AS OIL 
                     LEFT JOIN order_ingredient AS OI ON OI.order_ingredient_id = OIL.order_ingredient_id
@@ -96,10 +96,18 @@ class OrderItem extends CommonOrderItem
                     LEFT JOIN order_ingredient AS OI ON OI.order_ingredient_id = OIL.order_ingredient_id
                     WHERE  OI.order_item_id = order_item.order_item_id AND language_code = "ar")
                  as arabic_ingredients'),
-               DB::raw(' 
+                DB::raw(' 
                     (SELECT GROUP_CONCAT( `ingredient_price` ) FROM `order_ingredient` AS OIL 
                     WHERE OIL.order_item_id = order_item.order_item_id)
                  as ingredient_price'),
+                DB::raw(' 
+                    (SELECT GROUP_CONCAT( `ingredient_quanitity` ) FROM `order_ingredient` AS OIL 
+                    WHERE OIL.order_item_id = order_item.order_item_id)
+                 as ingredient_quantity'),
+                DB::raw(' 
+                    (SELECT GROUP_CONCAT( `ingredient_subtotal` ) FROM `order_ingredient` AS OIL 
+                    WHERE OIL.order_item_id = order_item.order_item_id)
+                 as ingredient_subtotal'),
                 OrderItem::tableName().".item_quantity",
                 OrderItem::tableName().".item_subtotal"
             ])->where([

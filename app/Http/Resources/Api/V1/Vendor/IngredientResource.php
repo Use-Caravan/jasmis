@@ -21,11 +21,14 @@ class IngredientResource extends JsonResource
             ),
         ];*/
         
+        //print_r($this);exit;   
         $arabic_ingredient_name = OrderIngredientLang::where('order_ingredient_id',$this->order_ingredient_id)->where('language_code','ar')->value('ingredient_name');
         return [ 
             'ingredient_name' => ($this->ingredients === null) ? (($this->ingredient_name === null) ? '' : $this->ingredient_name ) : $this->ingredients,
             'arabic_ingredients' => ($this->arabic_ingredients === null) ? (($arabic_ingredient_name === null) ? '' : $arabic_ingredient_name ) : $this->arabic_ingredients,
             'price' => Common::currency($this->ingredient_price),
+            'ingredient_quanitity' => $this->ingredient_quanitity,
+            'ingredient_subtotal' => Common::currency($this->ingredient_subtotal),
 	    //'price' => $ingredient_price_str
         ];
 	/*$ingredient_price_arr = explode( ",", $this->ingredient_price );
