@@ -33,6 +33,56 @@ class ItemResource extends JsonResource
 
         $vendor = new Vendor();
 
+        $price_on_selection_options = !empty( $this->price_on_selection_options ) ? json_decode( $this->price_on_selection_options ) : array();
+
+
+        if( $this->price_on_selection == 1 ) {
+            if( (!auth()->guard(GUARD_USER_API)->check()) && (!auth()->guard(GUARD_USER)->check())) {
+                //return 0;
+            } else {
+                if(auth()->guard(GUARD_USER_API)->check()) {                        
+                    $userID = request()->user(GUARD_USER_API)->user_id;
+                }
+                if(auth()->guard(GUARD_USER)->check()) {
+                    $userID = request()->user(GUARD_USER)->user_id;
+                }
+
+                $cart = Cart::where(['user_id' => $userID])->withTrashed(false)->first();                    
+                if($cart === null) {
+                    //return 0;
+                    foreach( $price_on_selection_options as $price_on_selection_option ) {
+                        $price_on_selection_option->quantity = 0;
+                    }
+                }
+
+                $cartItemDet = CartItem::where([
+                    'cart_id' => $cart->cart_id,
+                    'item_id' => $this->item_id
+                ])->first();
+                //print_r($cartItemDet->price_on_selection_options);exit;
+
+                if( isset( $cartItemDet->price_on_selection_options ) && !empty( $cartItemDet->price_on_selection_options ) ) {
+                    $cart_item_price_on_selection_options = ( isset( $cartItemDet->price_on_selection_options ) && !empty( $cartItemDet->price_on_selection_options ) ) ? json_decode( $cartItemDet->price_on_selection_options ) : array();
+
+                    $price_on_selection_options = ( isset( $this->price_on_selection_options ) && !empty( $this->price_on_selection_options ) ) ? json_decode( $this->price_on_selection_options ) : array();
+                    //print_r($price_on_selection_options);exit;
+
+                    foreach( $price_on_selection_options as $price_on_selection_option ){
+                        foreach( $cart_item_price_on_selection_options as $cart_item_price_on_selection_option ) {
+                            //echo $cart_item_price_on_selection_option->quantity;exit;
+                            if( $price_on_selection_option->option_id == $cart_item_price_on_selection_option->sub_item_id ) {
+                                $price_on_selection_option->quantity = ( isset( $cart_item_price_on_selection_option->quantity ) && $cart_item_price_on_selection_option->quantity > 0 ) ? $cart_item_price_on_selection_option->quantity : 0;
+                                break;
+                            }
+                            else
+                                $price_on_selection_option->quantity = 0;
+                        }
+
+                    }
+                }
+            }
+        }
+
         return [
             'item_id' => $this->item_id,
           //  'category_id' => $this->category_id,       
@@ -81,7 +131,7 @@ class ItemResource extends JsonResource
             'item_description' => $this->item_description,
             'arabic_item_description' => ItemLang::where('item_id',$this->item_id)->where('language_code','ar')->value('item_description'),
             'price_on_selection' => $this->price_on_selection,         
-            'price_on_selection_options' => !empty( $this->price_on_selection_options ) ? json_decode( $this->price_on_selection_options ) : array(),
+            'price_on_selection_options' => $price_on_selection_options,//!empty( $this->price_on_selection_options ) ? json_decode( $this->price_on_selection_options ) : array(),
             'category_name' => $this->category_name,
             'arabic_category_name' => CategoryLang::where('category_id',$this->category_id)->where('language_code','ar')->value('category_name'),
             'cuisine_name' => $this->cuisine_name,    

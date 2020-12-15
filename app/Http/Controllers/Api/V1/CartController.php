@@ -220,6 +220,33 @@ class CartController extends Controller
                                 
                 $cartItem = new CartItem();
                 $cartItem = $cartItem->find($catItemID);
+
+                $exist_price_on_selection = $cartItem->price_on_selection;
+                if( $exist_price_on_selection == 1 ) {
+                    $exist_price_on_selection_options = $cartItem->price_on_selection_options;
+                    $exist_price_on_selection_options = json_decode( $exist_price_on_selection_options );
+
+                    $exist_count = 0;
+                    if( isset( $exist_price_on_selection_options ) && !empty( $exist_price_on_selection_options ) ) {
+                        $exist_sub_item_count = 0;
+                        //print_r($exist_price_on_selection_options);exit;
+                        foreach( $exist_price_on_selection_options as $exist_price_on_selection_option ) {
+                            foreach( $sub_items as $sub_item ) {
+                                if( $exist_price_on_selection_option->sub_item_name == $sub_item["sub_item_name"] ) {
+                                    $exist_price_on_selection_options[$exist_count] = (object)$sub_items;
+                                    //array_push( (array)$exist_price_on_selection_options, $sub_items );
+                                    $exist_count++;
+                                    $exist_sub_item_count++;
+                                }
+                            }
+                        }
+
+                        if( $exist_sub_item_count == 0 ) {
+                            $exist_price_on_selection_options_count = count( $exist_price_on_selection_options );
+                            $exist_price_on_selection_options[$exist_price_on_selection_options_count + 1] = $sub_items;
+                        }
+                    }
+                }
                 
                 /* $ingredients = json_decode($cartItem->ingredients);
                 if(count($ingredients) > 0) {
@@ -273,13 +300,35 @@ class CartController extends Controller
     public function updateQuantity()
     {
         $removeCartItem = CartItem::findByKey(request()->cart_item_key);
+        //echo $removeCartItem->price_on_selection;exit;
         if(request()->quantity == 0)
         {
             $updateCartItem = CartItem::where(['cart_item_key' => request()->cart_item_key])->delete();
         } else {
-            $removeCartItem->quantity = request()->quantity;
-            $removeCartItem->item_instruction = request()->item_instruction;
-            $removeCartItem->save();
+            if( $removeCartItem->price_on_selection == 1 ) {
+                if( isset( request()->sub_item_id ) ) {
+                    $price_on_selection_options = $removeCartItem->price_on_selection_options;
+                    $price_on_selection_options = ( isset( $price_on_selection_options ) && !empty( $price_on_selection_options ) ) ? json_decode($price_on_selection_options) : array();
+                    //print_r($price_on_selection_options);exit;
+                    foreach ( $price_on_selection_options as $price_on_selection_option ) {
+                        if( $price_on_selection_option->sub_item_id == request()->sub_item_id ) {
+                            $price_on_selection_option->quantity = request()->quantity;
+                            //print_r($price_on_selection_option);exit;
+                            break;
+                        }
+                    }
+                    //print_r($price_on_selection_options);exit;
+
+                    $removeCartItem->price_on_selection_options = ( isset( $price_on_selection_options ) && !empty( $price_on_selection_options ) ) ? json_encode( $price_on_selection_options ) : "";
+                    $removeCartItem->item_instruction = request()->item_instruction;
+                    $removeCartItem->save();
+                }
+            }
+            else {
+                $removeCartItem->quantity = request()->quantity;
+                $removeCartItem->item_instruction = request()->item_instruction;
+                $removeCartItem->save();
+            }
         } 
         
         /** Write request data in text file **/
