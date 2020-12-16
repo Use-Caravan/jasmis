@@ -2251,7 +2251,8 @@ class OrderController extends Controller
         $deliveryFeeAmount = 0;
         
         if(request()->order_type == ORDER_TYPE_DELIVERY && request()->user_address_key !== null) {
-            $checkIfAvailable = $this->checkDeliveryAreaAvailable();                        
+            $checkIfAvailable = $this->checkDeliveryAreaAvailable();  
+            //print_r($checkIfAvailable);exit;                      
             
             /* if($checkIfAvailable['response'] !== null) {
                 $checkIfAvailable = $checkIfAvailable['response']->toArray();                    
@@ -2261,12 +2262,13 @@ class OrderController extends Controller
                 return $returnData;
             } else {
                 if(isset($checkIfAvailable['response'])) {
-                        if(is_object($checkIfAvailable['response'])) {
+                    if(is_object($checkIfAvailable['response'])) {
                         $checkIfAvailable = $checkIfAvailable['response']->toArray();
                     }
                 }    
              
-                $deliveryFeeAmount = $checkIfAvailable['price'];
+                //$deliveryFeeAmount = $checkIfAvailable['price'];
+                $deliveryFeeAmount = $checkIfAvailable['delivery_charge'];
                                                         
                 $deliveryDetails = [
                     'price' => Common::currency($deliveryFeeAmount),
@@ -2278,6 +2280,7 @@ class OrderController extends Controller
                     'is_italic' => IS_ITALIC,
                     'is_line' => IS_LINE,
                 ];
+                //print_r($deliveryDetails);exit;
                 array_push($responseData['payment_details'], $deliveryDetails);
                 $responseData['delivery_cost'] = $deliveryDetails;  
                           
@@ -2619,7 +2622,11 @@ class OrderController extends Controller
             return ['status'=> false, 'error' => __('apimsg.The selected address in not within the delivery area of the branch')];
         }
         $this->branchDeliveryArea = $branchDeliveryArea;
-        return $this->calculateDistanceFar($userAddress, request()->branch_key);
+        //return $this->calculateDistanceFar($userAddress, request()->branch_key);
+
+        //$checkIfAvailable = $this->getDeliveryChargeByBranch( request()->branch_key );
+        //print_r($checkIfAvailable);exit;
+        return $this->getDeliveryChargeByBranch( $userAddress, request()->branch_key );
     }
 
     /**
@@ -2634,7 +2641,7 @@ class OrderController extends Controller
             * cos( radians( branch.longitude ) - radians($userAddress->longitude) ) + sin( radians($userAddress->latitude) )
             * sin( radians( branch.latitude ) ) ) as distance from branch where branch.branch_key = '$branchKey' &&  branch.status = ".ITEM_ACTIVE.") as distance")
         ])->havingRaw('from_km <= distance && to_km >= distance')->where('status',ITEM_ACTIVE)->orderBy('price','ASC')->first();
-       
+        
         if($deliveryChrage === null) {
            return $deliveryChrage = [
                 'delivery_charge_id' => null,
@@ -2651,6 +2658,59 @@ class OrderController extends Controller
             
             // return ['status'=> true, 'response' => $deliveryChrage];
         } 
+        return ['status'=> true, 'response' => $deliveryChrage];
+    }
+
+    /**
+     * @param string $branchKey
+     */
+    public function getDeliveryChargeByBranch($userAddress, $branchKey)
+    {   
+        $deliveryChrage = DeliveryCharge::select([
+            '*',
+            DB::raw("(select 6371 * acos( cos( radians($userAddress->latitude) ) * cos( radians( branch.latitude ) ) 
+            * cos( radians( branch.longitude ) - radians($userAddress->longitude) ) + sin( radians($userAddress->latitude) )
+            * sin( radians( branch.latitude ) ) ) as distance from branch where branch.branch_key = '$branchKey' &&  branch.status = ".ITEM_ACTIVE.") as distance")
+        ])->havingRaw('from_km <= distance && to_km >= distance')->where('status',ITEM_ACTIVE)->orderBy('price','ASC')->first();
+       
+        //print_r($deliveryChrage);exit;
+
+        if(isset($deliveryChrage)) {
+            if(is_object($deliveryChrage)) {
+                $deliveryChrage = $deliveryChrage->toArray();
+            }
+        }
+
+        if($deliveryChrage === null) {
+            $distance  = null;
+            // return ['status'=> true, 'response' => $deliveryChrage];
+        }
+        else
+           $distance  = $deliveryChrage['distance']; 
+
+        $deliveryChrage = Branch::select(['*'])->where('branch_key', $branchKey)->first();
+       
+        if($deliveryChrage === null) {
+           return $deliveryChrage = [
+                'delivery_charge_id' => null,
+                'delivery_charge_key' => null,
+                'from_km' => null,
+                'to_km' => null,
+                'price' => 0,
+                'delivery_charge' => 0,
+                'delivery_charge_type' => 0,
+                'status' => null,
+                'created_at' => null,   
+                'updated_at' => null,
+                'deleted_at' => null,
+                'distance' => null
+            ];
+            
+            // return ['status'=> true, 'response' => $deliveryChrage];
+        } 
+        else
+            $deliveryChrage->distance = $distance;
+
         return ['status'=> true, 'response' => $deliveryChrage];
     }
     
