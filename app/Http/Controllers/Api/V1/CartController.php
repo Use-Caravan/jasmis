@@ -306,6 +306,7 @@ class CartController extends Controller
             $updateCartItem = CartItem::where(['cart_item_key' => request()->cart_item_key])->delete();
         } else {
             if( $removeCartItem->price_on_selection == 1 ) {
+                $price_on_selection_options_arr = array();
                 if( isset( request()->sub_item_id ) ) {
                     $price_on_selection_options = $removeCartItem->price_on_selection_options;
                     $price_on_selection_options = ( isset( $price_on_selection_options ) && !empty( $price_on_selection_options ) ) ? json_decode($price_on_selection_options) : array();
@@ -313,13 +314,18 @@ class CartController extends Controller
                     foreach ( $price_on_selection_options as $price_on_selection_option ) {
                         if( $price_on_selection_option->sub_item_id == request()->sub_item_id ) {
                             $price_on_selection_option->quantity = request()->quantity;
+
+                            $price_on_selection_option->sub_item_sub_total = $price_on_selection_option->sub_item_price * request()->quantity;
                             //print_r($price_on_selection_option);exit;
-                            break;
+                            //break;
                         }
+                        $price_on_selection_options_arr[] = $price_on_selection_option;
                     }
                     //print_r($price_on_selection_options);exit;
+                    //print_r($price_on_selection_options_arr);exit;
 
-                    $removeCartItem->price_on_selection_options = ( isset( $price_on_selection_options ) && !empty( $price_on_selection_options ) ) ? json_encode( $price_on_selection_options ) : "";
+                    //$removeCartItem->price_on_selection_options = ( isset( $price_on_selection_options ) && !empty( $price_on_selection_options ) ) ? json_encode( $price_on_selection_options ) : "";
+                    $removeCartItem->price_on_selection_options = ( isset( $price_on_selection_options_arr ) && !empty( $price_on_selection_options_arr ) ) ? json_encode( $price_on_selection_options_arr ) : "";
                     $removeCartItem->item_instruction = request()->item_instruction;
                     $removeCartItem->save();
                 }
