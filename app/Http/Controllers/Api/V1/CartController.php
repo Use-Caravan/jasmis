@@ -144,9 +144,25 @@ class CartController extends Controller
                             return $this->commonError( __("apimsg.Invalid sub items selected.") );
                         }
 
-                        $catItemID = $value->cart_item_id;
+                        $existsPriceOnSelectionOptions = $value->price_on_selection_options;
+                        $existsPriceOnSelectionOptions = json_decode($existsPriceOnSelectionOptions);
+                        //print_r($existsPriceOnSelectionOptions[0]->ingrdient_groups);exit;
+                        $existsIngredientsPOS = isset( $existsPriceOnSelectionOptions[0]->ingrdient_groups ) ? $existsPriceOnSelectionOptions[0]->ingrdient_groups : array();
+
+                        $currentIngredientsPOS = $sub_items[0]['ingrdient_groups'];
+                        $currentIngredientsPOS = $currentIngredientsPOS;
+                        /** If POS item ingredients is same update the items otherwise add the items **/
+                        if($existsIngredientsPOS == $currentIngredientsPOS) {
+                            $catItemID = $value->cart_item_id;
                         
-                        goto cartItemUpdate;
+                            goto cartItemUpdate;                                                
+                        }
+                        else
+                            goto cartItemAdd;
+
+                        //$catItemID = $value->cart_item_id;
+                        
+                        //goto cartItemUpdate;
                     }
                 }                
                 goto cartItemAdd;
@@ -300,6 +316,7 @@ class CartController extends Controller
     public function updateQuantity()
     {
         $removeCartItem = CartItem::findByKey(request()->cart_item_key);
+        //print_r($removeCartItem);exit;
         //echo $removeCartItem->price_on_selection;exit;
         if(request()->quantity == 0)
         {
@@ -307,28 +324,29 @@ class CartController extends Controller
         } else {
             if( $removeCartItem->price_on_selection == 1 ) {
                 $price_on_selection_options_arr = array();
-                if( isset( request()->sub_item_id ) ) {
+                //if( isset( request()->sub_item_id ) ) {
                     $price_on_selection_options = $removeCartItem->price_on_selection_options;
                     $price_on_selection_options = ( isset( $price_on_selection_options ) && !empty( $price_on_selection_options ) ) ? json_decode($price_on_selection_options) : array();
                     //print_r($price_on_selection_options);exit;
                     foreach ( $price_on_selection_options as $price_on_selection_option ) {
-                        if( $price_on_selection_option->sub_item_id == request()->sub_item_id ) {
+                        //if( $price_on_selection_option->sub_item_id == request()->sub_item_id ) {
                             $price_on_selection_option->quantity = request()->quantity;
 
                             $price_on_selection_option->sub_item_sub_total = $price_on_selection_option->sub_item_price * request()->quantity;
                             //print_r($price_on_selection_option);exit;
                             //break;
-                        }
+                        //}
                         $price_on_selection_options_arr[] = $price_on_selection_option;
                     }
                     //print_r($price_on_selection_options);exit;
                     //print_r($price_on_selection_options_arr);exit;
 
                     //$removeCartItem->price_on_selection_options = ( isset( $price_on_selection_options ) && !empty( $price_on_selection_options ) ) ? json_encode( $price_on_selection_options ) : "";
+                    $removeCartItem->quantity = request()->quantity;
                     $removeCartItem->price_on_selection_options = ( isset( $price_on_selection_options_arr ) && !empty( $price_on_selection_options_arr ) ) ? json_encode( $price_on_selection_options_arr ) : "";
                     $removeCartItem->item_instruction = request()->item_instruction;
                     $removeCartItem->save();
-                }
+                //}
             }
             else {
                 $removeCartItem->quantity = request()->quantity;

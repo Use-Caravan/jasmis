@@ -54,30 +54,31 @@ class ItemResource extends JsonResource
                         $price_on_selection_option->quantity = 0;
                     }
                 }
+                else {
+                    $cartItemDet = CartItem::where([
+                        'cart_id' => $cart->cart_id,
+                        'item_id' => $this->item_id
+                    ])->first();
+                    //print_r($cartItemDet->price_on_selection_options);exit;
 
-                $cartItemDet = CartItem::where([
-                    'cart_id' => $cart->cart_id,
-                    'item_id' => $this->item_id
-                ])->first();
-                //print_r($cartItemDet->price_on_selection_options);exit;
+                    if( isset( $cartItemDet->price_on_selection_options ) && !empty( $cartItemDet->price_on_selection_options ) ) {
+                        $cart_item_price_on_selection_options = ( isset( $cartItemDet->price_on_selection_options ) && !empty( $cartItemDet->price_on_selection_options ) ) ? json_decode( $cartItemDet->price_on_selection_options ) : array();
 
-                if( isset( $cartItemDet->price_on_selection_options ) && !empty( $cartItemDet->price_on_selection_options ) ) {
-                    $cart_item_price_on_selection_options = ( isset( $cartItemDet->price_on_selection_options ) && !empty( $cartItemDet->price_on_selection_options ) ) ? json_decode( $cartItemDet->price_on_selection_options ) : array();
+                        $price_on_selection_options = ( isset( $this->price_on_selection_options ) && !empty( $this->price_on_selection_options ) ) ? json_decode( $this->price_on_selection_options ) : array();
+                        //print_r($price_on_selection_options);exit;
 
-                    $price_on_selection_options = ( isset( $this->price_on_selection_options ) && !empty( $this->price_on_selection_options ) ) ? json_decode( $this->price_on_selection_options ) : array();
-                    //print_r($price_on_selection_options);exit;
-
-                    foreach( $price_on_selection_options as $price_on_selection_option ){
-                        foreach( $cart_item_price_on_selection_options as $cart_item_price_on_selection_option ) {
-                            //echo $cart_item_price_on_selection_option->quantity;exit;
-                            if( $price_on_selection_option->option_id == $cart_item_price_on_selection_option->sub_item_id ) {
-                                $price_on_selection_option->quantity = ( isset( $cart_item_price_on_selection_option->quantity ) && $cart_item_price_on_selection_option->quantity > 0 ) ? $cart_item_price_on_selection_option->quantity : 0;
-                                break;
+                        foreach( $price_on_selection_options as $price_on_selection_option ){
+                            foreach( $cart_item_price_on_selection_options as $cart_item_price_on_selection_option ) {
+                                //echo $cart_item_price_on_selection_option->quantity;exit;
+                                if( $price_on_selection_option->option_id == $cart_item_price_on_selection_option->sub_item_id ) {
+                                    $price_on_selection_option->quantity = ( isset( $cart_item_price_on_selection_option->quantity ) && $cart_item_price_on_selection_option->quantity > 0 ) ? $cart_item_price_on_selection_option->quantity : 0;
+                                    break;
+                                }
+                                else
+                                    $price_on_selection_option->quantity = 0;
                             }
-                            else
-                                $price_on_selection_option->quantity = 0;
-                        }
 
+                        }
                     }
                 }
             }
