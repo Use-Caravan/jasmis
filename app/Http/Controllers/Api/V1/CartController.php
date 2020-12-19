@@ -46,8 +46,8 @@ class CartController extends Controller
                 'branch_key' => 'required|exists:branch,branch_key',
                 'item_key' => 'required|exists:item,item_key',
                 'quantity' => 'required|numeric',
-                //'price_on_selection' => 'required|numeric|in:1,0',
-                //'sub_items' => 'required_unless:price_on_selection,0',
+                'price_on_selection' => 'required|numeric|in:1,0',
+                'sub_items' => 'required_unless:price_on_selection,0',
             ]);
             
             if($validator->fails()) {
@@ -98,7 +98,8 @@ class CartController extends Controller
                 if($getThisItem === null) {
                     goto cartItemAdd;
                 }                
-                                
+                            
+                $cart_item_same_pos_item = 0;    
                 foreach($getThisItem as $key => $value) {
                     // if($value->is_ingredient == 0) {                        
                     //     $catItemID = $value->cart_item_id;
@@ -151,21 +152,29 @@ class CartController extends Controller
 
                         $currentIngredientsPOS = $sub_items[0]['ingrdient_groups'];
                         $currentIngredientsPOS = $currentIngredientsPOS;
+                        //print_r($currentIngredientsPOS);exit;
+
+                        $existsSubItemId = isset( $existsPriceOnSelectionOptions[0]->sub_item_id ) ? $existsPriceOnSelectionOptions[0]->sub_item_id : 0;
+                        $currentSubItemId = isset( $sub_items[0]['sub_item_id'] ) ? $sub_items[0]['sub_item_id'] : 0;
+
                         /** If POS item ingredients is same update the items otherwise add the items **/
-                        if($existsIngredientsPOS == $currentIngredientsPOS) {
+                        if( ( $existsIngredientsPOS == $currentIngredientsPOS ) && ( $existsSubItemId == $currentSubItemId ) ) {
                             $catItemID = $value->cart_item_id;
-                        
+                            $cart_item_same_pos_item++;
                             goto cartItemUpdate;                                                
                         }
-                        else
-                            goto cartItemAdd;
+                        //else
+                            //$cart_item_same_pos_item++;
+                            //goto cartItemAdd;
 
                         //$catItemID = $value->cart_item_id;
                         
                         //goto cartItemUpdate;
                     }
-                }                
-                goto cartItemAdd;
+                }    
+                //echo $cart_item_same_pos_item;exit;
+                if( $cart_item_same_pos_item == 0 )            
+                    goto cartItemAdd;
             }
             
             cartItemAdd:
