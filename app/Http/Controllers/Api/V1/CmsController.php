@@ -118,17 +118,17 @@ class CmsController extends Controller
          
         }
 
-        $quickbuy_items = ItemResource::collection(Item::getItems()->where('quickbuy_status',ITEM_ACTIVE)->get());
+        //$quickbuy_items = ItemResource::collection(Item::getItems()->where('quickbuy_status',ITEM_ACTIVE)->get());
 
         
 
         $cuisine = CuisineResource::collection(Cuisine::getList()->where('status',ITEM_ACTIVE)->get());
 
-        $branches = Branch::getBranches()->where('popular_status',ITEM_ACTIVE)->get();
-        $branches = BranchResource::collection($branches);   
+        //$branches = Branch::getBranches()->where('popular_status',ITEM_ACTIVE)->get();
+        //$branches = BranchResource::collection($branches);   
 
         
-        $section3 =  [ 
+        /*$section3 =  [ 
                      'section_id' => 3, 
                      'section_name' => 'Quick Buy', 
                      'no_of_items' => '', 
@@ -142,16 +142,13 @@ class CmsController extends Controller
                      'no_of_items' => '', 
                      'branches' => $branches
                      
-                   ];
+                   ];*/
 
-         $section5 =  [ 
+        $section5 =  [ 
                      'section_id' => 5, 
                      'section_name' => 'Sort & Filter', 
                      'no_of_items' => '', 
                      'cuisine' => $cuisine
-                     
-                       
-
                    ];
 
         $section6 =  [ 
@@ -164,8 +161,8 @@ class CmsController extends Controller
 
                    ];
 
-        array_push($data,$section3); 
-        array_push($data,$section4); 
+        //array_push($data,$section3); 
+        //array_push($data,$section4); 
         array_push($data,$section5); 
         array_push($data,$section6);
         //$cms = CmsResource::collection($cms);

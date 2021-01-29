@@ -53,7 +53,8 @@
      */
 	const ITEM_ACTIVE 	= 1;
     const ITEM_INACTIVE = 0;
-    const CMS_SEC = [1,2];
+    //const CMS_SEC = [1,2];
+    const CMS_SEC = [2];
 
     /**
      * Email And OTP
