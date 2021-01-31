@@ -27,6 +27,22 @@ class UserResource extends JsonResource
     public function toArray($request)
     {        
         //return parent::toArray($request);
+
+        $loyalty_levels = LoyaltyLevel::where('status','=',ITEM_ACTIVE)->get();
+
+        $loyalty_level = LoyaltyLevel::where('from_point','<=',(int)$this->total_loyalty_points)->where('to_point','>=',(int)$this->total_loyalty_points);
+        $loyalty_level = $loyalty_level->first();
+        $loyalty_level_id_user = ($loyalty_level === null) ? '' : $loyalty_level->loyalty_level_id;
+
+        $points_required = array();
+        foreach( $loyalty_levels as $loyalty_level ) {
+            $loyalty_level_id = ( $loyalty_level->loyalty_level_id ) ? $loyalty_level->loyalty_level_id : '';
+            $loyalty_level_name = ( $loyalty_level->loyalty_level_id > 0 ) ? LoyaltyLevelLang::where('loyalty_level_id',$loyalty_level_id)->where('language_code','en')->value('loyalty_level_name') : '';
+            if( $loyalty_level_id > $loyalty_level_id_user ) {
+                $points_required[$loyalty_level_name] = $loyalty_level->from_point - (int)$this->total_loyalty_points;
+            }
+        }
+
         return [
             //'branch_id' => $this->branch_id,
             'user_id' => $this->user_id,
@@ -47,7 +63,9 @@ class UserResource extends JsonResource
                 LoyaltyLevelLang::selectTranslation($loyalty_level);
                 $loyalty_level = $loyalty_level->first();
                 return ($loyalty_level === null) ? '' : $loyalty_level->loyalty_level_name;
-            }),            
+            }),  
+            'user_since' => ($this->created_at === null) ? '' : date( 'd-m-Y H:i:s', strtotime( $this->created_at ) ), 
+            'points_required_to _reach_other_levels' => $points_required         
         ];
     }
     

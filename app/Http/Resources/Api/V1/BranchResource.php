@@ -121,7 +121,8 @@ class BranchResource extends JsonResource
             'branch_avg_rating' => ($this->branch_avg_rating === null) ? 0 : Common::round($this->branch_avg_rating,1),
             'branch_rating_count' => ($this->branch_rating_count === null) ? 0 : $this->branch_rating_count,
             'branch_count' => ($this->branch_count === null) ? 0 : $this->branch_count,
-            'delivery_cost' => ($this->delivery_cost === null) ? Common::currency(0) : Common::currency($this->delivery_cost),
+            //'delivery_cost' => ($this->delivery_cost === null) ? Common::currency(0) : Common::currency($this->delivery_cost),
+            'delivery_cost' => ($this->delivery_charge === null) ? Common::currency(0) : Common::currency($this->delivery_charge),
             'is_wishlist' => $this->when(true,function() {                                 
                 if ( (!auth()->guard(GUARD_USER_API)->check()) && (!auth()->guard(GUARD_USER)->check()) ) {
                     return 0;

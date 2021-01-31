@@ -85,9 +85,6 @@ use Schema;
 use Storage;
 use Validator;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
-
 class OrderController extends Controller
 {
     public  $userDetails,
@@ -112,24 +109,6 @@ class OrderController extends Controller
         $orders = OrderResource::collection($orders);        
         $this->setMessage( __('apimsg.Orders are fetched') );
         return $this->asJson($orders);
-    }
-
-    public function paymentcapture(Request $request)
-    {
-
-        $getAllDetails = (object)$request->all();
-        $client = new Client(['verify' => false]);
-        //$url = 'https://rzp_test_bBN36QyCMvdS9m:DEIqCL1OAvU09Edu2aJwPXlX@api.razorpay.com/v1/payments/'.$getAllDetails->payment_id.'/capture';
-        $url = 'https://rzp_live_TBbKsaxAsH8IVf:8f2AWjNwb8nK6kqsnaAvEwrO@api.razorpay.com/v1/payments/'.$getAllDetails->payment_id.'/capture';
-        $headers = [ 'Content-Type' => 'application/x-www-form-urlencoded' ];
-        $data = array( 'amount' => $getAllDetails->amount, 'currency' => 'INR');
-        
-        $response = $client->post($url, [ 'headers'   => $headers, 'form_params' => $data ]);
-        //print_r($response);exit;
-        $responseData = json_decode($response->getBody());
-        return json_encode($responseData);
-
-
     }
 
     /**
@@ -578,35 +557,34 @@ class OrderController extends Controller
 
                         /** Order Item Ingredient and Ingredient Lang */
                         $deliveryboyItems[$countItems]['ingredients'] = [];
+                        foreach($IGValue['ingredients'] as $Ivalue) {
 
-                        if( isset( $IGValue['ingredients'] ) ) {
-                            foreach($IGValue['ingredients'] as $Ivalue) {
-                                $ingredientDetails = Ingredient::find($Ivalue['ingredient_id']);
-                                $orderIngredient = new OrderIngredient();
-                                $orderIngredient = $orderIngredient->fill([
-                                    'order_id' => $orderID,
-                                    'order_item_id' => $orderItemID,
-                                    'order_item_ingredient_group_id' => $orderingredientGroupID,
-                                    'ingredient_id' => $Ivalue['ingredient_id'],
-                                    'ingredient_price' => $Ivalue['cprice'],
-                                    'ingredient_quanitity' => $Ivalue['quantity'],
-                                    'ingredient_subtotal' => $Ivalue['ingredient_csubtotal']
-                                ]);
-                                $orderIngredient->save();
-                                $orderIngredientID = $orderIngredient->getKey();
-                                $ingredientLangDetails = IngredientLang::where('ingredient_id',$Ivalue['ingredient_id'])->get();                        
 
-                                foreach($ingredientLangDetails as $ingredientLang) {
-                                    $orderIngredientLang = new OrderIngredientLang();
-                                    $orderIngredientLang = $orderIngredientLang->fill([
-                                        'order_ingredient_id' => $orderIngredientID,
-                                        'language_code' => $ingredientLang->language_code,
-                                        'ingredient_name' => $ingredientLang->ingredient_name,
-                                        'arabic_ingredient_name' => IngredientLang::where('ingredient_id', $ingredientLang->ingredient_id)->where('language_code','ar')->value('ingredient_name'),
-                                    ]);                            
-                                    $orderIngredientLang->save();
-                                    $deliveryboyItems[$countItems]['ingredients']['name'] = $ingredientLang->ingredient_name;
-                                }
+                            $ingredientDetails = Ingredient::find($Ivalue['ingredient_id']);
+                            $orderIngredient = new OrderIngredient();
+                            $orderIngredient = $orderIngredient->fill([
+                                'order_id' => $orderID,
+                                'order_item_id' => $orderItemID,
+                                'order_item_ingredient_group_id' => $orderingredientGroupID,
+                                'ingredient_id' => $Ivalue['ingredient_id'],
+                                'ingredient_price' => $Ivalue['cprice'],
+                                'ingredient_quanitity' => $Ivalue['quantity'],
+                                'ingredient_subtotal' => $Ivalue['ingredient_csubtotal']
+                            ]);
+                            $orderIngredient->save();
+                            $orderIngredientID = $orderIngredient->getKey();
+                            $ingredientLangDetails = IngredientLang::where('ingredient_id',$Ivalue['ingredient_id'])->get();                        
+
+                            foreach($ingredientLangDetails as $ingredientLang) {
+                                $orderIngredientLang = new OrderIngredientLang();
+                                $orderIngredientLang = $orderIngredientLang->fill([
+                                    'order_ingredient_id' => $orderIngredientID,
+                                    'language_code' => $ingredientLang->language_code,
+                                    'ingredient_name' => $ingredientLang->ingredient_name,
+                                    'arabic_ingredient_name' => IngredientLang::where('ingredient_id', $ingredientLang->ingredient_id)->where('language_code','ar')->value('ingredient_name'),
+                                ]);                            
+                                $orderIngredientLang->save();
+                                $deliveryboyItems[$countItems]['ingredients']['name'] = $ingredientLang->ingredient_name;
                             }
                         }
                     }

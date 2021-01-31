@@ -31,8 +31,10 @@ class OrderResource extends JsonResource
                         ->where('status',ITEM_ACTIVE)
                         ->where('approved_status',REVIEW_APPROVED_STATUS_APPROVED)->first();
 						
-	   $user_rating = BranchReview::where('vendor_id',$this->vendor_id)->where('branch_id',$this->branch_id)->
+	    $user_rating = BranchReview::where('vendor_id',$this->vendor_id)->where('branch_id',$this->branch_id)->
                        where('user_id',$this->user_id)->first();
+
+        $orderItems = OrderItem::getOrderItems($this->order_id);
 
         return [
             'order_key' => $this->order_key,            
@@ -77,6 +79,7 @@ class OrderResource extends JsonResource
             //'order_items' => OrderItemResource::collection( OrderItem::getOrderItems($this->order_id) ),
             'item_namelist' => OrderItem::getOrderItems($this->order_id)->pluck('item_name'),
             'arabic_item_namelist' => OrderItem::getOrderItemsArabic($this->order_id)->pluck('item_name'),
+            //'items' => OrderItemResource::collection($orderItems),
             $this->mergeWhen($request->order_key, [                
 
                 'items' =>  $this->when($request->order_key, function() {                    
@@ -101,14 +104,14 @@ class OrderResource extends JsonResource
                             'is_italic' => IS_ITALIC,
                             'is_line' => IS_LINE,                            
                         ],
-                        /*[
+                        [
                             'name' => __('apimsg.VAT',['percent' => $this->tax_percent]),
                             'price' => Common::currency($this->tax),
                             'color_code' => PAYMENT_VAR_TAX_COLOR,
                             'is_bold' => IS_BOLD,
                             'is_italic' => IS_ITALIC,
                             'is_line' => IS_LINE, 
-                        ], */                       
+                        ]                      
                     ];
                     if($this->service_tax !== null && $this->service_tax > 0) {
                         $service_tax = [
