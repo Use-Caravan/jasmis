@@ -47,6 +47,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
     Route::get('offer', 'OfferController@getOffers')->middleware('localization');
     Route::resource('faq','FaqController')->middleware('localization');
     Route::get('get-near-branches/{vendor_key?}/{branch_key?}','BranchController@branchByVendor')->middleware('localization');
+
+    Route::get('get-payment-options/{branch_key?}','OrderController@getPaymentOptions')->middleware('localization');
     
 
     /** Node team status update */

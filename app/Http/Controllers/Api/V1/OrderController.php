@@ -3457,6 +3457,50 @@ class OrderController extends Controller
         } catch(Exception $e) {
             throw $e->getMessage();
         }
-    }
+    }   
+
+    /** Update driver location to track driver's current location **/
+    public function getPaymentOptions()
+    {
+        try {
+            $paymentOptionsArr = array( "1" => "Debit Card", "2" => "COD", "3" => "Wallet", "8" => "Wallet and Online", "9" => "Credit Card");         
+
+            if( isset( request()->branch_key ) ) {
+                $branchDetails = Branch::select([
+                    Vendor::tableName().'.vendor_key',
+                    Vendor::tableName().'.vendor_id',
+                    Vendor::tableName().'.payment_option'
+                ])
+                ->leftJoin(Vendor::tableName(),Branch::tableName().".vendor_id",'=',Vendor::tableName().'.vendor_id')
+                ->where([
+                    Branch::tableName().'.status' => ITEM_ACTIVE,
+                    Vendor::tableName().'.status' => ITEM_ACTIVE,
+                    Branch::tableName().'.branch_key' => request()->branch_key,
+                ])->first();
+
+                $branchPaymentOptions = ( isset( $branchDetails->payment_option ) ) ? explode(',',$branchDetails->payment_option) : array();
+                
+                $cnt = 0;
+                $branchPaymentOptionsAvailable = array();
+                foreach( $branchPaymentOptions as $key => $value ) {
+                    $branchPaymentOptionsAvailable[$value] = ( isset( $paymentOptionsArr[$value] ) ) ? $paymentOptionsArr[$value] : '';
+                    $cnt++;
+                }
+
+                //return response()->json(['status' => HTTP_SUCCESS,'data' => $branchPaymentOptionsAvailable, 'message' => __('apimsg.Payment options are retrieved successfully.')],HTTP_SUCCESS);
+
+                $data =  [ 'branch_payment_options' => $branchPaymentOptionsAvailable];                
+            }
+            else
+                $data =  [ 'branch_payment_options' => $paymentOptionsArr];
+
+            $this->setMessage( __('apimsg.Payment options are fetched.') );
+
+            return $this->asJson($data);
+
+        } catch(Exception $e) {
+            throw $e->getMessage();
+        }
+    } 
 }
 

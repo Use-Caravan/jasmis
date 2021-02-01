@@ -35,7 +35,7 @@ class UserAddressResource extends JsonResource
             'floor' => ($this->floor === null) ? '' : $this->floor,
             'block' => ($this->block === null) ? '' : $this->block,
             'full_address' => ($this->full_address === null) ? '' : $this->full_address,
-            
+            'entrance_number' => ($this->entrance_number === null) ? '' : $this->entrance_number,
         ];
     }
 

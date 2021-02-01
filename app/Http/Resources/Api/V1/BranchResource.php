@@ -158,8 +158,9 @@ class BranchResource extends JsonResource
                 'city_name' => $this->city_name,
                 'country_name' => $this->country_name,
                 'rating' => $this->when($this->branch_id,BranchReview::getBranchReviews($this->branch_id)),
-                'time_info' => $this->when(true, BranchTimeslot::timeInfo($this->branch_id)),
+                'time_info' => $this->when(true, BranchTimeslot::timeInfo($this->branch_id))
             ]),            
+            'restaurant_type' => ( $this->restaurant_type == 1 ) ? "Veg" : ( $this->restaurant_type == 2 ) ? "Non Veg" : "Both",
             // 'zone_radius' => $this->zone_radius,  /**  for testing */
         ];
 

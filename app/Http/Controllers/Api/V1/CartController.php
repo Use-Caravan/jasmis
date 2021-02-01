@@ -723,6 +723,10 @@ class CartController extends Controller
                 'is_italic' => IS_ITALIC,
                 'is_line' => IS_LINE,
             ];  
+			
+			$cart['no_contact_delivery'] = 1;
+			$cart['delivery_time'] = "30 Mins";
+			$cart['cost_for_2'] = Common::currency($totalCheckouAmount * 2);
 
             $this->setMessage( __("apimsg.The cart items are fetched") );
             $this->setData($cart);
