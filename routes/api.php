@@ -49,6 +49,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
     Route::get('get-near-branches/{vendor_key?}/{branch_key?}','BranchController@branchByVendor')->middleware('localization');
 
     Route::get('get-payment-options/{branch_key?}','OrderController@getPaymentOptions')->middleware('localization');
+	
+	Route::get('get-order-status/{order_key?}','OrderController@getOrderStatus')->middleware('localization');
     
 
     /** Node team status update */

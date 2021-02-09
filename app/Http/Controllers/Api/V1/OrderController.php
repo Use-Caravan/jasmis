@@ -2469,7 +2469,7 @@ class OrderController extends Controller
     public function itemCheckoutItemData($branchDetails)
     {        
         $items = [];
-        //print_r($branchDetails);exit;
+        //print_r($branchDetails['items']);exit;
         foreach($branchDetails['items'] as $key => $value) {
             $itemDetails = Item::getItems($value['item_key'])->first();
             //print_r($itemDetails);exit;
@@ -2512,12 +2512,13 @@ class OrderController extends Controller
             if(isset($value['cart_item_key'])) {
                 $items[$key]['cart_item_key'] = $value['cart_item_key'];
             }
+            //print_r($value['ingrdient_groups']);exit;
             if(isset($value['ingrdient_groups']) && !empty($value['ingrdient_groups'])) {
                 foreach($value['ingrdient_groups'] as $igKey => $igValue) {
                     $ingredientGroup = IngredientGroup::select(IngredientGroup::tableName().'.*');
                     IngredientGroupLang::selectTranslation($ingredientGroup);
                     $ingredientGroup = $ingredientGroup->where('ingredient_group_key',$igValue['ingredient_group_key'])->first();
-                    if($ingredientGroup === null) {                    
+					if($ingredientGroup === null) {                    
                         return ['status'=> false, 'error' => __('apimsg.Invalid Ingredient group key')];
                     }
                     $items[$key]['ingredient_groups'][$igKey] = [
@@ -2530,15 +2531,22 @@ class OrderController extends Controller
                     if(!isset($igValue['ingredients'])) {
                         return ['status'=> false, 'error' => __('apimsg.Ingredients are missing')];
                     }
+                    //print_r($ingredientGroup);exit;
                     foreach($igValue['ingredients'] as $iKey => $iValue) {
                         $ingredients = IngredientGroupMapping::select(IngredientGroupMapping::tableName().".*",Ingredient::tableName().".*")
                         ->leftJoin(Ingredient::tableName(),IngredientGroupMapping::tableName().'.ingredient_id','=',Ingredient::tableName().'.ingredient_id');
+
                         IngredientLang::selectTranslation($ingredients);
+                        //echo $ingredients->toSql();exit;
                         $ingredients = $ingredients->where([
                             Ingredient::tableName().".ingredient_key" => $iValue['ingredient_key'],
                             Ingredient::tableName().".status" => ITEM_ACTIVE,
                             'ingredient_group_mapping.ingredient_group_id' => $ingredientGroup->ingredient_group_id
                             ])->first();
+                        //echo $ingredients->toSql();exit;
+                        //echo 'ingredient_key - '.$iValue['ingredient_key'];
+                        //echo 'ingredient_group_id - '.$ingredientGroup->ingredient_group_id;exit;
+						//print_r($ingredients);
                         if($ingredients === null) {
                             return ['status'=> false, 'error' => 'Invalid Ingredient key'];
                         }
@@ -3502,5 +3510,23 @@ class OrderController extends Controller
             throw $e->getMessage();
         }
     } 
+
+    /** Get order status by order key */
+    public function getOrderStatus()
+    {   
+        $orderModel = Order::findByKey(request()->order_key);
+        if($orderModel === null) {
+            return $this->commonError(__("apimsg.Order status is not found"));
+        }
+
+        $order_status = $orderModel->order_status;
+        $order_status_name = ($order_status === null) ? "" : ( $order_status == ORDER_APPROVED_STATUS_DRIVER_ACCEPTED || $order_status == ORDER_DRIVER_REJECTED ) ? (new Order)->approvedStatus(ORDER_APPROVED_STATUS_PENDING) : (new Order)->approvedStatus($order_status);
+
+        $data = [ 'order_status' => $order_status, 'order_status_name' => $order_status_name ];
+
+        $this->setMessage( __('apimsg.Order status has been fetched.') );
+
+        return $this->asJson($data);
+    }
 }
 

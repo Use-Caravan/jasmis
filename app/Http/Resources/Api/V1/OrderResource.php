@@ -79,10 +79,60 @@ class OrderResource extends JsonResource
             //'order_items' => OrderItemResource::collection( OrderItem::getOrderItems($this->order_id) ),
             'item_namelist' => OrderItem::getOrderItems($this->order_id)->pluck('item_name'),
             'arabic_item_namelist' => OrderItem::getOrderItemsArabic($this->order_id)->pluck('item_name'),
-            //'items' => OrderItemResource::collection($orderItems),
+            'items' => OrderItemResource::collection($orderItems),
+            'payment_details' => $this->when(true, function(){
+                $paymentDetails = [
+                    [ 
+                        'name' => __('apimsg.Sub Total'), 
+                        'price' => Common::currency($this->item_total),
+                        'color_code' => PAYMENT_SUB_TOTOAL_COLOR,
+                        'is_bold' => IS_BOLD,
+                        'is_italic' => IS_ITALIC,
+                        'is_line' => IS_LINE,
+                    ],
+                    [
+                        'name' => __('apimsg.Delivery Charge'), 
+                        'price' => Common::currency($this->delivery_fee),
+                        'color_code' => PAYMENT_DELIVERY_FEE_COLOR,
+                        'is_bold' => IS_BOLD,
+                        'is_italic' => IS_ITALIC,
+                        'is_line' => IS_LINE,                            
+                    ],
+                    [
+                        'name' => __('apimsg.VAT',['percent' => $this->tax_percent]),
+                        'price' => Common::currency($this->tax),
+                        'color_code' => PAYMENT_VAR_TAX_COLOR,
+                        'is_bold' => IS_BOLD,
+                        'is_italic' => IS_ITALIC,
+                        'is_line' => IS_LINE, 
+                    ]                      
+                ];
+                if($this->service_tax !== null && $this->service_tax > 0) {
+                    $service_tax = [
+                        'name' => __('apimsg.Service Tax',[ 'percent' => $this->service_tax_percent]),
+                        'price' => Common::currency($this->service_tax), 
+                        'color_code' => PAYMENT_SERVICE_TAX_COLOR,
+                        'is_bold' => IS_BOLD,
+                        'is_italic' => IS_ITALIC,
+                        'is_line' => IS_LINE,
+                    ];
+                    array_push($paymentDetails,$service_tax);
+                }
+                if($this->voucher_offer_value !== null && $this->voucher_offer_value != 0 && $this->voucher_offer_value != '') {
+                    array_push($paymentDetails, [
+                        'name' => __('apimsg.Coupon Offer'), 
+                        'price' => Common::currency($this->voucher_offer_value),
+                        'color_code' => PAYMENT_COUPON_FEE_COLOR,
+                        'is_bold' => IS_BOLD,
+                        'is_italic' => IS_ITALIC,
+                        'is_line' => IS_LINE,
+                    ]);                    
+                }                        
+                return $paymentDetails;
+            }),
             $this->mergeWhen($request->order_key, [                
 
-                'items' =>  $this->when($request->order_key, function() {                    
+                /*'items' =>  $this->when($request->order_key, function() {                    
                     $orderItems = OrderItem::getOrderItems($this->order_id);
                     return OrderItemResource::collection($orderItems);
                 }),
@@ -135,9 +185,10 @@ class OrderResource extends JsonResource
                         ]);                    
                     }                        
                     return $paymentDetails;
-                })
+                })*/
             ]),            
         ];
+		
     }
     /**
      * Customize the outgoing response for the resource.
