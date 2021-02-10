@@ -30,6 +30,14 @@ class OrderItem extends CommonOrderItem
                     (SELECT GROUP_CONCAT( `ingredient_price` ) FROM `order_ingredient` AS OIL
                     WHERE OIL.order_item_id = order_item.order_item_id)
                  as ingredient_price'),
+                DB::raw(' 
+                    (SELECT GROUP_CONCAT( `ingredient_quanitity` ) FROM `order_ingredient` AS OIL
+                    WHERE OIL.order_item_id = order_item.order_item_id)
+                 as ingredient_quanitity'),
+                DB::raw(' 
+                    (SELECT GROUP_CONCAT( `ingredient_subtotal` ) FROM `order_ingredient` AS OIL
+                    WHERE OIL.order_item_id = order_item.order_item_id)
+                 as ingredient_subtotal'),
 		        OrderItem::tableName().".item_quantity",
                 OrderItem::tableName().".item_subtotal"
             ])->where([

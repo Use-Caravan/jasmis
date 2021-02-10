@@ -10,7 +10,7 @@ use App\Api\IngredientLang;
 use App\Api\OrderIngredient;
 use App\Api\OrderIngredientLang;
 
-class OrderItemResource extends JsonResource
+class OrderIngredientResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -23,25 +23,16 @@ class OrderItemResource extends JsonResource
         //return parent::toArray($request);
 
         $order_ingredient = OrderIngredient::where(OrderIngredient::tableName().'.order_item_id',$this->order_item_id)->get();
-        $order_ingredient = OrderIngredientResource::collection($order_ingredient);
         //print_r($order_ingredient);exit;
 
         return [
-            'item_name' => $this->item_name,
-            'arabic_item_name' => ItemLang::where('item_id',$this->item_id)->where('language_code','ar')->value('item_name'),
-            'item_subtotal' => Common::currency($this->item_subtotal),
-            'item_quantity' => $this->item_quantity,
-            'item_image_path' => FileHelper::loadImage($this->item_image_path),
-            'item_description' => $this->item_description,
-            'arabic_item_description' => ItemLang::where('item_id',$this->item_id)->where('language_code','ar')->value('item_description'),
-            'ingredients' => $this->ingredients,
-            'arabic_ingredients' => $this->arabic_ingredients,
-            /*'ingredient_price' => $this->ingredient_price,
+            'order_ingredient_id' => $this->order_ingredient_id,
+            'ingredient_id' => $this->ingredient_id,
+            'ingredient_name' => OrderIngredientLang::where('order_ingredient_id',$this->order_ingredient_id)->where('language_code','en')->value('ingredient_name'),
+            'arabic_ingredient_name' => OrderIngredientLang::where('order_ingredient_id',$this->order_ingredient_id)->where('language_code','ar')->value('ingredient_name'),
+            'ingredient_price' => $this->ingredient_price,
             'ingredient_quanitity' => $this->ingredient_quanitity,
-            'ingredient_subtotal' => $this->ingredient_subtotal,*/
-            'order_ingredients' => $order_ingredient,
-            'price_on_selection' => $this->price_on_selection,
-            'sub_items' => ( isset( $this->price_on_selection ) && $this->price_on_selection == 1 && !empty( isset( $this->price_on_selection_options ) ) ) ? json_decode( $this->price_on_selection_options ) : [],
+            'ingredient_subtotal' => $this->ingredient_subtotal,
         ];
     }
     /**

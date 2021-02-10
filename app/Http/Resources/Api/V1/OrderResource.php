@@ -35,6 +35,7 @@ class OrderResource extends JsonResource
                        where('user_id',$this->user_id)->first();
 
         $orderItems = OrderItem::getOrderItems($this->order_id);
+        //print_r($orderItems);exit;
 
         return [
             'order_key' => $this->order_key,            

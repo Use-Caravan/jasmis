@@ -65,7 +65,8 @@ class UserResource extends JsonResource
                 return ($loyalty_level === null) ? '' : $loyalty_level->loyalty_level_name;
             }),  
             'user_since' => ($this->created_at === null) ? '' : date( 'd-m-Y H:i:s', strtotime( $this->created_at ) ), 
-            'points_required_to _reach_other_levels' => $points_required         
+            'points_required_to _reach_other_levels' => $points_required,
+            'card_number' => ($this->card_number === null) ? '' : $this->card_number         
         ];
     }
     
