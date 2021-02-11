@@ -58,6 +58,7 @@ class Voucher extends CommonVoucher
         ->groupBy(Voucher::tableName().".voucher_id");
 
         VendorLang::selectTranslation($query);
+        //echo $query->toSql();exit;
         return $query;
     }
 }

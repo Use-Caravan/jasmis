@@ -84,6 +84,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
         Route::post('wallet/redeem-points','WalletController@redeemPoint')->middleware('localization');
         Route::put('user-change-password','UserController@changePassword')->middleware('localization');
         Route::match(['GET','PUT','POST'],'user-wishlist','UserController@wishlist')->middleware('localization');
+		Route::get('user-wishlist/{user_latitude}/{user_longitude}','UserController@wishlist')->middleware('localization');
         Route::match(['PUT','POST'],'branch-review','UserController@ratings')->middleware('localization');
         Route::post('profile-image','UserController@profileImage')->middleware('localization');
 
@@ -103,7 +104,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
 
         Route::get('loyalty-point','LoyaltyPointController@loyaltyPointDetails')->middleware('localization');
 
-        Route::get('get-vouchers','VoucherController@getVouchers')->middleware('localization');
+        Route::get('get-vouchers/{filter_value}','VoucherController@getVouchers')->middleware('localization');
     });
     Route::get('order-confirmation-mail/{order_key}','OrderController@sendConfirmationMail')->middleware('localization');
 

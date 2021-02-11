@@ -19,7 +19,9 @@ use App\Api\{
     BranchReview,
     Cuisine,
     CuisineLang,
-    VendorLang
+    VendorLang,
+    BranchDeliveryArea,
+    DeliveryArea
 };
 use Auth;
 use FileHelper;
@@ -168,7 +170,7 @@ class UserController extends Controller
         return $this->asJson();
     }
 
-    public function wishlist()
+    public function wishlist($user_latitude=null,$user_longitude=null)
     {   
         $user = request()->user();
         $branch = new Branch();
@@ -181,7 +183,6 @@ class UserController extends Controller
         $branchReviewTable = $branchReview->getTable(); 
         $cuisine = new Cuisine();
         $cuisineTable = $cuisine->getTable();
-       
 
         switch(request()->method()) {
             case 'GET';
@@ -195,13 +196,16 @@ class UserController extends Controller
                     "$branchCuisineTable.cuisine_id",
                     DB::raw('GROUP_CONCAT( DISTINCT(CUL.cuisine_name)) as cuisines'),
                     DB::raw("avg(".BranchReview::tableName().".rating) as branch_avg_rating"),
-                    DB::raw("(SELECT COUNT(*) from branch_timeslot as BT where BT.branch_id = branch.branch_id and status = 1) as timeslotcount")
+                    DB::raw("(SELECT COUNT(*) from branch_timeslot as BT where BT.branch_id = branch.branch_id and status = 1) as timeslotcount"),
+                    DeliveryArea::tableName().'.zone_type'
                 ])
                 ->leftjoin($branchTable,"$userWishlistTable.branch_id","$branchTable.branch_id")
                 ->leftjoin($branchCuisineTable,"$userWishlistTable.branch_id","$branchCuisineTable.branch_id")
                 ->leftjoin($cuisineTable,"$branchCuisineTable.cuisine_id","$cuisineTable.cuisine_id")
                 ->leftjoin(BranchReview::tableName(),UserWishlist::tableName().".branch_id",BranchReview::tableName().".branch_id")
                 ->leftjoin(Vendor::tableName(),Branch::tableName().".vendor_id",Vendor::tableName().".vendor_id")
+                ->leftJoin(BranchDeliveryArea::tableName(),BranchDeliveryArea::tableName().".branch_id","$branchTable.branch_id")
+                ->leftJoin(DeliveryArea::tableName(),BranchDeliveryArea::tableName().".delivery_area_id",DeliveryArea::tableName().".delivery_area_id")
                 ->where([
                     "$userWishlistTable.user_id" => $user->user_id,
                     "$userWishlistTable.status" => ITEM_ACTIVE,
@@ -216,6 +220,21 @@ class UserController extends Controller
                 VendorLang::selectTranslation($query);
                 $query = $query->havingRaw("timeslotcount > 0")->get();
                 $data = UserWishlistResource::collection($query);
+
+                $cnt = 0;
+                /** Check whether the favorite restaurant within the user location **/
+                foreach( $data as $whislist ) {
+                    $branch_id = $whislist->branch_id;
+                    $zone_type = $whislist->zone_type;
+
+                    $branchDeliveryArea = $this->checkDeliveryAreaAvailable( $branch_id, $zone_type, $user_latitude, $user_longitude );
+
+                    if($branchDeliveryArea === null || $branchDeliveryArea->count() == 0) {
+                        unset($data[$cnt]);                        
+                    }
+                    $cnt++;
+                }
+
                 $this->setMessage(__('apimsg.wishlists are fetched'));
                 return $this->asJson($data);
             break;
@@ -295,6 +314,65 @@ class UserController extends Controller
                 return $this->asJson();
             break;
         }
+    }
+
+    public function checkDeliveryAreaAvailable( $branch_id, $zone_type, $user_latitude, $user_longitude )
+    {
+        if($zone_type == DELIVERY_AREA_ZONE_CIRCLE) {
+            
+            $branchDeliveryArea = Branch::select([
+                    'branch.branch_id',
+                    'branch.branch_key',
+                    'DA.*',
+                    DB::raw("( 6371000 * acos( cos( radians($user_latitude) ) * cos( radians( DA.circle_latitude ) ) 
+                    * cos( radians( DA.circle_longitude ) - radians($user_longitude) ) + sin( radians($user_latitude) )
+                    * sin( radians( DA.circle_latitude ) ) ) ) as distance")
+                ])
+                ->leftJoin('branch_delivery_area as BDA','branch.branch_id','=','BDA.branch_id')
+                ->leftJoin('delivery_area as DA','BDA.delivery_area_id','=','DA.delivery_area_id')
+                ->where([
+                    'branch.branch_id' => $branch_id,
+                    'DA.status' => ITEM_ACTIVE,
+                    "DA.zone_type" => DELIVERY_AREA_ZONE_CIRCLE,
+                ])
+                ->havingRaw("distance <  DA.zone_radius")
+                ->orderBy('distance','ASC')
+                ->first();
+                
+        }
+        if($zone_type == DELIVERY_AREA_ZONE_POLYGON) {
+            
+            // $zoneLatLng = '[GEOMETRY - 129 B]';
+            $branchDeliveryArea = BranchDeliveryArea::select([
+                BranchDeliveryArea::tableName().".branch_id",
+                DeliveryArea::tableName().".*"                
+            ])
+            ->leftJoin(DeliveryArea::tableName(),BranchDeliveryArea::tableName().".delivery_area_id",DeliveryArea::tableName().".delivery_area_id")
+            ->leftJoin(Branch::tableName(),BranchDeliveryArea::tableName().".branch_id",Branch::tableName().".branch_id")
+            ->where([
+                DeliveryArea::tableName().".zone_type" => DELIVERY_AREA_ZONE_POLYGON,
+                DeliveryArea::tableName().".status" => ITEM_ACTIVE,
+                Branch::tableName().".branch_id" => $branch_id,
+            ])
+            ->whereNull(DeliveryArea::tableName().".deleted_at")
+            ->whereRaw("ST_CONTAINS(".DeliveryArea::tableName().".zone_latlng, Point(".$user_latitude.", ".$user_longitude."))")
+            // ->whereRaw("ST_CONTAINS(".DeliveryArea::tableName().".zone_latlng, Point(1.122, 21.2121))")
+            ->groupBy(BranchDeliveryArea::tableName().".branch_id")
+            ->get();
+            
+        }
+        /*print_r($branchDeliveryArea);exit;
+        //print_r(array($branchDeliveryArea));exit;
+        //echo count(array($branchDeliveryArea));exit;
+        //echo count( is_countable( $branchDeliveryArea ) ? $branchDeliveryArea : [] );exit;
+
+        //if($branchDeliveryArea === null || count(array($branchDeliveryArea)) == 0) {
+        if($branchDeliveryArea === null || $branchDeliveryArea->count() == 0) {
+        //if($branchDeliveryArea === null || count( is_countable( $branchDeliveryArea ) ? $branchDeliveryArea : [] ) == 0) {
+            return ['status'=> false, 'error' => __('apimsg.The selected address in not within the delivery area of the branch')];
+        }*/
+        
+        return $branchDeliveryArea;
     }
 
     public function ratings()

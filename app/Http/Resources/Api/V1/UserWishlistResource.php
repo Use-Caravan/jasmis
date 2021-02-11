@@ -53,6 +53,7 @@ class UserWishlistResource extends JsonResource
                 }
                 return $availabilityStatus;
             }),
+            'zone_type' => ($this->zone_type === null) ? "" : $this->zone_type
         ];
     }
 

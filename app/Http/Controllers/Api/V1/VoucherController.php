@@ -37,14 +37,18 @@ class VoucherController extends Controller
     }
 
     
-    public function getVouchers()
+    public function getVouchers($filter_value)
     {
         $userID = Auth::user()->user_id;
         $vouchers = Voucher::getBranchVouchers();
-        $vouchers->addSelect([
+        $vouchers = $vouchers->addSelect([
             DB::raw(" (SELECT COUNT(VU.voucher_id) FROM voucher_usage AS VU where VU.beneficiary_type = ".VOUCHER_APPLY_PROMO_USERS." and VU.voucher_id = ".Voucher::tableName().".voucher_id "." and VU.beneficiary_id = ".$userID."  and VU.status = ".ITEM_ACTIVE.") as usage_count")
-        ])
-        ->havingRaw('usage_count < limit_of_use');        
+        ]);
+
+        if( $filter_value == "active" ) //Active coupons user can use ( Usage count not exceed limit of use )   
+            $vouchers->havingRaw('usage_count < limit_of_use');       
+        else if( $filter_value == "used" ) //Used  coupons user can't use ( Usage count exceed or equal to limit of use )
+            $vouchers->havingRaw('usage_count >= limit_of_use');        
 
         $modelVoucher = VoucherResource::collection($vouchers->get());
         $this->setMessage(__('apimsg.Voucher List'));
