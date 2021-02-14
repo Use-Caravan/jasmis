@@ -21,7 +21,8 @@ use App\Api\{
     CuisineLang,
     VendorLang,
     BranchDeliveryArea,
-    DeliveryArea
+    DeliveryArea,
+    Order
 };
 use Auth;
 use FileHelper;
@@ -199,11 +200,15 @@ class UserController extends Controller
                     DB::raw("(SELECT COUNT(*) from branch_timeslot as BT where BT.branch_id = branch.branch_id and status = 1) as timeslotcount"),
                     DeliveryArea::tableName().'.zone_type'
                 ])
-                ->leftjoin($branchTable,"$userWishlistTable.branch_id","$branchTable.branch_id")
-                ->leftjoin($branchCuisineTable,"$userWishlistTable.branch_id","$branchCuisineTable.branch_id")
+                ->leftjoin(Vendor::tableName(),"$userWishlistTable.vendor_id",Vendor::tableName().".vendor_id")
+                //->leftjoin($branchTable,"$userWishlistTable.branch_id","$branchTable.branch_id")
+                ->leftjoin($branchTable,"$userWishlistTable.vendor_id","$branchTable.vendor_id")
+                //->leftjoin($branchCuisineTable,"$userWishlistTable.branch_id","$branchCuisineTable.branch_id")
+                ->leftjoin($branchCuisineTable,"$branchTable.branch_id","$branchCuisineTable.branch_id")
                 ->leftjoin($cuisineTable,"$branchCuisineTable.cuisine_id","$cuisineTable.cuisine_id")
-                ->leftjoin(BranchReview::tableName(),UserWishlist::tableName().".branch_id",BranchReview::tableName().".branch_id")
-                ->leftjoin(Vendor::tableName(),Branch::tableName().".vendor_id",Vendor::tableName().".vendor_id")
+                //->leftjoin(BranchReview::tableName(),UserWishlist::tableName().".branch_id",BranchReview::tableName().".branch_id")
+                ->leftjoin(BranchReview::tableName(),"$branchTable.branch_id",BranchReview::tableName().".branch_id")
+                //->leftjoin(Vendor::tableName(),Branch::tableName().".vendor_id",Vendor::tableName().".vendor_id")
                 ->leftJoin(BranchDeliveryArea::tableName(),BranchDeliveryArea::tableName().".branch_id","$branchTable.branch_id")
                 ->leftJoin(DeliveryArea::tableName(),BranchDeliveryArea::tableName().".delivery_area_id",DeliveryArea::tableName().".delivery_area_id")
                 ->where([
@@ -214,7 +219,8 @@ class UserController extends Controller
                 ->whereNull(Cuisine::tableName().".deleted_at")
                 ->whereNull(Vendor::tableName().".deleted_at")
                 ->whereNull(Branch::tableName().".deleted_at")
-                ->groupBy("$userWishlistTable.branch_id");
+                //->groupBy("$userWishlistTable.branch_id");
+                ->groupBy("$userWishlistTable.vendor_id");
                 BranchLang::selectTranslation($query);
                 CuisineLang::selectTranslation($query,'CUL');
                 VendorLang::selectTranslation($query);
@@ -224,13 +230,15 @@ class UserController extends Controller
                 $cnt = 0;
                 /** Check whether the favorite restaurant within the user location **/
                 foreach( $data as $whislist ) {
-                    $branch_id = $whislist->branch_id;
+                    $vendor_id = $whislist->vendor_id;
                     $zone_type = $whislist->zone_type;
 
-                    $branchDeliveryArea = $this->checkDeliveryAreaAvailable( $branch_id, $zone_type, $user_latitude, $user_longitude );
+                    if( isset( $vendor_id ) && isset( $user_latitude ) && isset( $user_longitude ) ) {
+                        $branchDeliveryArea = $this->checkDeliveryAreaAvailable( $vendor_id, $zone_type, $user_latitude, $user_longitude );
 
-                    if($branchDeliveryArea === null || $branchDeliveryArea->count() == 0) {
-                        unset($data[$cnt]);                        
+                        if($branchDeliveryArea === null || $branchDeliveryArea->count() == 0) {
+                            unset($data[$cnt]);                        
+                        }
                     }
                     $cnt++;
                 }
@@ -240,23 +248,28 @@ class UserController extends Controller
             break;
             
             case 'POST':                
-                $validator = Validator::make(request()->all(),['branch_key' => 'required']);
+                //$validator = Validator::make(request()->all(),['branch_key' => 'required']);
+                $validator = Validator::make(request()->all(),['vendor_key' => 'required']);
                 if($validator->fails()) {
                     return $this->validateError($validator->errors());
                 }
                 DB::beginTransaction();
                 try {
-                    $branchId = Branch::findByKey(request()->branch_key);
+                    /*$branchId = Branch::findByKey(request()->branch_key);
                     if($branchId == null) {
                         return $this->validateError(__('apimsg.Invalid branch key'));
+                    }*/
+                    $vendorId = Vendor::findByKey(request()->vendor_key);
+                    if($vendorId == null) {
+                        return $this->validateError(__('apimsg.Invalid vendor key'));
                     }
                     $checkExists = UserWishlist::where([
                             'user_id' => $user->user_id,
-                            'branch_id' => $branchId->branch_id,
+                            'vendor_id' => $vendorId->vendor_id,
                         ])->first();
                 
                     if($checkExists != null && $checkExists->status == ITEM_ACTIVE) {
-                        return $this->commonError(__("apimsg.Branch already exists in wishlist"));                
+                        return $this->commonError(__("apimsg.Vendor already exists in wishlist"));                
                     } elseif ($checkExists != null && $checkExists->status == ITEM_INACTIVE) {                        
                         $model = UserWishlist::find($checkExists->user_wishlist_id);
                         $model->status = ITEM_ACTIVE;
@@ -264,7 +277,7 @@ class UserController extends Controller
                     } else {                                
                         $model = new UserWishlist();
                         $model->user_id = $user->user_id;
-                        $model->branch_id = $branchId->branch_id;
+                        $model->vendor_id = $vendorId->vendor_id;
                         $model->status = ITEM_ACTIVE;
                         $model->save();                        
                     }
@@ -278,35 +291,41 @@ class UserController extends Controller
             break;   
 
             case 'PUT': 
-                $validator = Validator::make(request()->all(),['branch_key' => 'required']);
+                //$validator = Validator::make(request()->all(),['branch_key' => 'required']);
+                $validator = Validator::make(request()->all(),['vendor_key' => 'required']);
                 
                 if($validator->fails()) {
                     return $this->validateError($validator->errors());
                 }                               
-                $branchId = Branch::findByKey(request()->branch_key);
+                /*$branchId = Branch::findByKey(request()->branch_key);
                 if($branchId == null) {
                     return $this->validateError(__('apimsg.Invalid branch key'));
+                }*/
+
+                $vendorId = Vendor::findByKey(request()->vendor_key);
+                if($vendorId == null) {
+                    return $this->validateError(__('apimsg.Invalid vendor key'));
                 }
                 
                 $checkExists = UserWishlist::where([
                         'user_id' => $user->user_id,
-                        'branch_id' => $branchId->branch_id,
+                        'vendor_id' => $vendorId->vendor_id,
                     ])->first();   
                     
                 if($checkExists != null && $checkExists->status == ITEM_INACTIVE) {
-                    return $this->commonError(__("apimsg.Branch already removed from wishlist"));
+                    return $this->commonError(__("apimsg.Vendor already removed from wishlist"));
                 }
                 if ($checkExists === null) {
-                    return $this->setMessage(__('apimsg.Branch is unavailable to unwishlist'));
+                    return $this->setMessage(__('apimsg.Vendor is unavailable to unwishlist'));
                 }                
                 
                 DB::beginTransaction();
                 try {
                     $userId = $user->user_id;    
                                                 
-                    $model = UserWishlist::where(['branch_id' => $branchId->branch_id,'user_id' => $userId])->update(['status' => ITEM_INACTIVE]);
+                    $model = UserWishlist::where(['vendor_id' => $vendorId->vendor_id,'user_id' => $userId])->update(['status' => ITEM_INACTIVE]);
                     DB::commit();     
-                    $this->setMessage(__('apimsg.Restaurant has been removed from wishlist'));
+                    $this->setMessage(__('apimsg.Vendor has been removed from wishlist'));
                 } catch (\Throwable $e) {
                     DB::rollback();
                     throw $e;
@@ -316,7 +335,7 @@ class UserController extends Controller
         }
     }
 
-    public function checkDeliveryAreaAvailable( $branch_id, $zone_type, $user_latitude, $user_longitude )
+    public function checkDeliveryAreaAvailable( $vendor_id, $zone_type, $user_latitude, $user_longitude )
     {
         if($zone_type == DELIVERY_AREA_ZONE_CIRCLE) {
             
@@ -331,7 +350,7 @@ class UserController extends Controller
                 ->leftJoin('branch_delivery_area as BDA','branch.branch_id','=','BDA.branch_id')
                 ->leftJoin('delivery_area as DA','BDA.delivery_area_id','=','DA.delivery_area_id')
                 ->where([
-                    'branch.branch_id' => $branch_id,
+                    'branch.vendor_id' => $vendor_id,
                     'DA.status' => ITEM_ACTIVE,
                     "DA.zone_type" => DELIVERY_AREA_ZONE_CIRCLE,
                 ])
@@ -352,7 +371,7 @@ class UserController extends Controller
             ->where([
                 DeliveryArea::tableName().".zone_type" => DELIVERY_AREA_ZONE_POLYGON,
                 DeliveryArea::tableName().".status" => ITEM_ACTIVE,
-                Branch::tableName().".branch_id" => $branch_id,
+                Branch::tableName().".vendor_id" => $vendor_id,
             ])
             ->whereNull(DeliveryArea::tableName().".deleted_at")
             ->whereRaw("ST_CONTAINS(".DeliveryArea::tableName().".zone_latlng, Point(".$user_latitude.", ".$user_longitude."))")
@@ -378,10 +397,12 @@ class UserController extends Controller
     public function ratings()
     {   
         $user = request()->user();
-        $branchId = Branch::findByKey(request()->branch_key);
+        //$branchId = Branch::findByKey(request()->branch_key);
+        $orderId = Order::findByKey(request()->order_key);
         $validator = Validator::make(request()->all(),
             [
-                'branch_key' => 'required|exists:branch,branch_key',
+                //'branch_key' => 'required|exists:branch,branch_key',
+                'order_key' => 'required|exists:order,order_key',
                 'rating' => 'required',
                 //'review' => 'required',
             ],
@@ -398,16 +419,22 @@ class UserController extends Controller
             case 'POST':      
                 DB::beginTransaction();
                 try { 
-                    $checkExists = BranchReview::where(['user_id' => $user->user_id,
+                    /*$checkExists = BranchReview::where(['user_id' => $user->user_id,
                         'branch_id' => $branchId->branch_id,
+                    ])->first();*/
+
+                    $checkExists = BranchReview::where(['user_id' => $user->user_id,
+                        'order_id' => $orderId->order_id,
                     ])->first();
+
                     if($checkExists != null) {
                         return  $this->commonError(__("apimsg.It seems you have rated already!"));
                     } else { 
                         $model = new BranchReview();
-                        $model->branch_id = $branchId->branch_id;
-                        $model->vendor_id = $branchId->vendor_id;
-                        $model->fill(request()->all()); 
+                        $model->branch_id = $orderId->branch_id;
+                        $model->vendor_id = $orderId->vendor_id;
+                        $model->order_id = $orderId->order_id;
+                        $model->fill(request()->except(['order_key'])); 
                         $model->user_id = $user->user_id;
                         $model->status = ITEM_ACTIVE;                        
                         $model->save();
@@ -424,13 +451,18 @@ class UserController extends Controller
             
                 DB::beginTransaction();
                 try { 
-                    $checkExists = BranchReview::where(['user_id' => $user->user_id,
+                    /*$checkExists = BranchReview::where(['user_id' => $user->user_id,
                         'branch_id' => $branchId->branch_id,
+                    ])->first();*/
+
+                    $checkExists = BranchReview::where(['user_id' => $user->user_id,
+                        'order_id' => $orderId->order_id,
                     ])->first();
+                    
                     if($checkExists != null) {
                         $model = new BranchReview();
                         $model = $model->find($checkExists->branch_review_id);
-                        $model->fill(request()->all());
+                        $model->fill(request()->except(['order_key']));
                         $model->save();
                     }
                     else { 

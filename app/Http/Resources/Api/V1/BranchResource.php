@@ -135,7 +135,8 @@ class BranchResource extends JsonResource
                     }
                     $count = UserWishlist::where([
                         'user_id' =>  $userID,
-                        'branch_id' => $this->branch_id,
+                        //'branch_id' => $this->branch_id,
+                        'vendor_id' => $this->vendor_id,
                         'status' => ITEM_ACTIVE,
                     ])->count();
                     return ($count > 0) ? 1 : 0;

@@ -71,7 +71,8 @@ class ItemController extends Controller
                 // $data['vendors'] = collect($data['items'])->unique('vendor_id');
 
             }else{
-                $data['items'] = ItemResource::collection(Item::getItems()->get());
+				//echo request()->item_name;exit;
+				$data['items'] = ItemResource::collection(Item::getItems()->get());
                 $data['vendors'] = collect($data['items'])->unique('vendor_id')->values();
             }
         }

@@ -23,8 +23,7 @@ class OrderItem extends CommonOrderItem
                  as ingredients'),
                 DB::raw(' 
                     (SELECT GROUP_CONCAT( `ingredient_name` ) FROM `order_ingredient_lang` AS OIL 
-                    LEFT JOIN order_ingredient AS OI ON OI.order_ingredient_id = OIL.order_ingredient_id
-                    WHERE  OI.order_item_id = order_item.order_item_id AND language_code = "ar")
+                    LEFT JOIN order_ingredient AS OI ON OI.order_ingredient_id = OIL.order_ingredient_id)
                  as arabic_ingredients'),
                 DB::raw(' 
                     (SELECT GROUP_CONCAT( `ingredient_price` ) FROM `order_ingredient` AS OIL

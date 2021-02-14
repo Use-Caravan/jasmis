@@ -27,12 +27,12 @@ class OrderResource extends JsonResource
         //echo $vendor_logo;exit;
 
         //return parent::toArray($request);
-        $ratings = BranchReview::where('vendor_id',$this->vendor_id)->where('branch_id',$this->branch_id)->where('user_id',$this->user_id)
+        $ratings = BranchReview::where('vendor_id',$this->vendor_id)->where('branch_id',$this->branch_id)->where('user_id',$this->user_id)->where('order_id',$this->order_id)
                         ->where('status',ITEM_ACTIVE)
                         ->where('approved_status',REVIEW_APPROVED_STATUS_APPROVED)->first();
 						
 	    $user_rating = BranchReview::where('vendor_id',$this->vendor_id)->where('branch_id',$this->branch_id)->
-                       where('user_id',$this->user_id)->first();
+                       where('user_id',$this->user_id)->where('order_id',$this->order_id)->first();
 
         $orderItems = OrderItem::getOrderItems($this->order_id);
         //print_r($orderItems);exit;
