@@ -52,8 +52,8 @@ class OrderResource extends JsonResource
             'arabic_branch_name' => BranchLang::where('branch_id',$this->branch_id)->where('language_code','ar')->value('branch_name'),
             'branch_key' => $this->branch_key, 
             'rating'     =>  ($user_rating == null) ? "null" : 'rated',  			
-            'branch_rating' => ($ratings == null) ? "" : $ratings->rating,                           
-            'branch_review' => ($ratings == null) ? "" : $ratings->review,                           
+            'order_rating' => ($ratings == null) ? "" : $ratings->rating,                           
+            'order_review' => ($ratings == null) ? "" : $ratings->review,                           
             'color_code' => ($this->color_code === null) ? '' : '#'.$this->color_code,
             'payment_status' => $this->payment_status,
             'total_amount' => $this->when(true,function()
