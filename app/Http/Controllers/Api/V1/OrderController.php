@@ -1979,8 +1979,22 @@ class OrderController extends Controller
         $temp_order_id = "";
         $amount_to_pay = "0";
         $online_payment = 0;
+        $amount_to_pay_to_wallet = 0;
+
+        $paymentGateway = new PaymentGateway();                    
+        $paymentGateway->save();                    
+        $payment_gateway_id = $paymentGateway->getKey();
+        $temp_order_id = $payment_gateway_id;
 
         $user = User::find(request()->user()->user_id); 
+
+        if($user->wallet_amount < $paymentDetails['total']['cprice'])
+            $amount_to_pay_to_wallet = $paymentDetails['total']['cprice'] - $user->wallet_amount;   
+
+        if( $amount_to_pay_to_wallet > 0 )
+            $amount_to_pay_to_wallet = number_format((float)$amount_to_pay_to_wallet, 3, '.', '');        
+
+        $amount_to_pay = $paymentDetails['total']['cprice'];                         
 
         /** Create temporary order id and send in response to process payment in mobile app **/
         if( request()->payment_option && ( ( request()->payment_option == PAYMENT_OPTION_ONLINE ) || ( request()->payment_option == PAYMENT_OPTION_CREDIT ) || ( request()->payment_option == PAYMENT_OPTION_WALLET ) ) )
@@ -1995,7 +2009,7 @@ class OrderController extends Controller
                     $amount_to_pay_to_wallet = $paymentDetails['total']['cprice'] - $user->wallet_amount;                    
                 else
                 {
-                    $temp_order_id = "";
+                    //$temp_order_id = "";
                     $amount_to_pay = "0";
                     $online_payment = 0;
                 }
@@ -2003,10 +2017,10 @@ class OrderController extends Controller
 
             if( $online_payment == 1 )
             {
-                $paymentGateway = new PaymentGateway();                    
+                /*$paymentGateway = new PaymentGateway();                    
                 $paymentGateway->save();                    
                 $payment_gateway_id = $paymentGateway->getKey();
-                $temp_order_id = $payment_gateway_id;
+                $temp_order_id = $payment_gateway_id;*/
 
                 //$amount_to_pay = $paymentDetails['total']['cprice'];
                 $amount_to_pay = ( request()->payment_option == PAYMENT_OPTION_WALLET ) ? $amount_to_pay_to_wallet : $paymentDetails['total']['cprice'];                
@@ -2018,6 +2032,7 @@ class OrderController extends Controller
                     
         $responseData['data']['temp_order_id'] = (string)$temp_order_id;
         $responseData['data']['amount_to_pay'] = $amount_to_pay;
+        $responseData['data']['cpocket_amount_to_pay'] = $amount_to_pay_to_wallet;
         $responseData['data']['otp_verified'] = isset( $user->otp_verified ) ? $user->otp_verified : 0;
 
         $this->setMessage(__("apimsg.Cart details are processed") );
