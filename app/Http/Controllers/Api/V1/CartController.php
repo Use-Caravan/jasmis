@@ -669,9 +669,13 @@ class CartController extends Controller
 
             /** Sub Total */
             $vatDetails = [
-                'name' => 'Sub Total', 
+                //'name' => 'Sub Total', 
+				'name' => __('apimsg.Item Total'),
                 'price' => Common::currency($itemSubtotal),
-                'color_code' => PAYMENT_VAR_TAX_COLOR,
+                //'color_code' => PAYMENT_VAR_TAX_COLOR,
+				'color_code' => PAYMENT_SUB_TOTOAL_COLOR,
+				'text_size' => PAYMENT_TEXT_SIZE,
+				'is_semi_bold' => SEMI_BOLD,
                 'is_bold' => SUB_TOTAL_BOLD,
                 'is_italic' => IS_ITALIC,
                 'is_line' => IS_LINE, 
@@ -716,9 +720,12 @@ class CartController extends Controller
             $cart['total'] = [
                 'cprice' => number_format($totalCheckouAmount,3),
                 'price' => Common::currency($totalCheckouAmount),
-                'name' => 'Total',
+                //'name' => 'Total',
+				'name' => __('apimsg.To Pay'),
                 'cart_total' => count($cart['items']),
                 'color_code' => PAYMENT_GRAND_TOTOAL_COLOR,
+				'text_size' =>PAYMENT_GRAND_TOTAL_TEXT_SIZE,
+				'is_semi_bold' => SEMI_BOLD,
                 'is_bold' => IS_BOLD,
                 'is_italic' => IS_ITALIC,
                 'is_line' => IS_LINE,

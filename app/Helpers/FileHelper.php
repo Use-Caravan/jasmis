@@ -66,4 +66,19 @@ class FileHelper
         }
         return $imageUrl;
     }
+	
+	/**
+     * @param string $filepath
+     * @return string $imageUrl 
+     */
+    public static function loadImageProfile($filepath = '')
+    {        
+        //$imageUrl =  url(PLACEHOLDER_IMAGE);	
+		$imageUrl = "";		
+			                
+        if(Storage::exists(str_replace(FILE_BASE_PATH, '', $filepath))){
+            $imageUrl =  url($filepath);                        
+        }
+        return $imageUrl;
+    }
 }

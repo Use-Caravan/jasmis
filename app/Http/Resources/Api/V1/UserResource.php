@@ -51,7 +51,7 @@ class UserResource extends JsonResource
             'last_name' => ($this->last_name === null) ? '' : $this->last_name,
             'username' => ($this->username === null) ? '' : $this->username,
             'email' => ($this->email === null) ? '' : $this->email,
-            'profile_image' => FileHelper::loadImage($this->profile_image),
+            'profile_image' => FileHelper::loadImageProfile($this->profile_image),
             'phone_number' => ($this->phone_number === null) ? '' : $this->phone_number,
             'dob' => ($this->dob === null) ? '' : $this->dob,
             'gender' => ($this->gender === null) ? '' : Common::gender($this->gender),

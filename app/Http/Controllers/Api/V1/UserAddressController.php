@@ -93,7 +93,7 @@ class UserAddressController extends Controller
             $model->status = ITEM_ACTIVE;
             $model->save();
             DB::commit();     
-            $this->setMessage(__('apimsg.Addrees has been saved.'));            
+            $this->setMessage(__('apimsg.Address has been saved.'));            
         } catch (\Throwable $e) {
             DB::rollback();
             throw $e;
@@ -167,7 +167,7 @@ class UserAddressController extends Controller
             $model->fill(request()->all());
             $model->save();
             DB::commit();     
-            $this->setMessage(__('apimsg.Addrees has been updated.'));            
+            $this->setMessage(__('apimsg.Address has been updated.'));            
         } catch (\Throwable $e) {
             DB::rollback();
             throw $e;
@@ -196,7 +196,7 @@ class UserAddressController extends Controller
         }
         $model->delete();
         $data = new UserAddressResource($model);
-        $this->setMessage(__('apimsg.User Address Has been deleted successfully'));
+        $this->setMessage(__('apimsg.User Address has been deleted successfully'));
         return $this->asJson($data);
     }
 }

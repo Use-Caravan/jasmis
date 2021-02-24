@@ -56,7 +56,7 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'technoducedevelopers@gmail.com'),
+        'address' => env('MAIL_FROM_ADDRESS', 'info@usecaravan.com'),
         'name' => env('MAIL_FROM_NAME', 'Caravan'),
     ],
 
@@ -84,9 +84,9 @@ return [
     |
     */
 
-    'username' => env('MAIL_USERNAME', 'technoducedevelopers@gmail.com'),
+    'username' => env('MAIL_USERNAME', 'orders@usecaravan.com'),
 
-    'password' => env('MAIL_PASSWORD', 'technoduce'),
+    'password' => env('MAIL_PASSWORD', 'CaravanOrders'),
 
     /*
     |--------------------------------------------------------------------------

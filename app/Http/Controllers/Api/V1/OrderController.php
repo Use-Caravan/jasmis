@@ -2270,10 +2270,13 @@ class OrderController extends Controller
             }
             $responseData['items'] = $itemDetails['data'];
             $subTotalDetails = [
-                'name' => __('apimsg.Sub total'),
+                //'name' => __('apimsg.Sub total'),
+				'name' => __('apimsg.Item Total'),
                 'price' => Common::currency($itemSubtotal),
                 'cprice' => $itemSubtotal,
                 'color_code' => PAYMENT_SUB_TOTOAL_COLOR,
+				'text_size' => PAYMENT_TEXT_SIZE,
+				'is_semi_bold' => SEMI_BOLD,
                 'is_bold' => IS_BOLD,
                 'is_italic' => IS_ITALIC,
                 'is_line' => IS_LINE,
@@ -2309,10 +2312,13 @@ class OrderController extends Controller
                                                         
                 $deliveryDetails = [
                     'price' => Common::currency($deliveryFeeAmount),
-                    'name' => __('apimsg.Delivery Fee',["km" => Common::round($checkIfAvailable['distance'],2)]), 
+                    //'name' => __('apimsg.Delivery Fee',["km" => Common::round($checkIfAvailable['distance'],2)]),
+					'name' => __('apimsg.Delivery Partner Fee',["km" => Common::round($checkIfAvailable['distance'],2)]),
                     'cprice' => $deliveryFeeAmount, 
                     'delivery_distance' => Common::round($checkIfAvailable['distance'],2),
                     'color_code' => PAYMENT_DELIVERY_FEE_COLOR,
+					'text_size' => PAYMENT_DELIVERY_FEE_TEXT_SIZE,
+					'is_medium' => MEDIUM,
                     'is_bold' => IS_BOLD,
                     'is_italic' => IS_ITALIC,
                     'is_line' => IS_LINE,
@@ -2435,8 +2441,11 @@ class OrderController extends Controller
         $responseData['total'] = [
             'cprice' => $totalCheckoutAmount,
             'price' => Common::currency($totalCheckoutAmount),
-            'name' => __('apimsg.Total'),
+            //'name' => __('apimsg.Total'),
+			'name' => __('apimsg.To Pay'),
             'color_code' => PAYMENT_GRAND_TOTOAL_COLOR,
+			'text_size' => PAYMENT_GRAND_TOTAL_TEXT_SIZE,
+			'is_semi_bold' => SEMI_BOLD,
             'is_bold' => IS_BOLD,
             'is_italic' => IS_ITALIC,
             'is_line' => IS_LINE,

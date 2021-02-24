@@ -433,13 +433,21 @@
     /**
      * API Payment Details Constants
      */
-    const PAYMENT_GRAND_TOTOAL_COLOR = '#fe1509';
-    const PAYMENT_SUB_TOTOAL_COLOR = '#D3D3D3';
+    //const PAYMENT_GRAND_TOTOAL_COLOR = '#fe1509';
+	const PAYMENT_GRAND_TOTOAL_COLOR = '#363535';
+    //const PAYMENT_SUB_TOTOAL_COLOR = '#D3D3D3';
+	const PAYMENT_SUB_TOTOAL_COLOR = '#D60E64';
     const PAYMENT_VAR_TAX_COLOR = '#D3D3D3';
     const PAYMENT_SERVICE_TAX_COLOR = '#D3D3D3';
-    const PAYMENT_DELIVERY_FEE_COLOR = '#D3D3D3';
+    //const PAYMENT_DELIVERY_FEE_COLOR = '#D3D3D3';
+	const PAYMENT_DELIVERY_FEE_COLOR = '#D60E64';
     const PAYMENT_COUPON_FEE_COLOR = '#e6e6e6';
+	const PAYMENT_TEXT_SIZE = 7;
+	const PAYMENT_DELIVERY_FEE_TEXT_SIZE = 6;
+	const PAYMENT_GRAND_TOTAL_TEXT_SIZE = 7;
     const IS_BOLD = 0;
+	const SEMI_BOLD = 1;
+	const MEDIUM = 1;
     const SUB_TOTAL_BOLD = 1;
     const IS_ITALIC = 0;
     const IS_LINE = 0;
