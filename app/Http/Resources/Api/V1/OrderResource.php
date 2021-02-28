@@ -67,7 +67,8 @@ class OrderResource extends JsonResource
                         'is_line' => IS_LINE,
                     ];
                 }),
-            'order_type' => ($this->order_type === null) ? "" : $this->order_type,    
+            'order_type' => ($this->order_type === null) ? "" : $this->order_type,  
+            'no_contact_delivery' => ($this->no_contact_delivery == null) ? 0 : $this->no_contact_delivery,  
             //'status' => ($this->order_status === null) ? "" :(new Order)->approvedStatus($this->order_status),
             'status' => ($this->order_status === null) ? "" : ( $this->order_status == ORDER_APPROVED_STATUS_DRIVER_ACCEPTED || $this->order_status == ORDER_DRIVER_REJECTED ) ? (new Order)->approvedStatus(ORDER_APPROVED_STATUS_PENDING) : (new Order)->approvedStatus($this->order_status),
             //'order_status_value' => ($this->order_status === null) ? "" : $this->order_status,

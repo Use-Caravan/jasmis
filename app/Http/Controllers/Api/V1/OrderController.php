@@ -107,6 +107,12 @@ class OrderController extends Controller
      */
     public function index()
     {    
+        /** Get available drivers from node server to auto assign drivers to order **/                
+        /*$url = config('webconfig.deliveryboy_url')."/api/v1/driver/company?company_id=".config('webconfig.company_id');
+        $data = Curl::instance()->setUrl($url)->send();
+        $response = json_decode($data,true);
+        print_r($response);exit;*/
+
         $orders = Order::getCustomerOrders()
             ->where([Order::tableName().'.user_id' => request()->user()->user_id])->get();
         $orders = OrderResource::collection($orders);        
@@ -382,6 +388,7 @@ class OrderController extends Controller
                 'status' => ITEM_ACTIVE,
                 'first_cut_off_time' => $first_cut_off_time,
                 'second_cut_off_time' => $second_cut_off_time,
+                'no_contact_delivery' => (isset(request()->no_contact_delivery)) ? request()->no_contact_delivery : 0,
             ];
 
             //print_r($paymentDetails['items']);exit;

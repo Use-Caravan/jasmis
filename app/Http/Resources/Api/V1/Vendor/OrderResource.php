@@ -29,8 +29,8 @@ class OrderResource extends JsonResource
     {
         //return parent::toArray($request);
         return [
-            'order_key' => $this->order_key, 
-            'branch_key' => Branch::where('branch_id',$this->branch_id)->value('branch_key'),
+            'order_key' => $this->order_key,
+			'branch_key' => Branch::where('branch_id',$this->branch_id)->value('branch_key'),
             'branch_name' => BranchLang::where('branch_id',$this->branch_id)->value('branch_name'),
             'arabic_branch_name' => BranchLang::where('branch_id',$this->branch_id)->where('language_code','ar')->value('branch_name'),
             'vendor_key' => Vendor::where('vendor_id',$this->vendor_id)->value('vendor_key'),
@@ -44,6 +44,7 @@ class OrderResource extends JsonResource
             'payment_type' => (new Order)->paymentTypes($this->payment_type),
             'payment_status' => (new Order)->paymentStatus($this->payment_status),
             'order_type' => ($this->order_type === null) ? 0 : $this->order_type,
+            'no_contact_delivery' => ($this->no_contact_delivery == null) ? 0 : $this->no_contact_delivery,
             'order_type_label' => ($this->order_type === null) ? "" :(new Order)->orderTypes($this->order_type),            
             'delivery_type' => ($this->delivery_type === null) ? 0 : $this->delivery_type,
             'delivery_type_label' => ($this->delivery_type === null) ? "" : (new Order)->deliveryTypes( $this->delivery_type),
