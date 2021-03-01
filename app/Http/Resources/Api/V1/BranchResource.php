@@ -63,8 +63,8 @@ class BranchResource extends JsonResource
 
         $branch_cuisine = explode(',',$this->branch_cuisine);
         if( count($branch_cuisine) > 1 ) {
-            for ($i = 0; $i < count($branch_cuisine); $i++) {
-                $branch_cuisine[$i] = $branch_cuisine[$i] . " ";
+            for ($i = 1; $i < count($branch_cuisine); $i++) {
+                $branch_cuisine[$i] = " ".$branch_cuisine[$i];
             }
         }
         $branch_cuisine = implode(',',$branch_cuisine);
