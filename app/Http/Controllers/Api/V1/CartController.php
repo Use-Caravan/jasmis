@@ -646,6 +646,15 @@ class CartController extends Controller
                 }
             }
             /* vendor details */
+			$branch_cuisine = CuisineLang::whereIn('cuisine_id',BranchCuisine::where('branch_id',$branch_id)->pluck('cuisine_id')->toarray())->where('language_code','en')->get()->pluck('cuisine_name');
+			//$branch_cuisine = (array)$branch_cuisine;
+			//$tmp = explode(",", $en['mm_wmeet']);
+			if( count( count($branch_cuisine) ) > 1 ) {
+				for ($i = 0; $i < count($branch_cuisine); $i++) {
+					$branch_cuisine[$i] = $branch_cuisine[$i] . " ";
+				}
+			}
+			//print_r($branch_cuisine);exit;
 
             $vendorlangDetails = VendorLang::where('vendor_id',$branchDetails->vendor_id)->first();
             $branch_name = BranchLang::where('branch_id',$branch_id)->value('branch_name');
@@ -657,7 +666,8 @@ class CartController extends Controller
                 'vendor_name' => $vendorlangDetails->vendor_name,
                 'arabic_vendor_name' => VendorLang::where('vendor_id',$branchDetails->vendor_id)->where('language_code','ar')->value('vendor_name'),
                 'vendor_logo' => FileHelper::loadImage($vendorlangDetails->vendor_logo),
-                'branch_cuisine' => CuisineLang::whereIn('cuisine_id',BranchCuisine::where('branch_id',$branch_id)->pluck('cuisine_id')->toarray())->where('language_code','en')->get()->pluck('cuisine_name'),
+                //'branch_cuisine' => CuisineLang::whereIn('cuisine_id',BranchCuisine::where('branch_id',$branch_id)->pluck('cuisine_id')->toarray())->where('language_code','en')->get()->pluck('cuisine_name'),
+				'branch_cuisine' => $branch_cuisine,
                 'arabic_branch_cuisine' => CuisineLang::whereIn('cuisine_id',BranchCuisine::where('branch_id',$branch_id)->pluck('cuisine_id')->toarray())->where('language_code','ar')->get()->pluck('cuisine_name'),
                 'branch_key' => $branchDetails->branch_key,
                 'branch_name' => $branch_name,
@@ -665,6 +675,7 @@ class CartController extends Controller
                 'min_order_value' => $branchDetails->min_order_value,
             
             ];
+			//print_r($vendorDetails);exit;
             array_push($cart['vendor_details'], $vendorDetails);
 
             /** Sub Total */

@@ -3116,7 +3116,9 @@ class OrderController extends Controller
                 'latitude' => $vendor->branch_latitude,
                 'longitude' => $vendor->branch_longitude                
             ],
+            'no_contact_delivery' => $orderDetails->no_contact_delivery,
         ];
+
         $languages = Common::getLanguages();
         foreach($languages as $key => $value) {
 
@@ -3327,6 +3329,7 @@ class OrderController extends Controller
         $postData = json_encode($deliveryboyData);   
         $data = Curl::instance()->action('POST')->setUrl($url)->setContentType('text/plain')->send($postData);
         $response = json_decode($data,true);
+        print_r($response);exit;
         if( isset( $response['status'] ) && $response['status'] == HTTP_SUCCESS) {
             $order = Order::findByKey($orderKey);
             $order->order_refkey = isset($response['data']['order_id']) ? $response['data']['order_id'] : '';
