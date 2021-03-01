@@ -649,7 +649,7 @@ class CartController extends Controller
 			$branch_cuisine = CuisineLang::whereIn('cuisine_id',BranchCuisine::where('branch_id',$branch_id)->pluck('cuisine_id')->toarray())->where('language_code','en')->get()->pluck('cuisine_name');
 			//$branch_cuisine = (array)$branch_cuisine;
 			//$tmp = explode(",", $en['mm_wmeet']);
-			if( count( count($branch_cuisine) ) > 1 ) {
+			if( count($branch_cuisine) > 1 ) {
 				for ($i = 0; $i < count($branch_cuisine); $i++) {
 					$branch_cuisine[$i] = $branch_cuisine[$i] . " ";
 				}
