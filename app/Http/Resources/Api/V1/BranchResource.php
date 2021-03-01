@@ -60,6 +60,15 @@ class BranchResource extends JsonResource
             /** Add new items as first element in category items array **/
             $categories->prepend((object)$new_items_category);
         }
+
+        $branch_cuisine = explode(',',$this->branch_cuisine);
+        if( count($branch_cuisine) > 1 ) {
+            for ($i = 0; $i < count($branch_cuisine); $i++) {
+                $branch_cuisine[$i] = $branch_cuisine[$i] . " ";
+            }
+        }
+        $branch_cuisine = implode(',',$branch_cuisine);
+        //print_r($branch_cuisine);exit;
         
         $vendor = new Vendor();
 
@@ -98,7 +107,8 @@ class BranchResource extends JsonResource
                 return $name;
             }),
             'distance' => ($this->distance === null) ? 0 : Common::round($this->distance),
-            'branch_cuisine' => $this->branch_cuisine,
+            //'branch_cuisine' => $this->branch_cuisine,
+            'branch_cuisine' => $branch_cuisine,
             'arabic_branch_cuisine' => $this->arabic_branch_cuisine,
             'availability_status' => $this->when(true,function(){
                 $availabilityStatus = $this->availability_status;
