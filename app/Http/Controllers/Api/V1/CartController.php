@@ -650,8 +650,8 @@ class CartController extends Controller
 			//$branch_cuisine = (array)$branch_cuisine;
 			//$tmp = explode(",", $en['mm_wmeet']);
 			if( count($branch_cuisine) > 1 ) {
-				for ($i = 0; $i < count($branch_cuisine); $i++) {
-					$branch_cuisine[$i] = $branch_cuisine[$i] . " ";
+				for ($i = 1; $i < count($branch_cuisine); $i++) {
+					$branch_cuisine[$i] = " ".$branch_cuisine[$i];
 				}
 			}
 			//print_r($branch_cuisine);exit;
