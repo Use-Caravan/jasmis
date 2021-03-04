@@ -2036,11 +2036,14 @@ class OrderController extends Controller
 
         if( $amount_to_pay > 0 )
             $amount_to_pay = number_format((float)$amount_to_pay, 3, '.', '');
+
+        $user_wallet_amount = isset( $user->wallet_amount ) ? number_format((float)$user->wallet_amount, 3, '.', '') : 0;
                     
         $responseData['data']['temp_order_id'] = (string)$temp_order_id;
         $responseData['data']['amount_to_pay'] = $amount_to_pay;
         $responseData['data']['cpocket_amount_to_pay'] = $amount_to_pay_to_wallet;
         $responseData['data']['otp_verified'] = isset( $user->otp_verified ) ? $user->otp_verified : 0;
+        $responseData['data']['user_wallet_amount'] = $user_wallet_amount;
 
         $this->setMessage(__("apimsg.Cart details are processed") );
         
