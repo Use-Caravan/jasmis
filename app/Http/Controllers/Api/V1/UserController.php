@@ -226,7 +226,6 @@ class UserController extends Controller
                 VendorLang::selectTranslation($query);
                 $query = $query->havingRaw("timeslotcount > 0")->get();
                 $data = UserWishlistResource::collection($query);
-
                 $cnt = 0;
                 /** Check whether the favorite restaurant within the user location **/
                 foreach( $data as $whislist ) {
