@@ -21,6 +21,7 @@ use App\{
 };
 use Auth;
 use Common;
+use DB;
 
 class BranchResource extends JsonResource
 {
@@ -69,7 +70,16 @@ class BranchResource extends JsonResource
         }
         $branch_cuisine = implode(',',$branch_cuisine);
         //print_r($branch_cuisine);exit;
-        
+		
+		$branch_delivery_area = explode(',',$this->branch_delivery_area);
+        if( count($branch_delivery_area) > 1 ) {
+            for ($i = 1; $i < count($branch_delivery_area); $i++) {
+                $branch_delivery_area[$i] = " ".$branch_delivery_area[$i];
+            }
+        }
+        $branch_delivery_area = implode(',',$branch_delivery_area);
+        //print_r($branch_delivery_area);exit;
+		
         $vendor = new Vendor();
 
         return  [
@@ -110,6 +120,8 @@ class BranchResource extends JsonResource
             //'branch_cuisine' => $this->branch_cuisine,
             'branch_cuisine' => $branch_cuisine,
             'arabic_branch_cuisine' => $this->arabic_branch_cuisine,
+            'branch_area' => $this->branch_delivery_area,
+			'arabic_branch_area' => $this->arabic_branch_delivery_area,
             'availability_status' => $this->when(true,function(){
                 $availabilityStatus = $this->availability_status;
                 $currentTime = date('H:i:s');
