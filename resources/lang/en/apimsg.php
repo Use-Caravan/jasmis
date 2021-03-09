@@ -149,4 +149,6 @@ return [
 	'Item Total' => 'Item Total',
 	'Delivery Partner Fee' => 'Delivery Partner Fee',
 	'To Pay' => 'To Pay',
+    'Invalid order key' => 'Invalid order key',
+    'No contact delivery value has been fetched.' => 'No contact delivery value has been fetched.',
 ];

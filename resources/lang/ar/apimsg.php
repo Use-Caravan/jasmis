@@ -150,5 +150,7 @@ return [
 	'Item Total' => 'مجموع الاشياء',
 	'Delivery Partner Fee' => 'رسوم شريك التوصيل',
 	'To Pay' => 'للدفع',
+    'Invalid order key' => 'مفتاح الطلب غير صالح',
+    'No contact delivery value has been fetched.' => 'لم يتم جلب أي قيمة تسليم لجهة الاتصال.',
 ];
 

@@ -51,6 +51,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'],function()
     Route::get('get-payment-options/{branch_key?}','OrderController@getPaymentOptions')->middleware('localization');
 	
 	Route::get('get-order-status/{order_key?}','OrderController@getOrderStatus')->middleware('localization');
+	
+	Route::get('get-no-contact-delivery/{order_key?}','OrderController@getNoContactDelivery')->middleware('localization');
     
 
     /** Node team status update */

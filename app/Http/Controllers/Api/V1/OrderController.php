@@ -3565,5 +3565,22 @@ class OrderController extends Controller
 
         return $this->asJson($data);
     }
+
+    /** Get no contact delivery value by order key */
+    public function getNoContactDelivery()
+    {   
+        $orderModel = Order::findByKey(request()->order_key);
+        if($orderModel === null) {
+            return $this->commonError(__("apimsg.Invalid order key"));
+        }
+
+        $no_contact_delivery = $orderModel->no_contact_delivery;
+
+        $data = [ 'no_contact_delivery' => $no_contact_delivery ];
+
+        $this->setMessage( __('apimsg.No contact delivery value has been fetched.') );
+
+        return $this->asJson($data);
+    }
 }
 
