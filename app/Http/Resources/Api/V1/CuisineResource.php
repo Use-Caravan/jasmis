@@ -24,6 +24,7 @@ class CuisineResource extends JsonResource
             'arabic_cuisine_name' => CuisineLang::where('cuisine_id',$this->cuisine_id)->where('language_code','ar')->value('cuisine_name'),
             //'arabic_cuisine_name' => ($this->arabic_cuisine_name === null) ? '' : $this->arabic_cuisine_name,
             'sort_no' => ($this->sort_no === null) ? 0 : $this->sort_no,
+            'cuisine_icon' => ($this->cuisine_icon === null) ? '' : $this->cuisine_icon,
         ];
     }
 

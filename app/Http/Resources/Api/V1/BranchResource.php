@@ -17,7 +17,8 @@ use App\{
     Api\BranchLang,
     Api\Order,
     Api\Category,
-    Api\Item
+    Api\Item,
+    Api\AreaLang
 };
 use Auth;
 use Common;
@@ -120,8 +121,10 @@ class BranchResource extends JsonResource
             //'branch_cuisine' => $this->branch_cuisine,
             'branch_cuisine' => $branch_cuisine,
             'arabic_branch_cuisine' => $this->arabic_branch_cuisine,
-            'branch_area' => $this->branch_delivery_area,
-			'arabic_branch_area' => $this->arabic_branch_delivery_area,
+            'branch_area' => $this->area_name,
+            'arabic_branch_area' => AreaLang::where('area_id',$this->area_id)->where('language_code','ar')->value('area_name'),
+            //'branch_area' => $this->branch_delivery_area,
+			//'arabic_branch_area' => $this->arabic_branch_delivery_area,
             'availability_status' => $this->when(true,function(){
                 $availabilityStatus = $this->availability_status;
                 $currentTime = date('H:i:s');
