@@ -65,27 +65,32 @@ class ItemResource extends JsonResource
                     //print_r($price_on_selection_options);exit;
                     
                     foreach( $price_on_selection_options as $price_on_selection_option ){
-                        $option_id = $price_on_selection_option->option_id;
-                        $option_id_contd = '"sub_item_id":'.$option_id;
-                        $cartItemQty = CartItem::where([
+						//print_r($price_on_selection_option);
+                        $option_id = isset( $price_on_selection_option->option_id ) ? $price_on_selection_option->option_id : "";
+
+                        $cart_item_key_pos = [];
+                        if( $option_id > 0 ) {
+                            $option_id_contd = '"sub_item_id":'.$option_id;
+                            $cartItemQty = CartItem::where([
+                                'cart_id' => $cart->cart_id,
+                                'item_id' => $this->item_id,
+                                ['price_on_selection_options', 'LIKE', '%'.$option_id_contd.'%'],
+                            ])->sum('quantity');
+                            //echo $cartItemQty;exit;
+
+                            $price_on_selection_option->quantity = ( isset( $cartItemQty ) && $cartItemQty > 0 ) ? (int)$cartItemQty : 0;
+
+                            $cart_item_pos = CartItem::where([
                             'cart_id' => $cart->cart_id,
                             'item_id' => $this->item_id,
                             ['price_on_selection_options', 'LIKE', '%'.$option_id_contd.'%'],
-                        ])->sum('quantity');
-                        //echo $cartItemQty;exit;
+                            ])->pluck('cart_item_key')->toArray();
 
-                        $price_on_selection_option->quantity = ( isset( $cartItemQty ) && $cartItemQty > 0 ) ? (int)$cartItemQty : 0;
-
-                        $cart_item_pos = CartItem::where([
-                        'cart_id' => $cart->cart_id,
-                        'item_id' => $this->item_id,
-                        ['price_on_selection_options', 'LIKE', '%'.$option_id_contd.'%'],
-                        ])->pluck('cart_item_key')->toArray();
-
-                        if($cart_item_pos === null){
-                            $cart_item_key_pos = [];
-                        }else{
-                            $cart_item_key_pos = $cart_item_pos;   
+                            if($cart_item_pos === null){
+                                $cart_item_key_pos = [];
+                            }else{
+                                $cart_item_key_pos = $cart_item_pos;   
+                            }
                         }
 
                         $price_on_selection_option->cart_item_key = ( isset( $cart_item_key_pos ) ) ? $cart_item_key_pos : [];
