@@ -90,6 +90,7 @@
     const FRONT_END_BASE_PATH = 'resources/assets/frontend/';
     const ADMIN_END_BASE_PATH = 'resources/assets/admin/';
     const FILE_BASE_PATH = 'storage/app/';
+	const FILE_BASE_PATH_S3 = 'https://adminblv2.s3.me-south-1.amazonaws.com/';
 
     const PLACEHOLDER_IMAGE = 'resources/assets/general/noimage.png';
 

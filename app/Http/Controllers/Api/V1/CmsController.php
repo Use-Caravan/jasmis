@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 use FileHelper; 
 use App\Http\{
     Controllers\Api\V1\Controller,
@@ -50,9 +51,27 @@ class CmsController extends Controller
         return $this->asJson($data);
     }
 
+    public function getS3Path( $field_name )
+    {
+        $exists = Storage::disk('s3')->has($field_name);
+        if($exists)
+            $field_value = FILE_BASE_PATH_S3.$field_name;
+        else if(Storage::exists(str_replace(FILE_BASE_PATH, '', $field_name)))
+            $field_value = url($field_name);
+        else
+            $field_value = url(PLACEHOLDER_IMAGE);
+
+        return $field_value;
+    }
+
     public function gethomepage()
     {
+        //print_r(CMS_SEC);exit;
+        //$cms = Cms::getList()->where(['status' => ITEM_ACTIVE])->whereIn('section',CMS_SEC)->orderBy('section','asc')->groupBy('section')->get()->toArray();
+
         $cms = Cms::getList()->where(['status' => ITEM_ACTIVE])->whereIn('section',CMS_SEC)->orderBy('section','asc')->groupBy('section')->get()->toArray();
+        //print_r($cms);exit;
+        //print_r(Cms::getList()->where(['status' => ITEM_ACTIVE])->whereIn('section',[2])->orderBy('section','asc')->toSql());exit;
         $data = [];
         $i = 0;
         foreach($cms as $key => $value) {
@@ -81,12 +100,19 @@ class CmsController extends Controller
                 $vendor_id = $sections['vendor_id'];
                 $as_arabic_banner = $sections['arabic_banner'];
                 $images = [
-                            'ldpi_image_path'     => FileHelper::loadImage($sections['ldpi_image_path']),
-                            'mdpi_image_path'     => FileHelper::loadImage($sections['mdpi_image_path']),
-                            'hdpi_image_path'     => FileHelper::loadImage($sections['hdpi_image_path']),
-                            'xhdpi_image_path'    => FileHelper::loadImage($sections['xhdpi_image_path']),
-                            'xxhdpi_image_path'   => FileHelper::loadImage($sections['xxhdpi_image_path']),
-                            'xxxhdpi_image_path'  => FileHelper::loadImage($sections['xxxhdpi_image_path']),                          
+                            //'ldpi_image_path'     => FileHelper::loadImage($sections['ldpi_image_path']),
+                            //'mdpi_image_path'     => FileHelper::loadImage($sections['mdpi_image_path']),
+                            //'hdpi_image_path'     => FileHelper::loadImage($sections['hdpi_image_path']),
+                            //'xhdpi_image_path'    => FileHelper::loadImage($sections['xhdpi_image_path']),
+                            //'xxhdpi_image_path'   => FileHelper::loadImage($sections['xxhdpi_image_path']),
+                            //'xxxhdpi_image_path'  => FileHelper::loadImage($sections['xxxhdpi_image_path']),
+
+                            'ldpi_image_path'     => isset( $sections['ldpi_image_path'] ) ? $this->getS3Path( $sections['ldpi_image_path'] ) : "",
+                            'mdpi_image_path'     => isset( $sections['mdpi_image_path'] ) ? $this->getS3Path( $sections['mdpi_image_path'] ) : "",
+                            'hdpi_image_path'     => isset( $sections['hdpi_image_path'] ) ? $this->getS3Path( $sections['hdpi_image_path'] ) : "",
+                            'xhdpi_image_path'     => isset( $sections['xhdpi_image_path'] ) ? $this->getS3Path( $sections['xhdpi_image_path'] ) : "",
+                            'xxhdpi_image_path'     => isset( $sections['xxhdpi_image_path'] ) ? $this->getS3Path( $sections['xxhdpi_image_path'] ) : "",
+                            'xxxhdpi_image_path'     => isset( $sections['xxxhdpi_image_path'] ) ? $this->getS3Path( $sections['xxxhdpi_image_path'] ) : "",                          
                           ];
                 $section_items = [
 
@@ -95,6 +121,8 @@ class CmsController extends Controller
                                     'as_arabic_banner' => $sections['arabic_banner'],
                                     'branch_key' => Branch::where('branch_id',$sections['branch_id'])->value('branch_key'),
                                     'branch_id' => $sections['branch_id'],
+                                    'cms_id' => $sections['cms_id'],
+                                    'cms_key' => $sections['cms_key'],
                                     'item_id' => null,
                                     'item_name' => '',
                                     'restarunt_name' => '',
